@@ -1,0 +1,12 @@
+position: marketing
+display_name: 市场营销
+roots:
+- name: 用户与定位
+- name: 活动与评估
+question_routes:
+  marketing-1-1-20261030: 用户与定位
+  marketing-1-2-20261030: 用户与定位
+  marketing-1-3-20261030: 用户与定位
+  marketing-2-1-20261030: 活动与评估
+  marketing-2-2-20261030: 活动与评估
+  marketing-2-3-20261030: 活动与评估

@@ -1,0 +1,39 @@
+/* 居中与平衡：统一区块中轴，双栏等宽，阅读内容保留自然对齐。 */
+
+.landing .section-heading,
+.landing .sec > .container > :is(.eyebrow, .sec-h2, .sec-lead),
+.landing .faq-grid > div:first-child,
+.landing .cta-grid > div:first-child { text-align: center; }
+
+.landing .section-heading > :is(.sec-h2, .sec-lead), .landing .sec > .container > :is(.sec-h2, .sec-lead), .landing .faq-grid .sec-h2, .landing .faq-grid .sec-lead, .landing .cta-note { margin-inline: auto; }
+
+.landing .section-heading > .eyebrow,
+.landing .sec > .container > .eyebrow,
+.landing .faq-grid > div:first-child > .eyebrow,
+.landing .cta-grid > div:first-child > .eyebrow { justify-content: center; }
+
+.landing .datum { text-align: center; padding-inline: 16px; }
+
+.landing .datum dd { justify-content: center; }
+
+.landing .demo-tabs { justify-content: center; }
+
+.landing .demo-label { margin-left: 0; }
+
+.landing .score-card { width: 100%; margin-inline: auto; }
+
+.site-foot .foot-col:first-child p { margin-inline: auto; }
+
+.site-foot .foot-col { text-align: center; }
+
+.site-foot .foot-honest { margin-inline: auto; text-align: center; }
+
+@media (min-width: 901px) {
+  .landing :is(.demo-panel, .score-grid, .faq-grid, .cta-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
+}
+
+@media (max-width: 900px) {
+  .site-foot .foot-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 16px; }
+  .site-foot .foot-col:first-child { grid-column: 1 / -1; }
+  .site-foot .foot-row { justify-content: center; text-align: center; }
+}

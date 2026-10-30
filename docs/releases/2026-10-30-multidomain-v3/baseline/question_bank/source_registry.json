@@ -1,0 +1,192 @@
+{
+  "format_version": 1,
+  "sources": [
+    {
+      "id": "builtin",
+      "label": "项目自编 · Java演示题",
+      "origin": "self_authored",
+      "review_state": "unreviewed",
+      "references": []
+    },
+    {
+      "id": "builtin-python-demo-v1",
+      "label": "项目自编 · Python演示题",
+      "origin": "self_authored",
+      "review_state": "unreviewed",
+      "references": []
+    },
+    {
+      "id": "original-spring-di-20261026",
+      "label": "自编候选 · Spring依赖注入",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Spring Framework: Dependency Injection",
+          "url": "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html",
+          "checked_on": "2026-10-26"
+        }
+      ]
+    },
+    {
+      "id": "original-redis-persistence-20261026",
+      "label": "自编候选 · Redis持久化",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Redis: Persistence",
+          "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/",
+          "checked_on": "2026-10-26"
+        }
+      ]
+    },
+    {
+      "id": "original-python-copy-20261026",
+      "label": "自编候选 · Python拷贝",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Python 3.12: copy",
+          "url": "https://docs.python.org/3.12/library/copy.html",
+          "checked_on": "2026-10-26"
+        }
+      ]
+    },
+    {
+      "id": "original-python-asyncio-20261026",
+      "label": "自编候选 · Python协程调度",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Python 3.12: Coroutines and Tasks",
+          "url": "https://docs.python.org/3.12/library/asyncio-task.html",
+          "checked_on": "2026-10-26"
+        }
+      ]
+    },
+    {
+      "id": "original-mysql-transactions-20261029",
+      "label": "项目自编 · MySQL事务",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "MySQL 8.4: autocommit, Commit, and Rollback",
+          "url": "https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-java-runtime-20261029",
+      "label": "项目自编 · Java运行机制",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Java SE 21: Thread",
+          "url": "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Thread.html",
+          "checked_on": "2026-10-29"
+        },
+        {
+          "title": "JVM Specification SE 21: Runtime Data Areas",
+          "url": "https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-2.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-spring-transactions-20261029",
+      "label": "项目自编 · Spring事务代理",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Spring Framework: Using @Transactional",
+          "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-redis-lock-20261029",
+      "label": "项目自编 · Redis租约锁",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Redis: SET",
+          "url": "https://redis.io/docs/latest/commands/set/",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-http-semantics-20261029",
+      "label": "项目自编 · HTTP语义",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "RFC 9110: HTTP Semantics",
+          "url": "https://www.rfc-editor.org/rfc/rfc9110.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-python-resources-20261029",
+      "label": "项目自编 · Python异常与资源",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Python 3.12: Errors and Exceptions",
+          "url": "https://docs.python.org/3.12/tutorial/errors.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-python-async-20261029",
+      "label": "项目自编 · Python异步协作",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Python 3.12: Coroutines and Tasks",
+          "url": "https://docs.python.org/3.12/library/asyncio-task.html",
+          "checked_on": "2026-10-29"
+        },
+        {
+          "title": "Python 3.12: Synchronization Primitives",
+          "url": "https://docs.python.org/3.12/library/asyncio-sync.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-python-sqlite-20261029",
+      "label": "项目自编 · Python数据库资源",
+      "origin": "self_authored",
+      "review_state": "reference_checked",
+      "references": [
+        {
+          "title": "Python 3.12: sqlite3",
+          "url": "https://docs.python.org/3.12/library/sqlite3.html",
+          "checked_on": "2026-10-29"
+        }
+      ]
+    },
+    {
+      "id": "original-cross-domain-20261030",
+      "label": "项目自编 · 跨领域情境与英语面试",
+      "origin": "self_authored",
+      "review_state": "unreviewed",
+      "references": []
+    }
+  ]
+}

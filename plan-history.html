@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>计划练习记录 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/plan-history.js" defer></script>
+<script src="/assets/account-menu.js" defer></script>
+</head>
+<body class="notes-page">
+  <a class="skip" href="#plan-history-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog">题库</a><a href="/plans">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
+  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+  <main id="plan-history-main" class="container notes-main board-main">
+    <section class="notes-intro board-intro" aria-labelledby="plan-history-title"><div><p class="eyebrow">ONE PLAN, EVERY ATTEMPT</p><h1 id="plan-history-title">同一个方向，<br>每一次都有记录。</h1></div><div><p class="sec-lead">把一份计划里的练习放在一起。接着未讲完的思路，也回看已经留下的回答。</p><p class="notes-boundary">这里只整理仍保留的关联场次；记录数量不表示能力，完成练习不改变计划目标。</p><a href="/dashboard" class="link-arrow">返回练习概览 ↗</a></div></section>
+    <!-- 身份与地址：先检查会话及计划编号，不枚举他人的记录。 -->
+    <p id="plan-history-loading" class="report-loading" role="status">正在读取计划练习记录…</p>
+    <section id="plan-history-login" class="notes-message" hidden><h2>登录后，接着自己的准备。</h2><p>请登录所属账户，再从准备计划打开这份记录。</p><a href="/account" class="notes-button notes-primary">前往登录</a></section>
+    <section id="plan-history-choose" class="notes-message" hidden><h2>先选一份准备计划。</h2><p>在计划卡片中打开“计划练习记录”，即可回看它关联的场次。</p><a href="/plans" class="link-arrow">查看准备计划 ↗</a></section>
+    <section id="plan-history-error-panel" class="notes-message" hidden><h2>暂时无法读取记录。</h2><p id="plan-history-error" class="notes-alert" role="alert"></p><div class="note-actions"><button id="plan-history-retry" class="notes-button" type="button">重新读取</button><a href="/plans" class="link-arrow">返回准备计划 ↗</a><a href="/history" class="link-arrow">查看全部练习 ↗</a></div></section>
+    <div id="plan-history-content" hidden>
+      <!-- 当前计划：名称和日期实时读取，归档保留记录，移除不删除练习。 -->
+      <section class="plan-history-summary" aria-labelledby="plan-history-name"><div><p id="plan-history-state" class="eyebrow"></p><h2 id="plan-history-name"></h2><p id="plan-history-range" class="plans-topics"></p><p id="plan-history-target" class="notes-boundary"></p></div><a id="plan-history-plan" href="/plans" class="notes-button notes-primary">打开来源计划</a></section>
+      <!-- 状态计数：按全部有效关联汇总，筛选及翻页不截断总数。 -->
+      <section class="plan-history-metrics" aria-label="本计划练习状态统计"><div><span>未开始</span><strong id="plan-history-created">—</strong></div><div><span>进行中</span><strong id="plan-history-running">—</strong></div><div><span>已完成</span><strong id="plan-history-finished">—</strong></div><div><span>已取消</span><strong id="plan-history-cancelled">—</strong></div></section>
+      <!-- 主题复盘：按需读取已完成场次，回看证据并显式加入本场复习任务。 -->
+      <details id="plan-history-review" class="report-panel plan-theme-review">
+        <summary>按主题复盘这份计划</summary>
+        <p class="notes-boundary">仅整理本计划已完成且有评分的场次，每次查看一个主题。评分依据与版本可打开报告查看，同版本重复题按本账户全部已完成场次判断。加入复习任务沿用本场报告待补强项，已有状态保持。</p>
+        <form id="plan-history-review-form" class="plans-toolbar"><label for="plan-history-review-theme">已完成主题<select id="plan-history-review-theme"><option value="">正在读取主题…</option></select></label><button class="notes-button notes-primary" type="submit">查看主题</button><button id="plan-history-review-refresh" class="notes-button" type="button">刷新复盘</button><a href="/revision" class="link-arrow">查看复习任务 ↗</a></form>
+        <p id="plan-history-review-message" class="board-notice" role="status"></p><p id="plan-history-review-error" class="notes-alert" role="alert"></p><button id="plan-history-review-retry" class="notes-button" type="button" hidden>重新读取复盘</button>
+        <p id="plan-history-review-count" class="board-counts" role="status"></p><p id="plan-history-review-empty" class="notes-message" hidden>当前主题暂无已完成的评分记录。完成练习后可回来刷新。</p>
+        <div id="plan-history-review-list" class="plan-history-list"></div>
+        <nav id="plan-history-review-pages" class="notes-pagination" aria-label="主题复盘分页" hidden><button id="plan-history-review-previous" class="notes-button" type="button">前四场</button><span id="plan-history-review-page"></span><button id="plan-history-review-next" class="notes-button" type="button">后四场</button></nav>
+        <p id="plan-history-review-note" class="notes-boundary"></p>
+      </details>
+      <!-- 筛选与恢复：八项一页，状态及页码保留在地址中，刷新不提交写操作。 -->
+      <form id="plan-history-filters" class="plans-toolbar"><label for="plan-history-status">练习状态<select id="plan-history-status"><option value="">全部状态</option><option value="created">未开始</option><option value="running">进行中</option><option value="finished">已完成</option><option value="cancelled">已取消</option></select></label><button class="notes-button notes-primary" type="submit">筛选记录</button><button id="plan-history-clear" class="notes-button" type="button">全部状态</button><button id="plan-history-refresh" class="notes-button" type="button">刷新记录</button><p>时间均为北京时间</p></form>
+      <p id="plan-history-count" class="board-counts" role="status"></p>
+      <p id="plan-history-empty" class="notes-message" hidden>这个范围暂无关联场次。可以切换状态，或打开来源计划安排练习。</p>
+      <section id="plan-history-list" class="plan-history-list" aria-label="本计划关联练习"></section>
+      <nav id="plan-history-pages" class="notes-pagination" aria-label="计划练习分页" hidden><button id="plan-history-previous" class="notes-button" type="button">上一页</button><span id="plan-history-page"></span><button id="plan-history-next" class="notes-button" type="button">下一页</button></nav>
+      <section class="plans-boundary"><h2>保留练习，也保留自己的安排。</h2><p>归档计划仍能回看或继续已有场次。删除练习会清除对应关联并重算计数；移除计划后，可在全部练习中找回仍保留的记录与报告。</p><a href="/history" class="link-arrow">全部练习记录 ↗</a></section>
+    </div>
+  </main>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 同一个方向，每次再往前一点。</span><a href="/plans">准备计划 ↗</a></div></footer>
+  <noscript><p class="no-script">开启JavaScript并登录所属账户后，可读取计划练习记录。</p></noscript>
+</body>
+</html>

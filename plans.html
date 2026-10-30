@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>准备计划 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/plans.js" defer></script>
+<script src="/assets/account-menu.js" defer></script>
+</head>
+<body class="notes-page">
+  <a class="skip" href="#plans-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog">题库</a><a href="/plans" aria-current="page">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
+  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+  <main id="plans-main" class="container notes-main board-main">
+    <section class="notes-intro board-intro" aria-labelledby="plans-title"><div><p class="eyebrow">GIVE YOUR PREPARATION A DIRECTION</p><h1 id="plans-title">给下一次面试，<br>留一份自己的准备。</h1></div><div><p class="sec-lead">选好岗位与主题，留一个目标日期。每次从这里开始，接着练，再回头看。</p><p class="notes-boundary">为自己安排练习节奏。目标日期仅作记录，不发送提醒。</p><a href="#plans-create-panel" class="link-arrow">建立一份准备计划 ↗</a></div></section>
+    <!-- 身份状态：计划仅当前账户可见，失效后清除旧内容和编辑框。 -->
+    <p id="plans-loading" class="report-loading" role="status">正在读取账户与计划…</p><p id="plans-error" class="notes-alert" role="alert"></p><p id="plans-notice" class="board-notice" role="status"></p>
+    <section id="plans-login" class="notes-message" hidden><h2>登录后，安排自己的准备。</h2><p>计划保存在账户中，重新登录同一服务可找回。</p><a href="/account" class="link-arrow">前往账户登录 ↗</a></section><button id="plans-retry" class="notes-button" type="button" hidden>重新读取计划</button>
+    <div id="plans-workspace" hidden>
+      <!-- 来源定位：跨页打开指定计划，仍按账户授权读取；可返回全部计划。 -->
+      <section id="plans-focus" class="report-callout" hidden><h2>正在查看一份来源计划</h2><p>查看这份计划的练习安排，或返回全部计划。</p><a href="/plans" class="link-arrow">查看全部计划 ↗</a></section>
+      <!-- 计划范围：计数跟随岗位，不受状态和分页影响；目标日按北京时间。 -->
+      <section class="plans-toolbar" aria-label="计划筛选"><label for="plans-filter-position">已建岗位<select id="plans-filter-position"><option value="">全部岗位</option></select></label><label for="plans-filter-status">计划状态<select id="plans-filter-status"><option value="active">准备中</option><option value="archived">已归档</option><option value="">全部状态</option></select></label><button id="plans-apply" class="notes-button notes-primary" type="button">筛选计划</button><button id="plans-refresh" class="notes-button" type="button">刷新列表</button><p id="plans-identity" class="notes-boundary"></p></section>
+      <section class="plans-metrics" aria-label="计划统计"><div><span>准备中</span><strong id="plans-active">—</strong></div><div><span>已归档</span><strong id="plans-archived">—</strong></div><div><span>已过目标日期</span><strong id="plans-past">—</strong></div></section>
+      <p id="plans-calendar" class="notes-boundary"></p>
+      <div class="plans-layout">
+        <!-- 计划卡片：完成场次来自关联练习，归档与恢复均不修改练习。 -->
+        <section aria-labelledby="plans-list-title"><div class="notes-toolbar-heading"><h2 id="plans-list-title">按自己的节奏，接着准备</h2></div><div id="plans-list" class="plans-list"></div><section id="plans-empty" class="notes-message" hidden><h2>这个范围还没有计划。</h2><p>可以切换状态，或在右侧为自己选好下一组主题。</p></section><nav id="plans-pages" class="notes-pagination" aria-label="计划分页" hidden><button id="plans-previous" class="notes-button" type="button">上一页</button><span id="plans-page"></span><button id="plans-next" class="notes-button" type="button">下一页</button></nav></section>
+        <!-- 新建计划：范围创建后固定；保存不创建练习，只有点击开始才出题。 -->
+        <aside id="plans-create-panel" class="plans-builder" aria-labelledby="plans-create-title"><p class="eyebrow">START WITH ONE CLEAR FOCUS</p><h2 id="plans-create-title">这段时间，想准备什么？</h2><form id="plans-create-form">
+          <label for="plans-name">计划名称<input id="plans-name" required maxlength="160" placeholder="例如：后端面试前的数据库准备" autocomplete="off"></label>
+          <label for="plans-position">目标岗位<select id="plans-position"><option value="">正在读取岗位…</option></select></label>
+          <fieldset><legend>知识主题</legend><div id="plans-themes"></div></fieldset><p id="plans-selected" class="plans-selection" role="status"></p>
+          <label for="plans-difficulty">练习强度<select id="plans-difficulty"><option value="easy">轻松</option><option value="mid" selected>标准</option><option value="hard">挑战</option></select></label>
+          <label for="plans-target">目标日期（可不填）<input id="plans-target" type="date" min="2000-01-01" max="2100-12-31"></label>
+          <p class="notes-boundary">保存后练习范围固定，每个主题最多两道主问题，包含追问。</p><button id="plans-create" class="notes-button notes-primary" type="submit" disabled>保存准备计划</button><button id="plans-clear" class="notes-button" type="button">清空草稿</button><p id="plans-create-error" class="notes-alert" role="alert"></p>
+        </form></aside>
+      </div>
+      <section class="plans-boundary"><h2>计划可以归档，练过的记录会留下。</h2><p>归档后不再从本计划新建练习，仍可到练习记录继续已有场次；恢复后可以接着安排。只有已归档计划可移除，移除只清计划及关联，练习和报告保留。</p><a href="/history" class="link-arrow">查看已有练习 ↗</a><button id="plans-enter" class="notes-button" type="button" hidden>进入已创建练习</button></section>
+    </div>
+  </main>
+  <!-- 编辑计划：只改名称和目标日，冲突保留输入，不覆盖其他页面。 -->
+  <dialog id="plans-edit" class="notes-discard plans-edit" aria-labelledby="plans-edit-title"><form id="plans-edit-form"><h2 id="plans-edit-title">调整名称与目标日期</h2><label for="plans-edit-name">计划名称<input id="plans-edit-name" required maxlength="160" autocomplete="off"></label><label for="plans-edit-target">目标日期（留空可清除）<input id="plans-edit-target" type="date" min="2000-01-01" max="2100-12-31"></label><p class="notes-boundary">练习范围保持原设置，已有练习不会改变。</p><p id="plans-edit-error" class="notes-alert" role="alert"></p><div class="note-actions"><button id="plans-edit-close" class="notes-button" type="button">返回列表</button><button class="notes-button notes-primary" type="submit">保存修改</button></div></form></dialog>
+  <!-- 草稿保护：关闭编辑前显式选择保留或放弃尚未保存的输入。 -->
+  <dialog id="plans-discard" class="notes-discard" aria-labelledby="plans-discard-title"><h2 id="plans-discard-title">放弃尚未保存的修改？</h2><p>服务器里的计划保持原样。</p><div class="note-actions"><button id="plans-keep-edit" class="notes-button" type="button" autofocus>继续编辑</button><button id="plans-discard-edit" class="notes-button" type="button">放弃修改</button></div></dialog>
+  <!-- 移除计划：仅归档计划可移除，明确保留关联练习与报告。 -->
+  <dialog id="plans-remove" class="notes-discard" aria-labelledby="plans-remove-title"><h2 id="plans-remove-title">移除这份已归档计划？</h2><p id="plans-remove-name"></p><p>计划名称、日期和关联将被删除，无法恢复。练习、回答及报告继续保留在练习记录中。</p><div class="note-actions"><button id="plans-keep" class="notes-button" type="button" autofocus>保留计划</button><button id="plans-remove-confirm" class="notes-button danger-button" type="button">确认移除计划</button></div></dialog>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 从一个明确的方向开始。</span><a href="/revision">报告里的待复习主题 ↗</a></div></footer>
+  <noscript><p class="no-script">开启JavaScript并登录后可管理准备计划。</p></noscript>
+</body>
+</html>

@@ -1,0 +1,107 @@
+/* 字体与阅读层级：本机黑体服务于工作区，品牌大标题保留宋体风格。 */
+
+.notes-page :is(h1, h2, h3, summary) { font-family: var(--sans); }
+
+.notes-page h1 { font-weight: 650; letter-spacing: -.025em; text-wrap: balance; }
+
+.notes-page :is(h2, h3) { font-weight: 600; letter-spacing: -.01em; }
+
+.notes-page :is(input, select, button) { font-family: var(--sans); }
+
+.notes-page .notes-boundary { font-size: 14px; line-height: 1.85; }
+
+.notes-page .eyebrow { font-size: 14px; letter-spacing: .12em; }
+
+.notes-page .sec-lead { max-width: 42em; line-height: 1.85; }
+
+.notes-page .notes-nav-links { font-size: 14px; }
+
+.notes-page .notes-intro h1, .notes-page .studio-intro h1 { font-size: clamp(30px, 3.2vw, 42px); line-height: 1.35; }
+
+.notes-page .voice-question h2 { font-size: clamp(21px, 2vw, 27px); line-height: 1.65; letter-spacing: 0; }
+
+.voice-page .voice-intro { gap: 32px; padding-block: 12px 24px; }
+
+.voice-page .voice-intro h1 { margin-block: 8px 16px; }
+
+.voice-page .voice-intro .notes-boundary { margin-top: 12px; }
+
+.voice-page #rt-hint, .voice-page #voice-hint { font-size: 14px; line-height: 1.8; }
+
+.voice-transcript-heading { justify-content: space-between; flex-wrap: wrap; }
+
+.realtime-follow { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); min-height: 44px; cursor: pointer; }
+
+.realtime-follow input { width: 17px; height: 17px; margin: 0; accent-color: var(--sage-deep); }
+
+#rt-messages { max-height: 420px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+
+.realtime-bubble { padding: 18px 20px; }
+
+.notes-message .realtime-bubble p:last-child { font: 15px/1.85 var(--sans); color: var(--ink); }
+
+.notes-message .realtime-bubble .eyebrow { color: var(--sage-deep); font-size: 14px; }
+
+.notes-page .notes-alert:empty { display: none; }
+
+@media (max-width: 560px) {
+  .notes-page .notes-nav-links { gap: 12px; font-size: 14px; }
+  .voice-page .voice-intro { gap: 12px; padding-top: 4px; }
+  .notes-page .voice-question { min-height: 0; padding: 24px; }
+  .voice-question h2 { margin-block: 18px 24px; }
+  .notes-page :is(input:not([type="checkbox"]):not([type="file"]), select) { font-size: 16px; }
+  #rt-messages { max-height: 360px; }
+}
+
+/* 2026-10-29 阅读与间距：辅助文字至少14px，正文和输入保持清晰。 */
+
+.notes-page .sec-lead, .notes-page .studio-intro > p { font-size: 16px; line-height: 1.85; }
+
+.notes-page :is(.note-preview, .board-focus, .report-answer-text, .report-evidence) { font-size: 16px; }
+
+.notes-page :is(.notes-button, .link-arrow) { text-decoration: none; line-height: 1.6; }
+
+.notes-page :is(input, textarea, select) { font-size: 16px; }
+
+.notes-page :is(.notes-toolbar, .plans-toolbar, .library-filters, .catalog-builder, .library-practice, .plans-builder, .plans-edit) :is(input, select), .notes-page .note-editor textarea, .notes-page .voice-controls input[type="file"], .landing .practice-form :is(select, textarea) { font-size: 16px; }
+
+.notes-page .notes-nav-links { flex-wrap: wrap; justify-content: end; column-gap: 20px; row-gap: 0; }
+
+.notes-page .nav { height: auto; min-height: var(--nav-h); }
+
+.notes-page .notes-nav { min-height: var(--nav-h); padding-block: 4px; }
+
+.notes-page .brand { flex-shrink: 0; }
+
+.studio-connection { flex-wrap: wrap; }
+
+.studio-connection > div:first-child { flex: 1 1 240px; }
+
+.studio-connection .notes-button { text-decoration: none; }
+
+.notes-page :is(.notes-toolbar, .plans-toolbar, .library-filters) :is(input, select) { min-width: 0; }
+
+.notes-page :is(.notes-boundary, .note-context, .report-version, .plan-history-dates) { overflow-wrap: anywhere; }
+
+@media (max-width: 760px) {
+  .notes-page .brand-en { display: none; }
+  .notes-page .notes-nav { flex-wrap: wrap; gap: 0 16px; }
+  .notes-page .notes-nav-links { margin-left: auto; gap: 0 12px; }
+  .notes-page .notes-main { padding-block: 32px 56px; }
+  .notes-page .voice-intro { padding-top: 0; }
+  .notes-page .notes-intro h1 { margin-top: 12px; }
+}
+
+@media (max-width: 560px) {
+  .notes-page :is(.note-card, .notes-message, .report-panel, .report-turn, .voice-question, .voice-controls, .voice-transcript, .account-panel, .catalog-builder, .plans-card, .plans-builder, .plan-history-summary) { padding: 20px; }
+  .notes-page .notes-toolbar { margin-top: 28px; }
+  .notes-page .notes-list { gap: 16px; }
+  .notes-page .studio-connection > div:first-child { flex-basis: 100%; }
+  .notes-page .studio-connection .notes-button { flex: 1 1 auto; text-align: center; }
+  .voice-controls .note-actions { grid-template-columns: 1fr; }
+  .landing .demo-tabs { flex-wrap: wrap; }
+  .landing .demo-tabs button { flex: 1 1 auto; }
+  .landing .hero-actions { flex-wrap: wrap; justify-content: center; }
+  .product-toolbar { flex-wrap: wrap; gap: 4px 12px; padding-block: 10px; }
+  .landing .hero-caption { flex-wrap: wrap; }
+}

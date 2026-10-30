@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN" id="top">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="青栈 AI 模拟面试：从六个岗位方向开始，沿着回答继续追问，回看评分要点，再安排下一次复习。">
+  <title>青栈 QINGZHAN · 把答案，聊明白。</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="assets/home.css">
+  <script src="assets/home.js" defer></script>
+</head>
+<!-- EDIT: 接口留空为离线首页预览；正式接入改 data-api 与 data-workspace-base，详见 assets/README.md。 -->
+<body data-api="" data-workspace-base="http://localhost:3000">
+  <a class="skip" href="#main">跳到主要内容</a>
+  <header class="nav" id="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#top" aria-label="青栈 QINGZHAN，返回顶部">
+        <svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg>
+        <span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span>
+      </a>
+      <nav class="nav-links" id="nav-links" aria-label="主导航">
+        <a class="nav-link" href="http://localhost:3000/catalog" data-workspace-path="/catalog">题库探索</a><a class="nav-link" href="http://localhost:3000/revision" data-workspace-path="/revision">复习任务</a><a class="nav-link" href="http://localhost:3000/dashboard" data-workspace-path="/dashboard">练习概览</a><a class="nav-link" href="http://localhost:3000/notes" data-workspace-path="/notes">复习笔记</a><a class="nav-link" href="#about">常见问题</a>
+      </nav>
+      <a class="btn btn-nav" href="#start">开始练习 <span aria-hidden="true">↗</span></a>
+      <button class="menu-toggle" type="button" aria-label="展开导航" aria-controls="nav-links" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path d="M3 6h14M3 14h14"/></svg></button>
+    </div>
+  </header>
+  <main id="main" class="landing">
+    <!-- EDIT: 首屏文案和演示对话；产品数字来自本地代码快照，不是用户规模或效果指标。 -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow hero-kicker"><span aria-hidden="true"></span> 为下一次开口，做好准备</p>
+          <h1 class="hero-h1" id="hero-title">不止答出来。<br><span>把答案，聊明白。</span></h1>
+          <p class="hero-sub">从一句回答，走到下一层追问。<br>练过之后，知道该补的是哪一个知识点。</p>
+          <div class="hero-actions"><a class="btn btn-primary" href="#start">开始一场练习 <span aria-hidden="true">↗</span></a><a class="link-arrow" href="#stage">先看它怎么问 <span aria-hidden="true">↓</span></a></div>
+          <ul class="hero-meta"><li>文字 / 语音作答</li><li>无需摄像头</li><li>无需简历也能开始</li></ul>
+        </div>
+        <figure class="hero-visual">
+          <div class="product-frame">
+            <div class="product-toolbar"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>青栈 · 专注练习</span><span class="product-preview">交互流程示意</span></div>
+            <div class="product-grid">
+              <div class="product-rail"><span class="mini-label">YOUR SESSION</span><p>每一问，<br>再深入一点。</p><div class="hero-steps" role="tablist" aria-label="首屏练习流程"><button id="hero-step-0" type="button" role="tab" aria-selected="true" aria-controls="hero-panel-0" data-hero-step="0"><b>01</b> 回答问题</button><button id="hero-step-1" type="button" role="tab" aria-selected="false" aria-controls="hero-panel-1" data-hero-step="1" tabindex="-1"><b>02</b> 继续追问</button><button id="hero-step-2" type="button" role="tab" aria-selected="false" aria-controls="hero-panel-2" data-hero-step="2" tabindex="-1"><b>03</b> 带走复盘</button></div><span class="rail-topic">Java / MySQL</span></div>
+          <div class="interview-card hero-demo-panel" id="hero-panel-0" role="tabpanel" aria-labelledby="hero-step-0" tabindex="0">
+            <div class="iv-top"><div class="iv-title"><span class="iv-co">Java 后端</span><span class="iv-sep" aria-hidden="true"></span><span class="iv-role">MySQL · 索引</span></div><span class="iv-timer">Q / 01</span></div>
+            <div class="iv-context"><span>本题考察 <b>B+树与索引选型</b></span><span>题库示例</span></div>
+            <div class="iv-body">
+              <div class="iv-row iv-ai"><span class="iv-av" aria-hidden="true">Q</span><div><p class="iv-label">面试官 · 主问题</p><p class="iv-text">为什么 MySQL 使用 B+ 树，而不是哈希表？</p></div></div>
+              <div class="iv-row iv-me"><p class="iv-bubble">B+树的叶子节点通过链表连接，适合范围查询。哈希索引适合等值查找。</p></div>
+              <div class="iv-row iv-follow"><p class="iv-label">思路提示</p><p class="iv-text">先说明数据结构，再结合查询场景解释选择。</p></div>
+            </div>
+            <div class="iv-foot"><span class="iv-score-label">从已覆盖要点，问到尚未解释的部分</span><span class="iv-tag">继续追问</span></div>
+          </div>
+          <div class="interview-card hero-demo-panel" id="hero-panel-1" role="tabpanel" aria-labelledby="hero-step-1" tabindex="0" hidden><div class="iv-top"><span class="iv-co">沿着回答，继续深入</span><span class="iv-timer">Q / 02</span></div><div class="iv-context"><span>追问目标 <b>磁盘 IO 与树高度</b></span><span>合成追问示意</span></div><div class="iv-body"><div class="iv-row iv-ai"><span class="iv-av" aria-hidden="true">Q</span><div><p class="iv-label">面试官 · 追问示意</p><h2 class="iv-text">范围查询说清楚了，那树的高度为什么会影响磁盘 IO？</h2></div></div><div class="hero-focus-note"><p class="iv-label">为什么问这一句</p><p>示例回答解释了叶子链表，还没有连接树高、节点访问与查询成本。</p></div><p class="notes-boundary">选择尚未覆盖的要点，让下一问更有方向。</p></div><div class="iv-foot"><span>把结论往原因再推进一步</span><span class="iv-tag">追问示意</span></div></div>
+          <div class="interview-card hero-demo-panel" id="hero-panel-2" role="tabpanel" aria-labelledby="hero-step-2" tabindex="0" hidden><div class="iv-top"><span class="iv-co">这一次，带走什么</span><span class="iv-timer">REVIEW</span></div><div class="iv-context"><span>示例回答 <b>规则评分</b></span><span>合成复盘示意</span></div><div class="iv-body"><h2 class="hero-review-score">6.3 <span>/ 10</span></h2><p>已覆盖 3 / 4 个要点</p><div class="hero-focus-note"><p class="iv-label">下一步补强</p><p>把磁盘 IO 与树高度的关系讲清楚，再尝试一次。</p></div><a href="#score" class="link-arrow">查看评分依据</a></div><div class="iv-foot"><span>规则估算，不代表能力或录用结论</span><span class="iv-tag">继续复习</span></div></div>
+              <div class="product-insight"><span class="mini-label">下一层思考</span><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="15" y="3" width="10" height="8" rx="3"/><rect x="3" y="28" width="10" height="8" rx="3"/><rect x="27" y="28" width="10" height="8" rx="3"/><path d="M20 11v9H8v8m12-8h12v8"/></svg><h2 id="hero-insight-title">从“知道”，到说得有依据。</h2><p id="hero-insight-copy">连接数据结构与查询成本，让思路再往前一步。</p><div class="insight-step"><span>当前重点</span><b id="hero-insight-now">范围查询</b></div><div class="insight-step next-step"><span>下一步</span><b id="hero-insight-next">解释原因与边界</b></div></div>
+            </div>
+          </div>
+          <figcaption class="hero-caption">题干改写自内置题库 · 合成回答与追问示意</figcaption>
+        </figure>
+      </div>
+      <div class="container data-sec" id="capability-metrics">
+        <dl class="data-bar" aria-label="当前本地版本能力">
+          <div class="datum"><dt>开放岗位</dt><dd><b class="datum-num mono" data-count="6">0</b><span>个</span></dd></div>
+          <div class="datum"><dt>内置练习题</dt><dd><b class="datum-num mono" data-count="120">0</b><span>道</span></dd></div>
+          <div class="datum"><dt>评分维度</dt><dd><b class="datum-num mono" data-count="3">0</b><span>项</span></dd></div>
+          <div class="datum"><dt>练习方式</dt><dd><b class="datum-num mono" data-count="2">0</b><span>种</span></dd></div>
+        </dl>
+        <p class="data-note">六个方向 · 120道题 · 支持英语面试与语音练习。</p>
+      </div>
+    </section>
+
+    <!-- 切换提问、追问、复盘，让用户主动查看同一题的不同环节。 -->
+    <section class="sec account-carousel" aria-labelledby="account-carousel-title">
+      <div class="container"><p class="eyebrow">YOUR PRACTICE, CONTINUED</p><h2 class="sec-h2" id="account-carousel-title">每一次准备，都有下一步。</h2><p id="carousel-status" role="status">先了解练习流程，登录后自动展示你的记录。</p>
+      <div class="account-metrics"><div><strong id="carousel-finished">0</strong><span>已完成练习</span></div><div><strong id="carousel-todo">0</strong><span>待复习任务</span></div><div><strong id="carousel-notes">0</strong><span>已有笔记</span></div></div>
+      <div id="carousel-slide" class="account-slide" aria-live="off"><div class="carousel-art scene-discover" aria-hidden="true"><span></span><span></span><span></span></div><div class="carousel-copy"><p class="eyebrow">01 / 发现方向</p><h3>找到值得练习的下一题</h3><p>从六个方向探索题库，选择适合自己的岗位与主题。</p><a href="/catalog" class="notes-button">探索题库</a></div></div><div class="carousel-controls"><button id="carousel-prev" class="notes-button" type="button">上一条</button><span id="carousel-page">1 / 3</span><button id="carousel-next" class="notes-button" type="button">下一条</button><button id="carousel-pause" class="notes-button" type="button">暂停轮播</button></div><a href="/account?next=%2F%23account-carousel-title" class="link-arrow">账户与登录</a></div>
+    </section>
+    <section class="sec demo-section" id="stage" aria-labelledby="stage-title">
+      <div class="container">
+        <div class="section-heading" data-reveal><p class="eyebrow">01 / A QUESTION GOES DEEPER</p><h2 class="sec-h2" id="stage-title">先回答，再把遗漏的地方问清楚。</h2><p class="sec-lead">下面是一道 MySQL 题的演示。切换环节，看看“会背”与“能解释”之间，还隔着哪一问。</p></div>
+        <div class="demo-shell" data-reveal>
+          <div class="demo-tabs" role="tablist" aria-label="一轮面试的三个环节"><button type="button" id="tab-question" role="tab" aria-selected="true" aria-controls="panel-question" tabindex="0">01 <span>提问</span></button><button type="button" id="tab-probe" role="tab" aria-selected="false" aria-controls="panel-probe" tabindex="-1">02 <span>追问</span></button><button type="button" id="tab-review" role="tab" aria-selected="false" aria-controls="panel-review" tabindex="-1">03 <span>复盘</span></button><span class="demo-label">同一道题 / 演示内容</span></div>
+          <article class="demo-panel" id="panel-question" role="tabpanel" aria-labelledby="tab-question" tabindex="0">
+            <div><p class="eyebrow">THE QUESTION</p><h3>为什么是 B+ 树？<br>别只停在“适合范围查询”。</h3><p>索引选型不是名词对照。试着把数据结构、访问方式与磁盘成本连起来讲。</p></div>
+            <dl class="question-spec"><div><dt>目标岗位</dt><dd>Java 后端</dd></div><div><dt>知识主题</dt><dd>MySQL / 索引</dd></div><div><dt>回答要点</dt><dd>B+树、哈希局限、磁盘 IO、叶子链表</dd></div><div><dt>练习方式</dt><dd>文字或语音</dd></div></dl>
+          </article>
+          <article class="demo-panel" id="panel-probe" role="tabpanel" aria-labelledby="tab-probe" tabindex="0" hidden>
+            <div><p class="eyebrow">THE FOLLOW-UP</p><h3>你解释了范围查询。<br>再说说一次查询的成本。</h3><p>追问示意：树高增加一层，需要付出什么代价？B+ 树的多路结构又如何减少磁盘访问？</p></div>
+            <div class="probe-note"><span class="mini-label">为什么问这一句</span><p>这份示例回答覆盖了范围查询，却没有解释磁盘 IO 与树高度的关系。</p><p class="probe-target">追问目标 / 磁盘 IO 与树高度</p><p class="fine-print">实际追问由当前题目、技能路径和回答共同决定，不保证与示意文案一致。</p></div>
+          </article>
+          <article class="demo-panel" id="panel-review" role="tabpanel" aria-labelledby="tab-review" tabindex="0" hidden>
+            <div><p class="eyebrow">THE REVIEW</p><h3>分数是一条线索。<br>下一步，补上缺的要点。</h3><p>回看真实题干、完整回答和各轮评分。把薄弱主题存到任务板，安排复习日期，再练一次。</p></div>
+            <div class="review-slip"><span class="mini-label">示例回答 · 规则评分</span><p class="review-number">6.3 <span>/ 10</span></p><p>已覆盖 3 / 4 个要点</p><p class="missed-point">待补充：磁盘 IO 与树高度的关系</p><a class="link-arrow" href="#score">查看评分依据 <span aria-hidden="true">↓</span></a></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- EDIT: 六项对应当前主流程；语音能力及验收边界在常见问题说明。 -->
+    <section class="sec" id="capability" aria-labelledby="cap-title">
+      <div class="container"><p class="eyebrow">02 / BUILT FOR PRACTICE</p><h2 class="sec-h2" id="cap-title">练习有来路，复习有去处。</h2>
+        <div class="cap-grid" data-reveal>
+          <article class="cap"><span class="cap-num mono">01</span><div><h3 class="cap-title">从背景开始</h3><p class="cap-desc">粘贴简历或上传带文本层的 PDF，用技能和项目辅助出题。也可以直接开始。</p></div></article>
+          <article class="cap"><span class="cap-num mono">02</span><div><h3 class="cap-title">沿着回答追问</h3><p class="cap-desc">从当前知识路径选择追问目标，每轮保留问题、回答与评分要点。</p></div></article>
+          <article class="cap"><span class="cap-num mono">03</span><div><h3 class="cap-title">一次聚焦一个主题</h3><p class="cap-desc">选择 MySQL、Python基础等专项主题，每主题最多两道主问题，继续展开追问。</p></div></article>
+          <article class="cap"><span class="cap-num mono">04</span><div><h3 class="cap-title">看懂分数从哪里来</h3><p class="cap-desc">回看三项评分与回答依据，找到还没讲清楚的地方。</p></div></article>
+          <article class="cap"><span class="cap-num mono">05</span><div><h3 class="cap-title">把记录留给下一次</h3><p class="cap-desc">登录后查看账户历史，继续未结束练习，导出完整报告，对照同岗位主题记录。</p></div></article>
+          <article class="cap"><span class="cap-num mono">06</span><div><h3 class="cap-title">把弱项安排进日历</h3><p class="cap-desc">保存复习任务，设置日期，查看今日与逾期安排。完成状态由你决定。</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec process-section" id="process" aria-labelledby="process-title">
+      <div class="container"><p class="eyebrow">03 / YOUR PRACTICE LOOP</p><h2 class="sec-h2" id="process-title">从准备，到知道下一步。</h2>
+        <ol class="process-list">
+          <li class="process-step"><span class="step-num mono">01 / PREPARE</span><div class="step-figure role-chips" aria-hidden="true"><span>Java</span><span>Python</span></div><h3 class="step-title">选择方向</h3><p class="step-desc">选岗位与强度，综合练习或集中练一个主题。</p></li>
+          <li class="process-step"><span class="step-num mono">02 / CONTEXT</span><div class="step-figure" aria-hidden="true"><div class="mini-doc"><span class="mini-doc-tag">PDF / TEXT</span><i></i><i></i><i></i></div></div><h3 class="step-title">补充背景</h3><p class="step-desc">综合面试可选填简历；主题专项无需简历。</p></li>
+          <li class="process-step"><span class="step-num mono">03 / PERFORM</span><div class="step-figure mini-chat" aria-hidden="true"><span class="mini-bubble mini-bubble--ai">再解释一下，为什么？</span><span class="mini-bubble mini-bubble--me">我的思路是……</span></div><h3 class="step-title">认真回答</h3><p class="step-desc">写下思路，接住追问。断线后可同步恢复。</p></li>
+          <li class="process-step"><span class="step-num mono">04 / REVIEW</span><div class="step-figure" aria-hidden="true"><svg width="118" height="50" viewBox="0 0 118 50" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 46h108M17 44V20M42 44V11M67 44V27M92 44V5"/></svg></div><h3 class="step-title">带走复盘</h3><p class="step-desc">回看逐题报告，保存弱项，再安排一次主题练习。</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 点击评分维度，定位同一份回答中的原文与该维度的评分口径。 -->
+    <section class="sec score-section" id="score" aria-labelledby="score-title">
+      <div class="container"><p class="eyebrow">04 / SHOW THE REASON</p><h2 class="sec-h2" id="score-title">别只看分数。<br>看看哪一句，还可以讲清楚。</h2><p class="sec-lead">以一道索引题为例，点击评分维度，回看回答中已覆盖和待补充的部分。</p>
+        <div class="score-grid">
+          <div class="score-card"><div class="score-head"><span class="mini-label">示例回答 · 规则评分</span><span class="tag-mono">3 / 4 要点</span></div><div class="score-total"><strong>6.3</strong><span>/ 10</span></div>
+            <svg class="native-radar" viewBox="0 0 300 220" role="img" aria-labelledby="radar-title radar-desc"><title id="radar-title">示例回答的三个评分维度</title><desc id="radar-desc">技术深度7.5，表达逻辑2.5，岗位匹配6.3。规则基线，不是语义质量结论。</desc><g class="radar-grid"><path d="M150 35 45 180h210ZM150 59.25 71.25 168h157.5ZM150 83.5 97.5 156h105ZM150 107.75 123.75 144h52.5ZM150 35v97M45 180l105-48 105 48"/></g><path class="radar-shape" d="M150 59.25 123.75 144 216.15 162.24Z"/><g class="radar-vertices"><circle data-dimension="depth" cx="150" cy="59.25" r="4" class="is-active"/><circle data-dimension="expression" cx="123.75" cy="144" r="4"/><circle data-dimension="match" cx="216.15" cy="162.24" r="4"/></g><g class="radar-labels"><text x="150" y="19" text-anchor="middle">内容完整度</text><text x="48" y="207" text-anchor="middle">表达逻辑</text><text x="251" y="207" text-anchor="middle">岗位匹配</text></g></svg>
+            <div class="dimension-list" role="group" aria-label="查看评分维度"><button type="button" data-dimension="depth" aria-pressed="true"><span>内容完整度</span><b>7.5</b></button><button type="button" data-dimension="expression" aria-pressed="false"><span>表达逻辑</span><b>2.5</b></button><button type="button" data-dimension="match" aria-pressed="false"><span>岗位匹配</span><b>6.3</b></button></div>
+          </div>
+          <div class="answer-evidence"><p class="mini-label">示例回答 / 完整原文</p><blockquote><span data-evidence="depth" class="is-evidence">B+树是一种多路平衡树，叶子节点通过链表连接，适合范围查询。</span><span data-evidence="match">哈希索引适合等值查找，但不能支持范围查询。</span></blockquote><div class="evidence-reason" aria-live="polite"><h3 id="evidence-heading">技术深度 · 覆盖了什么</h3><p id="evidence-reason">覆盖三个索引锚点；还没有解释磁盘 IO 与树高度的关系。下一问可以从这里展开。</p></div><p class="score-foot">示例为规则评分，实际报告会标注评分来源。分数用于练习参考。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 使用原生详情控件回答岗位、数据保留和能力边界问题。 -->
+    <section class="sec" id="about" aria-labelledby="about-title">
+      <div class="container faq-grid"><div><p class="eyebrow">05 / BEFORE YOU START</p><h2 class="sec-h2" id="about-title">开始之前，<br>你可能想知道。</h2><p class="sec-lead">选择合适的练习方式，<br>按自己的节奏往下走。</p></div><div class="faq-list">
+        <details open><summary>现在可以练哪些岗位？</summary><p>Java、Python、市场营销、运营管理、教育教学与英语面试，每个方向20道，共120道内置练习题，覆盖技术基础、内容与渠道、项目协作、课堂管理和英语表达等主题。可以综合练习，也可以选一个主题深入。</p></details>
+        <details><summary>和普通 AI 聊天有什么不同？</summary><p>练习围绕岗位题库、技能路径和评分锚点进行，保留轮次和追问记录。报告展示命中、未覆盖要点及评分来源，之后可以从弱项创建专项。</p></details>
+        <details><summary>我的简历和回答会被保存吗？</summary><p>上传的PDF原文件不落盘，提取的文本和面试回答会保存到服务端。账户所属内容可主动删除；备份和供应商副本须按部署方策略处理。启用外部模型时会处理脱敏后的输入。</p></details>
+        <details><summary>可以用语音练习吗？</summary><p>进入练习后可切换语音输入或实时对话。语音输入识别后自动保存并评分；实时对话不计分。请允许浏览器使用麦克风，建议佩戴耳机。</p></details>
+      </div></div>
+    </section>
+
+    <!-- 按本地岗位数据配置练习；只有显式接入接口后，提交才会上传简历或创建面试。 -->
+    <section class="cta-band" id="start" aria-labelledby="cta-title">
+      <div class="container cta-grid"><div data-reveal><p class="eyebrow">06 / MAKE YOUR NEXT MOVE</p><h2 class="cta-h2" id="cta-title">下一次面试，<br>先从这一题开始。</h2><p class="cta-sub">选一个方向，留一点时间。<br>不必等到全部准备好。</p><p class="cta-note">当前为本地首页预览。不会自动上传输入内容。</p></div>
+        <form id="practice-form" class="practice-form">
+          <div class="form-pair"><label for="position">目标岗位<select id="position" name="position"><option value="education">教育教学 · 20 道练习题</option><option value="english_interview">英语面试 · 20 道练习题</option><option value="java_backend">Java 后端 · 20 道练习题</option><option value="marketing">市场营销 · 20 道练习题</option><option value="operations">运营管理 · 20 道练习题</option><option value="python_backend">Python 后端 · 20 道练习题</option></select></label><label for="difficulty">练习强度<select id="difficulty" name="difficulty"><option value="easy">轻松</option><option value="mid" selected>标准</option><option value="hard">挑战</option></select></label></div>
+          <fieldset class="mode-options"><legend>练习方式</legend><label><input type="radio" name="mode" value="general" checked> 综合面试</label><label><input type="radio" name="mode" value="topic"> 主题专项</label></fieldset>
+          <fieldset id="theme-field" hidden><legend>知识主题 · 最多选择3项</legend><div id="theme-options" class="theme-options"></div><p class="form-help">每主题最多2道主问题，保留追问，不加入编码题。</p></fieldset>
+          <details id="resume-field" class="resume-field"><summary>补充简历背景 <span>可选 · 文本或 PDF</span></summary><div class="resume-fields"><label for="resume-pdf">上传 PDF 简历<input id="resume-pdf" type="file" accept=".pdf,application/pdf" aria-describedby="resume-pdf-status"></label><div class="resume-actions"><span id="resume-pdf-status" role="status">选择带文本层的 PDF，默认上限 5MB / 10页；点击开始后才上传。</span><button id="resume-remove" type="button" hidden>移除 PDF</button></div><label for="resume-text">或粘贴简历文本<textarea id="resume-text" name="resume_text" rows="4" maxlength="20000" placeholder="技能、项目经历，或一段你想在面试中展开的经历。"></textarea></label><div class="resume-actions"><span id="resume-count">0 / 20,000 字</span><button type="button" id="sample-resume">填入示例</button></div><p class="form-help">选择 PDF 后将优先使用文件；移除后可继续编辑文本。主题专项无需简历。</p></div></details>
+          <p id="form-summary" class="form-summary" aria-live="polite">Java 后端 / 标准 / 综合面试</p><p id="form-error" class="form-error" role="alert"></p><button class="btn btn-inverse form-submit" type="submit" disabled>预览这场练习 <span aria-hidden="true">↗</span></button>
+        </form>
+      </div>
+    </section>
+  </main>
+  <footer class="site-foot"><div class="container"><div class="foot-grid">
+    <div class="foot-col"><h3>青栈 / QINGZHAN</h3><p>把准备，变成能讲清楚的答案。</p></div>
+    <div class="foot-col"><h3>练习</h3><ul><li><a href="#start">综合面试</a></li><li><a href="#start" data-topic-entry>主题专项</a></li><li><a href="http://localhost:3000/catalog" data-workspace-path="/catalog">题库探索</a></li></ul></div>
+    <div class="foot-col"><h3>复盘</h3><ul><li><a href="http://localhost:3000/history" data-workspace-path="/history">练习记录</a></li><li><a href="http://localhost:3000/revision" data-workspace-path="/revision">复习任务</a></li><li><a href="http://localhost:3000/notes" data-workspace-path="/notes">复习笔记</a></li></ul></div>
+    <div class="foot-col"><h3>我的准备</h3><ul><li><a href="http://localhost:3000/dashboard" data-workspace-path="/dashboard">练习概览</a></li><li><a href="http://localhost:3000/account" data-workspace-path="/account">账户中心</a></li><li><a href="#about">常见问题</a></li></ul></div>
+    </div><div class="foot-legal"><p class="foot-honest">评分用于练习与复盘，不构成录用结论。</p><div class="foot-row"><span>© 2026 青栈 QINGZHAN</span><span>认真准备，从容表达。</span></div></div></div></footer>
+  <dialog id="preview-dialog" aria-labelledby="preview-title"><div class="dialog-heading"><span class="mini-label">PRACTICE PREVIEW</span><button type="button" id="close-preview" aria-label="关闭配置预览">×</button></div><h2 id="preview-title">先确认，这次练什么。</h2><p id="preview-selection"></p><p id="preview-detail"></p><p class="fine-print">这是本地配置预览，未上传简历、未创建面试。可进入现有练习室正式开始。</p><a class="btn btn-primary" href="http://localhost:3000/" data-workspace-path="/">进入现有练习室 <span aria-hidden="true">↗</span></a></dialog>
+  <noscript><p class="no-script">页面内容可直接阅读；开启 JavaScript 后可切换演示、筛选主题和预览练习配置。</p></noscript>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "format_version": 1,
+  "sources": [
+    {"id": "builtin", "label": "项目自编 · Java演示题", "origin": "self_authored", "review_state": "unreviewed", "references": []},
+    {"id": "builtin-python-demo-v1", "label": "项目自编 · Python演示题", "origin": "self_authored", "review_state": "unreviewed", "references": []},
+    {"id": "original-spring-di-20261026", "label": "自编候选 · Spring依赖注入", "origin": "self_authored", "review_state": "reference_checked", "references": [{"title": "Spring Framework: Dependency Injection", "url": "https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html", "checked_on": "2026-10-26"}]},
+    {"id": "original-redis-persistence-20261026", "label": "自编候选 · Redis持久化", "origin": "self_authored", "review_state": "reference_checked", "references": [{"title": "Redis: Persistence", "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/", "checked_on": "2026-10-26"}]},
+    {"id": "original-python-copy-20261026", "label": "自编候选 · Python拷贝", "origin": "self_authored", "review_state": "reference_checked", "references": [{"title": "Python 3.12: copy", "url": "https://docs.python.org/3.12/library/copy.html", "checked_on": "2026-10-26"}]},
+    {"id": "original-python-asyncio-20261026", "label": "自编候选 · Python协程调度", "origin": "self_authored", "review_state": "reference_checked", "references": [{"title": "Python 3.12: Coroutines and Tasks", "url": "https://docs.python.org/3.12/library/asyncio-task.html", "checked_on": "2026-10-26"}]}
+  ]
+}

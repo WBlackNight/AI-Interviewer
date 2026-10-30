@@ -1,0 +1,28 @@
+position: operations
+display_name: 运营管理
+roots:
+- name: 流程与协作
+- name: 服务与改进
+- name: 数据与增长
+- name: 项目与风险
+question_routes:
+  operations-1-1-20261030: 流程与协作
+  operations-1-2-20261030: 流程与协作
+  operations-1-3-20261030: 流程与协作
+  operations-2-1-20261030: 服务与改进
+  operations-2-2-20261030: 服务与改进
+  operations-2-3-20261030: 服务与改进
+  expand-v4-operations-25: 数据与增长
+  expand-v4-operations-26: 数据与增长
+  expand-v4-operations-27: 数据与增长
+  expand-v4-operations-28: 数据与增长
+  expand-v4-operations-29: 数据与增长
+  expand-v4-operations-30: 数据与增长
+  expand-v4-operations-31: 数据与增长
+  expand-v4-operations-32: 项目与风险
+  expand-v4-operations-33: 项目与风险
+  expand-v4-operations-34: 项目与风险
+  expand-v4-operations-35: 项目与风险
+  expand-v4-operations-36: 项目与风险
+  expand-v4-operations-37: 项目与风险
+  expand-v4-operations-38: 项目与风险

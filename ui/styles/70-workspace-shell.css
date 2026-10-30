@@ -1,0 +1,11 @@
+/* One navigation shell for account, preparation and review pages. */
+.notes-page .workspace-navigation { gap: 0 8px; flex-wrap: nowrap; }
+.workspace-navigation a { padding: 8px 10px; border-radius: 10px; white-space: nowrap; text-decoration: none; }
+.workspace-navigation a[aria-current="page"] { background: var(--mint); color: var(--sage-deep); font-weight: 600; }
+.workspace-navigation a:hover { background: var(--paper-2); }
+.notes-page main { min-height: calc(100svh - 180px); }
+[aria-busy="true"] { cursor: progress; }
+@media (max-width: 1100px) {
+  .notes-page .notes-nav:has(.workspace-navigation) { flex-wrap: wrap; padding-block: 12px; gap: 8px; }
+  .notes-page .workspace-navigation { width: 100%; overflow-x: auto; justify-content: flex-start; overscroll-behavior-x: contain; scrollbar-width: thin; padding-block: 2px; }
+}

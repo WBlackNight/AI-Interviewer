@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>实时语音陪练 · 青栈</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/realtime.js" defer></script>
+</head>
+<body class="notes-page voice-page" data-ws-base="">
+  <a class="skip" href="#realtime-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/">青栈 <span class="brand-en">QINGZHAN</span></a>
+    <nav class="notes-nav-links" aria-label="陪练导航"><a href="?mode=voice">语音作答</a><a href="?mode=text">正式文字练习</a></nav>
+  </div></header>
+  <main id="realtime-main" class="container notes-main">
+    <section class="notes-intro board-intro voice-intro">
+      <div><p class="eyebrow">A CONVERSATION, IN REAL TIME</p><h1>围绕这一题，<br>自然聊下去。</h1></div>
+      <div><p class="sec-lead">说出你的思路，停顿后听回复；也可以随时追问。</p><p class="notes-boundary">音频由豆包处理，字幕仅保留在本页。本模式不计分；建议佩戴耳机。</p></div>
+    </section>
+    <!-- 会话控制：先明确开始，再申请麦克风和建立供应商连接。 -->
+    <section class="studio-connection voice-connection"><p id="rt-status" role="status">正在检查实时语音服务…</p><span id="rt-clock" class="voice-timer" aria-label="本次对话剩余时间">--:--</span><button id="rt-sync" type="button" class="notes-button">重新检查</button></section>
+    <p id="rt-error" class="notes-alert" role="alert"></p>
+    <nav class="practice-modes" aria-label="练习方式"><a href="?mode=text">文字作答</a><a href="?mode=realtime" aria-current="page">实时对话<span>自由交流，不计分</span></a><a href="?mode=voice">语音输入<span>转写后保存答案</span></a></nav>
+    <div class="voice-layout">
+      <section class="report-panel voice-question" aria-labelledby="rt-title">
+        <p class="eyebrow">CURRENT QUESTION · 当前练习题</p><p id="rt-topic" class="notes-boundary">正在同步题目</p><h2 id="rt-title">正在读取本场练习题…</h2>
+        <p class="notes-boundary">先回答，再围绕没讲清楚的部分继续交流。</p>
+      </section>
+      <section class="note-card voice-controls" aria-label="实时对话控制">
+        <div class="voice-orb" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="12" y="4" width="8" height="15" rx="4"/><path d="M8 14v2a8 8 0 0 0 16 0v-2M16 24v5M11 29h10"/></svg><span></span><span></span><span></span><span></span><span></span></div>
+        <h2>准备好，就开口。</h2><div class="microphone-settings"><label for="rt-device">输入设备</label><div class="microphone-picker"><select id="rt-device"><option value="">系统默认麦克风</option></select><button id="rt-devices" class="notes-button" type="button">刷新设备</button></div><p id="rt-device-status" class="account-help" role="status"></p><label for="rt-level" class="voice-level-label">输入电平</label><meter id="rt-level" min="0" max="1" value="0">0</meter></div><p id="rt-hint" class="notes-boundary">麦克风尚未开启</p>
+        <div class="note-actions"><button id="rt-start" class="notes-button notes-primary" type="button">开始实时对话</button><button id="rt-pause" class="notes-button" type="button" disabled>暂停麦克风</button><button id="rt-interrupt" class="notes-button" type="button" disabled>打断回复</button><button id="rt-end" class="notes-button" type="button" disabled>结束对话</button></div>
+        <details class="report-answer"><summary>改用录音文件</summary><label for="rt-file">16kHz单声道PCM16 WAV，最长10秒</label><input id="rt-file" type="file" accept=".wav,audio/wav"><p class="notes-boundary">适合麦克风暂不可用时使用。选择后立即发送，不申请麦克风权限。</p></details><details class="voice-troubleshooting"><summary>麦克风无法使用？</summary><ol><li>在地址栏的站点权限中允许麦克风，并检查系统隐私设置。</li><li>选择正确的输入设备，关闭占用麦克风的其他应用。</li><li>内置浏览器不支持时，用 Edge 或 Chrome 打开本页；也可上传录音。</li></ol></details>
+      </section>
+    </div>
+    <!-- 对话字幕：最多保留八条，只在当前页面展示。 -->
+    <section class="notes-message voice-transcript" aria-labelledby="rt-captions"><div class="voice-transcript-heading"><h2 id="rt-captions">对话字幕</h2><label class="realtime-follow"><input id="rt-follow" type="checkbox" checked>跟随最新对话</label></div><p id="rt-empty" class="notes-boundary">你的话和陪练的回复会出现在这里。</p><div id="rt-messages" role="log" aria-live="polite" aria-relevant="additions text"></div></section>
+  </main>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 · 实时陪练</span><a href="?mode=voice">返回语音作答</a></div></footer>
+<noscript><p class="no-script">请启用JavaScript以读取练习数据和提交操作。<a href="/">返回首页</a></p></noscript>
+</body>
+</html>

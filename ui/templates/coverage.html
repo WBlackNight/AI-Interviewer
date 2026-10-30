@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>题库覆盖 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/coverage.js" defer></script>
+</head>
+<body class="notes-page">
+  <a class="skip" href="#coverage-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
+    <!-- @workspace-navigation -->
+  </div></header>
+  <main id="coverage-main" class="container notes-main board-main">
+    <section class="notes-intro board-intro" aria-labelledby="coverage-title"><div><p class="eyebrow">KNOW THE SHAPE OF THE BANK</p><h1 id="coverage-title">先看清题库，<br>再补好下一题。</h1></div><div><p class="sec-lead">哪些主题已有题目，哪些难度仍留着空白？把当前可练范围和来源放在一起看。</p><p class="notes-boundary">这里统计正在运行的题库。题数不代表知识覆盖质量，参考资料核对也不等于专家审题或独立评测。</p><a href="/catalog" class="link-arrow">回到题干，选择一场练习 ↗</a></div></section>
+    <!-- 范围选择：只读取公开岗位条件，刷新可恢复；缺口视图在当前统计中筛选。 -->
+    <section class="coverage-toolbar" aria-label="覆盖范围"><label for="coverage-position">查看岗位<select id="coverage-position"><option value="">全部岗位</option></select></label><button id="coverage-gaps" class="notes-button" type="button" aria-pressed="false">仅看待补主题</button><button id="coverage-refresh" class="notes-button" type="button">刷新统计</button><button id="coverage-export" class="notes-button notes-primary" type="button" disabled>导出待补清单 JSON</button></section>
+    <p id="coverage-error" class="notes-alert" role="alert"></p><p id="coverage-loading" class="report-loading" role="status">正在读取当前题库…</p><p id="coverage-notice" class="board-notice" role="status"></p>
+    <div id="coverage-content" hidden>
+      <!-- 规模摘要：只展示真实数量，待补格为知识主题的三种难度空格。 -->
+      <section class="coverage-metrics" aria-label="题库规模"><div><span>当前题目</span><strong id="coverage-total">—</strong><small id="coverage-kinds"></small></div><div><span>知识根主题</span><strong id="coverage-roots">—</strong><small>仅编码主题另列</small></div><div><span>难度待补格</span><strong id="coverage-missing">—</strong><small>当前题数为零的难度格</small></div><div><span>资料尚未核对题目</span><strong id="coverage-review">—</strong><small>按来源登记状态统计</small></div></section>
+      <!-- 覆盖矩阵：每个难度格提供对应题库范围链接，编码题不冒充知识题覆盖。 -->
+      <section class="coverage-section" aria-labelledby="coverage-matrix-title"><div class="notes-toolbar-heading"><div><p class="eyebrow">TOPICS AND DIFFICULTY</p><h2 id="coverage-matrix-title">已有的题，和仍待补齐的空格</h2></div><span id="coverage-theme-count" class="notes-boundary"></span></div><p id="coverage-definition" class="notes-boundary"></p><div id="coverage-matrix" class="coverage-matrix"></div><p id="coverage-empty" class="notes-message" hidden>当前范围没有待补主题，可切回全部主题查看。</p></section>
+      <!-- 来源登记：展示来源声明与资料核对状态；参考链接仅在主动点击时打开。 -->
+      <section class="coverage-section" aria-labelledby="coverage-sources-title"><div class="notes-toolbar-heading"><div><p class="eyebrow">WHERE THE QUESTIONS COME FROM</p><h2 id="coverage-sources-title">让来源，也清楚可见</h2></div><p id="coverage-registry" class="notes-boundary"></p></div><div id="coverage-sources" class="coverage-sources"></div><p class="notes-boundary">“已核对资料”只说明来源登记附有参考资料，不保证每道题已获独立审核。现有演示材料不作为正式招聘测评依据。</p></section>
+      <section class="coverage-next"><p class="eyebrow">FROM A GAP TO A BETTER QUESTION</p><h2>补充题目，从一个明确的缺口开始。</h2><p>优先补齐空难度、核对题干与评分要点，再更新运行题库。候选稿在审校和索引匹配完成前，不会出现在练习中。</p><p id="coverage-version" class="coverage-version"></p></section>
+    </div>
+  </main>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 先有可核查的题，再有扎实的练习。</span><a href="/catalog">回到题库探索 ↗</a></div></footer>
+  <noscript><p class="no-script">开启JavaScript后可读取当前题库覆盖统计。</p></noscript>
+</body>
+</html>

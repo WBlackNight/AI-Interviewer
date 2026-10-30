@@ -1,0 +1,12 @@
+position: education
+display_name: 教育教学
+roots:
+- name: 教学设计
+- name: 沟通与评价
+question_routes:
+  education-1-1-20261030: 教学设计
+  education-1-2-20261030: 教学设计
+  education-1-3-20261030: 教学设计
+  education-2-1-20261030: 沟通与评价
+  education-2-2-20261030: 沟通与评价
+  education-2-3-20261030: 沟通与评价

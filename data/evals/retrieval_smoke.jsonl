@@ -1,0 +1,10 @@
+{"query_id":"retrieval-01","split":"smoke","query":"数据库范围扫描为什么使用多路平衡树和叶子链表","filters":{"position":"java_backend"},"relevance":{"jv-mysql-index-001":3,"jv-mysql-index-002":1}}
+{"query_id":"retrieval-02","split":"smoke","query":"慢SQL执行计划如何排查，索引失效和类型转换有什么关系","filters":{"position":"java_backend"},"relevance":{"jv-mysql-index-002":3,"jv-mysql-index-001":1}}
+{"query_id":"retrieval-03","split":"smoke","query":"事务隔离下的快照读和undo多版本控制","filters":{"position":"java_backend"},"relevance":{"jv-mysql-txn-001":3}}
+{"query_id":"retrieval-04","split":"smoke","query":"线程池满了以后，任务队列和拒绝策略怎样工作","filters":{"position":"java_backend"},"relevance":{"jv-concurrent-pool-001":3}}
+{"query_id":"retrieval-05","split":"smoke","query":"并发同步中乐观锁和悲观锁的选择，CAS是什么","filters":{"position":"java_backend"},"relevance":{"jv-concurrent-lock-001":3}}
+{"query_id":"retrieval-06","split":"smoke","query":"Java运行时内存区域中，哪些线程共享，堆与栈有什么区别","filters":{"position":"java_backend"},"relevance":{"jv-jvm-mem-001":3,"jv-jvm-gc-001":1}}
+{"query_id":"retrieval-07","split":"smoke","query":"如何判断对象可回收，分代垃圾回收算法有哪些","filters":{"position":"java_backend"},"relevance":{"jv-jvm-gc-001":3,"jv-jvm-mem-001":1}}
+{"query_id":"retrieval-08","split":"smoke","query":"Spring如何通过容器创建Bean并完成依赖注入","filters":{"position":"java_backend"},"relevance":{"jv-spring-ioc-001":3}}
+{"query_id":"retrieval-09","split":"smoke","query":"缓存穿透和热点失效怎样避免冲垮数据库","filters":{"position":"java_backend"},"relevance":{"jv-redis-cache-001":3}}
+{"query_id":"retrieval-10","split":"smoke","query":"TCP建立连接为什么需要三次握手，关闭连接为什么需要四次挥手","filters":{"position":"java_backend"},"relevance":{"jv-net-tcp-001":3}}

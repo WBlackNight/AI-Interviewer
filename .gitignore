@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv.*/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+tools/.package-test-*/
+# 开发库及其备份/日志（dev.db.bak-* 是升级前的备份）
+dev.db*
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+# 隔离演示服务的临时库、PID和停止标记
+backend/.native-preview-*/
+backend/.ui-review-*/
+# 可再生离线向量索引（以命令构建，不包含原始简历）
+data/retrieval/
+
+# Node
+node_modules/
+.next/
+.test-build/
+out/
+
+# 环境与编辑器
+.env
+.env.local
+.idea/
+.vscode/
+.DS_Store
+*.log
+
+# Local publishing tools and private acceptance artifacts
+.local-tools/
+docs/logs/
+docs/deliveries/
+docs/references/
+*.tsbuildinfo
+*.pid

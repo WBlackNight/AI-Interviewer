@@ -1,0 +1,107 @@
+/* 基于本地 preview/v1-mist.html 整理；无需构建，所有页面样式在本文件。 */
+
+/* ============================================================
+     v1 雾林 · 色板 / 字号 / 动效（遵 SPEC §2）
+     彩色只有：主色鼠尾草绿系（sage / deep / mint / pine）
+     + 语义色陶土 clay（仅用于「待提升 / 扣分」）
+     共享基础色与布局；末尾为当前银白 / 青绿视觉与控件规范。
+     ============================================================ */
+
+:root {
+    --paper: #F5F5F7;
+    --paper-2: #ECEEF0;
+    --ink: #1D2522;
+    --ink-2: #606965;
+    --line: #14211B1F;
+    --line-2: #14211B1A;
+    --sage: #83A183;
+    --sage-deep: #2C4A3B;
+    --mint: #E3EDE3;
+    --pine: #102821;
+    --clay: #B06A45;
+
+    --serif: "Noto Serif SC", "Songti SC", "Microsoft YaHei", "SimSun", serif;
+    --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+    --mono: Consolas, "Cascadia Mono", "SFMono-Regular", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", monospace;
+
+    --ease: cubic-bezier(.22, 1, .36, 1);
+    --ease-state: cubic-bezier(.4, 0, .2, 1);
+    --t-fast: 200ms;
+    --t-base: 520ms;
+    --nav-h: 56px;
+    --card: #ffffff;
+    --line-strong: #14211b33;
+    --on-pine: #f6f4ee;
+    --on-pine-muted: #d2ddd3;
+    --field-dark: #1b352b;
+    --overlay: #10282188;
+    --container: 1160px;
+  }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-padding-top: 72px; }
+
+body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+h1, h2, h3, p, figure, blockquote { margin: 0; }
+
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+a { color: inherit; }
+
+button { font: inherit; }
+
+svg { display: block; }
+
+.mono {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .12em;
+  }
+
+.num { font-variant-numeric: tabular-nums; }
+
+:focus-visible { outline: 2px solid var(--sage-deep); outline-offset: 3px; }
+
+.cta-band :focus-visible { outline-color: var(--mint); }
+
+::selection { background: var(--mint); color: var(--pine); }
+
+.container { margin-inline: auto; }
+
+.skip {
+    position: absolute;
+    top: -60px;
+    left: 16px;
+    z-index: 100;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--pine);
+    color: var(--paper);
+    font-size: 14px;
+    text-decoration: none;
+    transition: top var(--t-fast) var(--ease-state);
+  }
+
+.skip:focus { top: 12px; }
+
+/* ---------- 入场：只播一次，opacity + translateY(14px) ---------- */
+
+.motion-ready [data-reveal] {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+    transition-delay: var(--d, 0ms);
+  }
+
+.motion-ready [data-reveal].is-in { opacity: 1; transform: none; }

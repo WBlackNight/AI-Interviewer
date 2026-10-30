@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>题库探索 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/catalog.js" defer></script>
+<script src="/assets/account-menu.js" defer></script>
+</head>
+<body class="notes-page">
+  <a class="skip" href="#catalog-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog" aria-current="page">题库</a><a href="/plans">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
+  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+  <main id="catalog-main" class="container notes-main board-main">
+    <section class="notes-intro board-intro" aria-labelledby="catalog-title">
+      <div><p class="eyebrow">FIND YOUR NEXT QUESTION</p><h1 id="catalog-title">先找到方向，<br>再把这一题讲清楚。</h1></div>
+      <div><p class="sec-lead">找到想练的方向，选一个主题，把思路讲清楚。</p><p class="notes-boundary">预览题目与参考来源，再开始练习。</p><a href="#catalog-build" class="link-arrow">选择主题，准备一场练习 ↗</a></div>
+    </section>
+    <!-- 题库筛选：由服务端做字面匹配和严格难度筛选，失败保留已应用范围。 -->
+    <section class="notes-toolbar" aria-label="题库筛选">
+      <form id="catalog-filters">
+        <label for="catalog-position">目标岗位<select id="catalog-position"><option value="">正在读取岗位…</option></select></label>
+        <label for="catalog-theme">题目主题<select id="catalog-theme"><option value="">全部主题</option></select></label>
+        <label for="catalog-level">题目难度<select id="catalog-level"><option value="">全部难度</option><option value="easy">基础</option><option value="mid">进阶</option><option value="hard">挑战</option></select></label>
+        <label for="catalog-query" class="board-search">关键词<input id="catalog-query" type="search" maxlength="200" placeholder="题干、主题、编号或来源" autocomplete="off"></label>
+        <button class="notes-button notes-primary" type="submit">查找题目</button><button id="catalog-reset" type="button" class="notes-button">清除筛选</button><button id="catalog-refresh" type="button" class="notes-button">刷新题库</button>
+      </form>
+      <div class="board-date-tabs" role="group" aria-label="题型"><button class="notes-button" type="button" data-kind="all" aria-pressed="true">全部题目</button><button class="notes-button" type="button" data-kind="knowledge" aria-pressed="false">知识题</button><button class="notes-button" type="button" data-kind="coding" aria-pressed="false">编程题</button></div>
+      <p id="catalog-scope" class="board-counts" role="status"></p>
+      
+    </section>
+    <p id="catalog-error" class="notes-alert" role="alert"></p><p id="catalog-notice" class="board-notice" role="status"></p><p id="catalog-loading" class="report-loading" role="status">正在读取题库…</p>
+    <div id="catalog-content" class="catalog-layout" hidden>
+      <!-- 题目预览：分页限制页面规模，加入按钮只选择主题，不指定题目ID。 -->
+      <section class="catalog-results" aria-labelledby="catalog-results-title">
+        <div class="notes-toolbar-heading"><h2 id="catalog-results-title">从问题，看看主题的边界</h2><a href="#catalog-build" class="link-arrow">查看已选主题 ↗</a></div>
+        <div id="catalog-list" class="catalog-list"></div>
+        <section id="catalog-empty" class="notes-message" hidden><h2>这个范围还没有匹配的题目。</h2><p>可以调整主题、难度或关键词；清除筛选后继续查看本岗位题目。</p></section>
+        <nav id="catalog-pagination" class="notes-pagination" aria-label="题库分页" hidden><button id="catalog-previous" type="button" class="notes-button">上一页</button><span id="catalog-page"></span><button id="catalog-next" type="button" class="notes-button">下一页</button></nav>
+      </section>
+      <!-- 专项配置：选择岗位内可练主题；创建只在显式点击后发生，不自动重试。 -->
+      <aside id="catalog-build" class="catalog-builder" aria-labelledby="catalog-build-title">
+        <p class="eyebrow">BUILD A FOCUSED PRACTICE</p><h2 id="catalog-build-title">这一次，想练哪一块？</h2>
+        <p id="catalog-role" class="notes-boundary"></p><p class="notes-boundary">最多选择3个主题；切换岗位后需重新选择。</p>
+        <fieldset id="catalog-choices"><legend>可练知识主题</legend><div id="catalog-themes"></div></fieldset>
+        <label for="catalog-intensity" class="studio-label">练习强度</label><select id="catalog-intensity"><option value="easy">轻松</option><option value="mid" selected>标准</option><option value="hard">挑战</option></select>
+        <p id="catalog-selected" class="catalog-selection" role="status">还没有选择主题。</p>
+        <p id="catalog-plan-note" class="notes-boundary"></p><p id="catalog-identity" class="notes-boundary"></p>
+        <button id="catalog-create" class="notes-button notes-primary" type="button" disabled>开始主题专项</button>
+        <p id="catalog-create-error" class="notes-alert" role="alert"></p><a href="/history" class="link-arrow">查看已有练习 ↗</a>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 从一个主题，开始下一次准备。</span><a href="/coverage">题库覆盖与来源 ↗</a></div></footer>
+  <noscript><p class="no-script">开启JavaScript后可浏览当前题库并选择专项主题。</p></noscript>
+</body>
+</html>

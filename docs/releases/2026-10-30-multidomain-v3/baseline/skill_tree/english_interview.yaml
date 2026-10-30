@@ -1,0 +1,12 @@
+position: english_interview
+display_name: 英语面试
+roots:
+- name: Introduction
+- name: Workplace communication
+question_routes:
+  english_interview-1-1-20261030: Introduction
+  english_interview-1-2-20261030: Introduction
+  english_interview-1-3-20261030: Introduction
+  english_interview-2-1-20261030: Workplace communication
+  english_interview-2-2-20261030: Workplace communication
+  english_interview-2-3-20261030: Workplace communication

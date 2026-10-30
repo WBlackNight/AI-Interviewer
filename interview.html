@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>文字练习室 · 青栈 QINGZHAN</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/assets/home.css">
+    <script src="/assets/interview.js" defer></script>
+  <script src="/assets/account-menu.js" defer></script>
+</head>
+  <body class="notes-page" data-ws-base="">
+    <!-- 练习室状态文案：后端接入时可直接在此替换，脚本只读取语义键。 -->
+    <div id="studio-copy"
+  hidden
+  data-connecting="正在连接并同步…"
+  data-active="已同步，可以继续回答"
+  data-finished="本场已完成，回答已保存"
+  data-cancelled="本场已取消，已保存回答保留"
+  data-error="连接已停止，可检查后重新同步"
+  data-pending="已发送，正在等待本轮保存…"
+  data-saved-title="这一场的回答，已经留下来了。"
+  data-preparing="正在准备题目…"
+  data-finished-title="这一场，先练到这里。"
+  data-cancelled-title="本场已取消。"
+  data-finished-copy="回到逐轮报告，核对评分依据，再安排下一次准备。"
+  data-cancelled-copy="部分报告保留取消前已保存的回答。"
+  data-finished-link="查看复盘报告"
+  data-cancelled-link="查看部分报告"
+  data-heuristic="规则评分"
+  data-llm="模型评分"
+  data-heuristic_fallback="模型失败后规则回退"
+  data-unknown-origin="来源未记录"
+  data-cached=" · 缓存命中"
+  data-stale-draft="轮次已更新，旧轮内容未用于新题。"
+  data-unsaved="本轮未保存，请同步后检查。"
+  data-config-error="连接地址配置不正确。"
+  data-parse-error="消息无法解析，请重新同步。"
+  data-connection-error="连接暂时不可用，正在尝试同步。"
+  data-length-error="请检查回答或代码长度。"
+  data-submit-error="浏览器无法保留或发送本轮，请重新同步后检查。"
+  data-cancel-error="取消失败，请同步后检查。"
+  data-cancel-timeout="请求超时，请重新同步检查结果。"></div>
+    <a class="skip" href="#studio-main">跳到主要内容</a>
+    <header class="nav">
+      <div class="container notes-nav">
+        <a class="brand" href="/" aria-label="青栈首页">
+          <svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg>
+          <span class="brand-mark">青栈</span>
+          <span class="brand-en">QINGZHAN</span>
+        </a>
+        <nav class="notes-nav-links" aria-label="练习室导航">
+          <a href="/dashboard">练习概览</a>
+          <a href="/history">练习记录</a>
+          <a href="/account">账户</a>
+        </nav>
+      <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div>
+    </header>
+    <main id="studio-main" class="container notes-main board-main">
+      <section class="studio-intro">
+        <div>
+          <p class="eyebrow">ONE QUESTION, A LITTLE DEEPER</p>
+          <h1>这一题，<br class="studio-small-break">慢慢讲清楚。</h1>
+        </div>
+        <p>写下思路，接住追问。<br>每轮回答保存后，都可以回看依据。</p>
+      </section>
+      <!-- 连接与恢复：明确区分连接、同步、待评分和保存，不把发送当作保存。 -->
+      <section class="studio-connection" aria-label="连接状态">
+        <div>
+          <span id="studio-indicator" class="studio-indicator" aria-hidden="true"></span>
+          <p id="studio-status" role="status">正在连接并同步…</p>
+        </div>
+        <button id="studio-sync" type="button" class="notes-button">重新同步</button>
+      </section>
+      <nav class="practice-modes" aria-label="练习方式"><a href="?mode=text" aria-current="page">文字作答</a><a href="?mode=realtime">实时对话<span>自由交流，不计分</span></a><a href="?mode=voice">语音输入<span>转写后保存答案</span></a></nav>
+      <p id="studio-error" class="notes-alert" role="alert"></p>
+      <p id="studio-notice" class="board-notice" role="status"></p>
+      <section id="studio-access" class="notes-message" hidden>
+        <h2>检查这场练习的访问范围。</h2>
+        <p>请登录所属账户，或回到保留匿名凭据的标签页。访问凭据不会通过地址传递。</p>
+        <div class="note-actions">
+          <a href="/account" class="notes-button notes-primary">检查账户</a>
+          <a href="/history" class="link-arrow">练习记录 ↗</a>
+        </div>
+      </section>
+      <div id="studio-workspace" class="studio-grid" hidden>
+        <div>
+          <!-- 当前题与输入：草稿只在页面内，点击提交后才发送；输入法组合键不触发提交。 -->
+          <section class="studio-question report-panel" aria-labelledby="studio-question-title">
+            <p id="studio-question-meta" class="eyebrow"></p>
+            <h2 id="studio-question-title">正在准备题目…</h2>
+            <details id="studio-tests" class="report-answer" hidden>
+              <summary>公开测试用例</summary>
+              <pre id="studio-test-copy" class="studio-tests"></pre>
+            </details>
+            <form id="studio-form">
+              <label class="studio-label" for="studio-answer">你的回答 <span>先说明背景，再补上行动、依据与结果。</span></label>
+              <textarea id="studio-answer" rows="6" maxlength="40000" placeholder="可以分段整理，Enter 换行。"></textarea>
+              <div id="studio-code-field" hidden>
+                <label class="studio-label" for="studio-code">Python 代码</label>
+                <textarea id="studio-code" rows="10" spellcheck="false" placeholder="在这里填写 Python 实现和标准输入输出。"></textarea>
+                <p class="notes-boundary">代码最多16KiB。判题可用性由后端配置决定，失败时保留本轮输入。</p>
+              </div>
+              <div class="studio-composer-footer">
+                <p><span id="studio-counter">0</span> / 20,000 字 · Ctrl / ⌘ + Enter 提交</p>
+                <div class="note-actions"><button id="studio-skip" class="notes-button" type="button" disabled>跳过本题</button><button id="studio-submit" class="notes-button notes-primary" type="submit" disabled>提交回答</button></div>
+              </div>
+              <p class="studio-draft-help">跳过会将本轮记为未作答并继续下一题。未提交草稿仅在本页保留。</p>
+            </form>
+          </section>
+          <!-- 结束导航：完整结束和取消分别标记，部分报告仍保留已提交证据。 -->
+          <section id="studio-terminal" class="report-callout" hidden>
+            <h2 id="studio-terminal-title"></h2>
+            <p id="studio-terminal-copy"></p>
+            <div class="note-actions">
+              <a id="studio-report" class="notes-button notes-primary">查看复盘报告</a>
+              <a href="/#start" class="link-arrow">再练一场 ↗</a>
+            </div>
+          </section>
+          <!-- 旧轮草稿：轮次变化时只读保留，绝不自动用于新题。 -->
+          <details id="studio-recovery" class="studio-recovery" hidden>
+            <summary>查看保留的草稿与待确认内容</summary>
+            <pre id="studio-recovery-copy"></pre>
+          </details>
+          <!-- 轮次回看：只展示已保存的回答，四轮一页限制DOM规模。 -->
+          <section id="studio-history" class="studio-history" aria-labelledby="studio-history-title">
+            <div class="notes-toolbar-heading">
+              <h2 id="studio-history-title">已保存的轮次</h2>
+              <span id="studio-saved-count">0 轮</span>
+            </div>
+            <p id="studio-history-empty" class="notes-boundary">第一轮保存后，会在这里留下回答与评分依据。</p>
+            <div id="studio-turns" class="studio-turns"></div>
+            <nav id="studio-pagination" class="notes-pagination" aria-label="轮次回看分页" hidden>
+              <button id="studio-previous" type="button" class="notes-button">上一页</button>
+              <span id="studio-page"></span>
+              <button id="studio-next" type="button" class="notes-button">下一页</button>
+            </nav>
+          </section>
+        </div>
+        <aside class="studio-sidebar">
+          <section class="report-panel">
+            <p class="eyebrow">LAST SAVED ROUND</p>
+            <h2>上一轮的依据</h2>
+            <strong id="studio-last-score" class="studio-last-score">—</strong>
+            <p class="note-context">本轮得分 / 10。整场综合分见报告。</p>
+            <div id="studio-dimensions" class="report-dimensions">
+              <div class="report-dimension" data-dimension="技术深度">
+                <span>内容完整度</span>
+                <strong>—</strong>
+                <meter min="0" max="10" value="0" aria-label="技术深度" hidden></meter>
+              </div>
+              <div class="report-dimension" data-dimension="表达逻辑">
+                <span>表达逻辑</span>
+                <strong>—</strong>
+                <meter min="0" max="10" value="0" aria-label="表达逻辑" hidden></meter>
+              </div>
+              <div class="report-dimension" data-dimension="岗位匹配">
+                <span>岗位匹配</span>
+                <strong>—</strong>
+                <meter min="0" max="10" value="0" aria-label="岗位匹配" hidden></meter>
+              </div>
+            </div>
+            <p id="studio-evidence" class="report-evidence">尚无已保存评分。</p>
+            <p id="studio-missed" class="report-missed"></p>
+            <p id="studio-origin" class="note-context"></p>
+          </section>
+          <section class="studio-guide">
+            <h2>给自己一点组织思路的时间</h2>
+            <ol>
+              <li>先说明概念与前提。</li>
+              <li>再解释为什么这样选择。</li>
+              <li>补一个例子，讲清边界。</li>
+            </ol>
+            <p>当前是文字练习。只有点击提交后，回答才会发送至服务端。</p>
+            <a id="studio-current-report" class="link-arrow">查看当前报告 ↗</a>
+            <button id="studio-cancel" class="notes-button danger-button" type="button">取消本场面试</button>
+          </section>
+        </aside>
+      </div>
+    </main>
+    <dialog id="studio-confirm" class="notes-discard" aria-labelledby="studio-confirm-title">
+      <h2 id="studio-confirm-title">取消本场面试？</h2>
+      <p>取消后不能继续本场，已保存回答与部分报告保留。未提交草稿不会上传。</p>
+      <p id="studio-confirm-error" role="alert" class="notes-alert"></p>
+      <div class="note-actions">
+        <button id="studio-confirm-back" class="notes-button" type="button" autofocus>继续练习</button>
+        <button id="studio-confirm-submit" class="notes-button danger-button" type="button">确认取消本场</button>
+      </div>
+    </dialog>
+    <footer class="site-foot">
+      <div class="container foot-row">
+        <span>青栈 QINGZHAN · 认真回答，从容往下走。</span>
+        <a href="/dashboard">回到练习概览 ↗</a>
+      </div>
+    </footer>
+    <noscript>
+      <p class="no-script">开启JavaScript后可同步和提交文字练习。</p>
+    </noscript>
+  </body>
+</html>

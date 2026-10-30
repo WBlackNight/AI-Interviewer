@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "commonjs", "moduleResolution": "node",
+    "strict": true, "esModuleInterop": true, "skipLibCheck": true,
+    "outDir": ".test-build", "rootDir": "."
+  },
+  "include": ["tests/**/*.ts", "lib/access.ts", "lib/history.ts", "lib/types.ts"]
+}

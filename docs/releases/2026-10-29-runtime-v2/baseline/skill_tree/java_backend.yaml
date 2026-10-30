@@ -1,0 +1,92 @@
+position: java_backend
+display_name: Java 后端
+roots:
+- name: MySQL
+  children:
+  - name: 索引
+    children:
+    - B+树与哈希索引选型
+    - 最左前缀原则
+    - 索引失效场景
+    - explain 与慢查询排查
+  - name: 事务
+    children:
+    - 隔离级别
+    - MVCC 机制
+    - 间隙锁与幻读
+  - name: 锁
+    children:
+    - 行锁与表锁
+    - 死锁排查
+- name: 并发编程
+  children:
+  - name: 线程池
+    children:
+    - 核心参数
+    - 执行流程
+    - 拒绝策略
+  - name: 锁
+    children:
+    - synchronized 与 Lock
+    - AQS 原理
+    - volatile 与 JMM
+  - name: 并发工具
+    children:
+    - ConcurrentHashMap
+    - ThreadLocal
+  - name: 线程启动
+- name: JVM
+  children:
+  - name: 内存区域
+    children:
+    - 运行时数据区划分
+    - OOM 场景
+  - name: 垃圾回收
+    children:
+    - 回收算法
+    - G1 与 CMS
+    - 调优经验
+- name: Spring
+  children:
+  - name: IOC
+    children:
+    - 容器与 Bean 生命周期
+    - 循环依赖
+  - name: AOP
+    children:
+    - 动态代理
+    - 事务传播
+    - name: 事务代理
+- name: Redis
+  children:
+  - 缓存穿透/击穿/雪崩
+  - 持久化（RDB/AOF）
+  - 分布式锁
+  - 数据结构与应用
+- name: 计算机网络
+  children:
+  - TCP 三次握手与四次挥手
+  - HTTP/HTTPS
+  - 浏览器输入 URL 全过程
+- name: 算法与编码
+  children:
+  - 数组与哈希
+  - 双指针
+  - 字符串处理
+question_routes:
+  jv-mysql-index-001: MySQL/索引
+  jv-mysql-index-002: MySQL/索引
+  jv-mysql-txn-001: MySQL/事务
+  jv-concurrent-pool-001: 并发编程/线程池
+  jv-concurrent-lock-001: 并发编程/锁
+  jv-jvm-mem-001: JVM/内存区域
+  jv-jvm-gc-001: JVM/垃圾回收
+  jv-spring-ioc-001: Spring
+  jv-redis-cache-001: Redis/缓存穿透/击穿/雪崩
+  jv-net-tcp-001: 计算机网络/TCP 三次握手与四次挥手
+  jv-mysql-autocommit-003: MySQL/事务
+  jv-thread-start-003: 并发编程/线程启动
+  jv-jvm-stack-heap-003: JVM/内存区域
+  jv-spring-self-invocation-003: Spring/AOP/事务代理
+  jv-redis-lock-expiry-003: Redis/分布式锁
+  jv-http-etag-003: 计算机网络/HTTP/HTTPS

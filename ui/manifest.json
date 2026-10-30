@@ -1,0 +1,174 @@
+{
+  "format": 1,
+  "styles": [
+    "00-tokens-base.css",
+    "10-components.css",
+    "20-home.css",
+    "30-workspace.css",
+    "40-design-system.css",
+    "50-readability.css",
+    "60-layout.css",
+    "70-workspace-shell.css",
+    "80-multidomain.css",
+    "90-account-security.css"
+  ],
+  "shared_scripts": [
+    "account-menu.js"
+  ],
+  "navigation": [
+    {
+      "path": "/",
+      "label": "首页"
+    },
+    {
+      "path": "/dashboard",
+      "label": "概览"
+    },
+    {
+      "path": "/catalog",
+      "label": "题库"
+    },
+    {
+      "path": "/plans",
+      "label": "计划"
+    },
+    {
+      "path": "/history",
+      "label": "记录"
+    },
+    {
+      "path": "/revision",
+      "label": "复习"
+    },
+    {
+      "path": "/notes",
+      "label": "笔记"
+    },
+    {
+      "path": "/library",
+      "label": "题单"
+    },
+    {
+      "path": "/account",
+      "label": "账户"
+    }
+  ],
+  "pages": [
+    {
+      "key": "home",
+      "route": "/",
+      "template": "index.html",
+      "script": "home.js",
+      "workspace_navigation": false,
+      "javascript_budget": 26000
+    },
+    {
+      "key": "notes",
+      "route": "/notes",
+      "template": "revision-notes.html",
+      "script": "revision-notes.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "revision",
+      "route": "/revision",
+      "template": "revision.html",
+      "script": "revision-board.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "account",
+      "route": "/account",
+      "template": "account.html",
+      "script": "account.js",
+      "workspace_navigation": true,
+      "javascript_budget": 26000
+    },
+    {
+      "key": "history",
+      "route": "/history",
+      "template": "history.html",
+      "script": "history.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "review",
+      "route": "/review",
+      "template": "review.html",
+      "script": "review.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "dashboard",
+      "route": "/dashboard",
+      "template": "dashboard.html",
+      "script": "dashboard.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "catalog",
+      "route": "/catalog",
+      "template": "catalog.html",
+      "script": "catalog.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "library",
+      "route": "/library",
+      "template": "library.html",
+      "script": "library.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "coverage",
+      "route": "/coverage",
+      "template": "coverage.html",
+      "script": "coverage.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "plans",
+      "route": "/plans",
+      "template": "plans.html",
+      "script": "plans.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "plan-history",
+      "route": "/plan-history",
+      "template": "plan-history.html",
+      "script": "plan-history.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "interview",
+      "route": null,
+      "template": "interview.html",
+      "script": "interview.js",
+      "workspace_navigation": false
+    },
+    {
+      "key": "report",
+      "route": null,
+      "template": "report.html",
+      "script": "report.js",
+      "workspace_navigation": false
+    },
+    {
+      "key": "voice",
+      "route": null,
+      "template": "voice.html",
+      "script": "voice.js",
+      "workspace_navigation": false,
+      "javascript_budget": 22000
+    },
+    {
+      "key": "realtime",
+      "route": null,
+      "template": "realtime.html",
+      "script": "realtime.js",
+      "workspace_navigation": false,
+      "javascript_budget": 22000
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>练习概览 · 青栈 QINGZHAN</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/assets/home.css">
+    <script src="/assets/dashboard.js" defer></script>
+  </head>
+  <body class="notes-page">
+    <a class="skip" href="#dashboard-main">跳到主要内容</a>
+    <header class="nav">
+      <div class="container notes-nav">
+        <a class="brand" href="/" aria-label="青栈首页">
+          <svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg>
+          <span class="brand-mark">青栈</span>
+          <span class="brand-en">QINGZHAN</span>
+        </a>
+        <!-- @workspace-navigation -->
+      </div>
+    </header>
+    <main id="dashboard-main" class="container notes-main board-main">
+      <section class="notes-intro board-intro">
+        <div>
+          <p class="eyebrow">A LITTLE PRACTICE, EVERY TIME</p>
+          <h1>从今天，<br>接着上一次的准备。</h1>
+        </div>
+        <div>
+          <p class="sec-lead">未结束的练习、安排好的复习，以及最近留下的报告。在这里找到下一步。</p>
+          <p id="dashboard-today" class="notes-boundary">按北京时间整理你的练习日历。</p>
+          <a href="/#start" class="link-arrow">开始新练习 ↗</a>
+        </div>
+      </section>
+      <!-- 概览读取：只在账户内汇总，失败不显示虚构的零值或旧账户内容。 -->
+      <div class="dashboard-toolbar">
+        <p id="dashboard-account">正在检查账户…</p>
+        <button id="dashboard-refresh" type="button" class="notes-button">刷新概览</button>
+      </div>
+      <p id="dashboard-loading" class="report-loading" role="status">正在读取概览…</p>
+      <section id="dashboard-login" class="notes-message" hidden>
+        <h2>给每一次准备，留一个自己的位置。</h2>
+        <p>登录后，集中查看已保存的练习与复习安排。匿名记录可先在记录页认领。</p>
+        <a href="/account" class="notes-button notes-primary">登录账户</a>
+      </section>
+      <section id="dashboard-error-panel" class="notes-message" hidden>
+        <h2>概览暂时无法读取。</h2>
+        <p id="dashboard-error" role="alert"></p>
+        <button id="dashboard-retry" type="button" class="notes-button">重试读取</button>
+      </section>
+      <div id="dashboard-content" hidden>
+        <section class="dashboard-metrics" aria-label="账户练习与复习统计">
+          <a href="/history">
+            <span>已经完成的练习</span>
+            <strong id="dashboard-finished">—</strong>
+            <small>场 · 保留逐轮报告</small>
+          </a>
+          <a href="/revision?status=todo&amp;due=today">
+            <span>今天安排的复习</span>
+            <strong id="dashboard-due">—</strong>
+            <small>项 · 待复习</small>
+          </a>
+          <a href="/revision?status=todo&amp;due=overdue">
+            <span>尚未处理的逾期</span>
+            <strong id="dashboard-overdue">—</strong>
+            <small>项 · 可以重新安排</small>
+          </a>
+          <a href="/notes">
+            <span>留下个人笔记</span>
+            <strong id="dashboard-notes">—</strong>
+            <small>项 · 含已保存内容</small>
+          </a>
+        </section>
+        <div class="dashboard-layout">
+          <section class="report-panel dashboard-week" aria-labelledby="dashboard-week-title">
+            <p class="eyebrow">THE LAST SEVEN DAYS</p>
+            <div class="dashboard-section-heading">
+              <h2 id="dashboard-week-title">这七天，留下的记录</h2>
+              <strong id="dashboard-week-total"></strong>
+            </div>
+            <ol id="dashboard-week" class="dashboard-week-grid" aria-label="近七日已完成场数"></ol>
+            <p id="dashboard-note" class="notes-boundary"></p>
+            <a href="/review" class="link-arrow">按主题跨场复盘 ↗</a>
+          </section>
+          <section class="report-panel dashboard-next" aria-labelledby="dashboard-active-title">
+            <p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p>
+            <h2 id="dashboard-active-title">接着往下讲</h2>
+            <p id="dashboard-active-total" class="notes-boundary"></p>
+            <div id="dashboard-active" class="dashboard-compact-list"></div>
+            <p id="dashboard-active-empty" class="notes-boundary" hidden>没有尚未结束的练习。可以从首页开始新的一场。</p>
+          </section>
+        </div>
+        <!-- 主动准备：展示本账户三个最近目标，不自动完成或创建练习。 -->
+        <section class="dashboard-section" aria-labelledby="dashboard-plans-title">
+          <div class="dashboard-section-heading"><div><p class="eyebrow">MAKE ROOM FOR YOUR NEXT STEP</p><h2 id="dashboard-plans-title">接下来的准备，放在这里</h2></div><a href="/plans" class="link-arrow">全部准备计划 ↗</a></div>
+          <p id="dashboard-plan-caption" class="notes-boundary"></p>
+          <div id="dashboard-plans" class="dashboard-recent"></div>
+          <section id="dashboard-plans-empty" class="notes-message" hidden><h3>先为自己选一个方向。</h3><p>还没有准备中的计划。可以恢复已归档计划，或为下一次练习选好主题和目标日期。</p><a href="/plans" class="link-arrow">安排准备计划 ↗</a></section>
+          <p class="notes-boundary">目标由你主动安排，不会自动提醒或完成；计划数量不表示能力。</p>
+        </section>
+        <!-- 今日与逾期：用户自己安排的日期，跳转任务板时带上相同日期范围。 -->
+        <section class="dashboard-section" aria-labelledby="dashboard-priority-title">
+          <div class="dashboard-section-heading">
+            <div>
+              <p class="eyebrow">TODAY & CATCHING UP</p>
+              <h2 id="dashboard-priority-title">给今天，留一个复习重点</h2>
+            </div>
+            <a href="/revision" class="link-arrow">全部复习任务 ↗</a>
+          </div>
+          <p id="dashboard-priority-caption" class="notes-boundary"></p>
+          <div id="dashboard-priority" class="dashboard-priority"></div>
+          <p id="dashboard-priority-empty" class="notes-message" hidden>当前没有今日或逾期的待复习任务。可到任务板为尚未安排的主题选择日期。</p>
+        </section>
+        <!-- 最近报告：只列已完成的三场摘要，不从概览读取原回答或笔记正文。 -->
+        <section class="dashboard-section" aria-labelledby="dashboard-recent-title">
+          <div class="dashboard-section-heading">
+            <div>
+              <p class="eyebrow">KEEP THE EVIDENCE</p>
+              <h2 id="dashboard-recent-title">最近完成的练习</h2>
+            </div>
+            <a href="/history" class="link-arrow">全部练习记录 ↗</a>
+          </div>
+          <div id="dashboard-recent" class="dashboard-recent"></div>
+          <p id="dashboard-recent-empty" class="notes-message" hidden>完成第一场练习后，报告会留在这里。</p>
+        </section>
+      </div>
+    </main>
+    <footer class="site-foot">
+      <div class="container foot-row">
+        <span>青栈 QINGZHAN · 给下一次，留一点今天的准备。</span>
+        <a href="/notes">整理个人笔记 ↗</a>
+      </div>
+    </footer>
+    <noscript>
+      <p class="no-script">开启JavaScript并登录账户后可读取练习概览。</p>
+    </noscript>
+  </body>
+</html>

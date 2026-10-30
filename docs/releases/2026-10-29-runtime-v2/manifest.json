@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "activated": false,
+  "semantic_model": false,
+  "expert_review_verified": false,
+  "variants": {
+    "baseline": {
+      "question_count": 30,
+      "corpus_sha256": "387bd938b4bdddc152f043aab7bdeb17bfd9ded4ef9571abee635e90502ec998",
+      "index_id": "363b745ddda6ba7fae9d55818de71f31c95b967e5908c20da4386f5dfe8a47da",
+      "warning_count": 18
+    },
+    "candidate": {
+      "question_count": 36,
+      "corpus_sha256": "b4b1e5a29b1fceb963c3c56c23c1ce42c3efb0bf5a91603a722ccde05e1cf1b4",
+      "index_id": "f24286e29e4a767e29584705dbcb1cd98821df1d70e4f2d6cf30ff7c984e3ee6",
+      "warning_count": 18
+    }
+  },
+  "files": {
+    "baseline/question_bank/java_backend.jsonl": "730b0cb6934dbd301e4769aadb47f4b3fe3e79af0de425a14209fea2e6996c1b",
+    "baseline/question_bank/java_fundamentals_v2.jsonl": "30e70dc77b79297c89804a83ea12356fad976df892a24fc9cb244c7553a371e8",
+    "baseline/question_bank/python_backend.jsonl": "b92f620d0516253b81bb7dc9bacf3fcaa737d4da4d7c828078a7d80aac510b08",
+    "baseline/question_bank/python_fundamentals_v2.jsonl": "59a7b2e17faca5d3340f8096e3a5d8d03a5f4de700ee2b2f78d6d0f4dec60102",
+    "baseline/question_bank/source_registry.json": "bee06edc8dddc0e2fa9609dc6289a4117dfcc6de449805545c439e50c53fc556",
+    "baseline/retrieval/hash-256.json": "c3a492e7348d3620dacb26f1c09d6d65c486a1d8703d30bc18d830ab0431b044",
+    "baseline/skill_tree/java_backend.yaml": "92ba7eea5ed02635ad18604b2ccd140755e085a4e2aba9ecbf5edbc963f5163c",
+    "baseline/skill_tree/python_backend.yaml": "2f018a9c38d7b42e8eb349011ac130723258a5305cb039a3d09979e9fb24e455",
+    "candidate/question_bank/java_backend.jsonl": "31c3c67e54754bd71030f05aa984d582467b08ccf06627d22e6f67bf7e32e1a8",
+    "candidate/question_bank/python_backend.jsonl": "7b760a56d40f87681b6ac88c82f2eec19af275dab57287fd89b9bc73c88e3272",
+    "candidate/question_bank/source_registry.json": "bee06edc8dddc0e2fa9609dc6289a4117dfcc6de449805545c439e50c53fc556",
+    "candidate/retrieval/hash-256.json": "eef03763a7ae206afaaac4b276ca83f8ced85e7c24dce478d3d9ef6e13471050",
+    "candidate/skill_tree/java_backend.yaml": "2b30bf08d7d64b7758345dbf2412d2cc188174fede47de53c5339b00c9b62caf",
+    "candidate/skill_tree/python_backend.yaml": "2d0b97cb341edd2bc4a6e9509ea29a0d01869147ba80108cb14a115ad235ffee"
+  }
+}

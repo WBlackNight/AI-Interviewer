@@ -1,0 +1,67 @@
+position: python_backend
+display_name: Python 后端
+roots:
+- name: Python基础
+  children:
+  - name: 可变默认参数
+    children:
+    - 定义时创建与共享对象
+    - None哨兵与函数内初始化
+  - name: 迭代器与生成器
+    children:
+    - yield与执行状态
+    - 惰性求值与资源关闭
+  - name: 对象共享与拷贝
+    children:
+    - 绑定
+    - 浅拷贝
+    - memo
+    - 资源
+  - name: 异常与资源
+    children:
+    - name: finally
+    - name: 上下文管理器
+- name: 异步与并发
+  children:
+  - name: 事件循环
+    children:
+    - await与协作调度
+    - 阻塞IO与to_thread
+  - name: 取消与超时
+    children:
+    - CancelledError与finally清理
+    - 版本检查与过期结果丢弃
+  - name: 协程与任务
+  - name: 并发限制
+  - name: 结构化并发
+- name: Web与数据
+  children:
+  - name: SQL参数绑定
+    children:
+    - 不可信输入与注入
+    - 动态标识符白名单
+  - name: 事务边界
+    children:
+    - 原子提交与回滚
+    - 外部副作用与幂等补偿
+    - name: 连接上下文
+  - name: HTTP语义与重试
+- name: 算法与编码
+  children:
+  - 数组与哈希
+  - 边界处理
+question_routes:
+  py-defaults-001: Python基础/可变默认参数
+  py-generator-001: Python基础/迭代器与生成器
+  py-async-001: 异步与并发/事件循环
+  py-cancel-001: 异步与并发/取消与超时
+  py-sql-001: Web与数据/SQL参数绑定
+  py-transaction-001: Web与数据/事务边界
+  py-exception-finally-003: Python基础/异常与资源/finally
+  py-with-file-003: Python基础/异常与资源/上下文管理器
+  py-semaphore-003: 异步与并发/并发限制
+  py-taskgroup-failure-003: 异步与并发/结构化并发
+  py-sqlite-context-003: Web与数据/事务边界/连接上下文
+  py-http-retry-003: Web与数据/HTTP语义与重试
+  py-copy-cycle-002: Python基础/对象共享与拷贝
+  py-coroutine-start-002: 异步与并发/协程与任务

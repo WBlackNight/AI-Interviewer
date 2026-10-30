@@ -1,0 +1,21 @@
+/* Test device-list races, constraints and a late permission grant after timeout. */
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+const source=readFileSync(new URL('../ui/shared/microphone.js',import.meta.url),'utf8');
+const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return{promise,resolve};};
+const first=deferred(),second=deferred(),permission=deferred();
+let calls=0,timeout,stopped=0,constraints;
+const select={value:'old',children:[],replaceChildren(){this.children=[];},append(n){this.children.push(n);}},status={};
+const context=vm.createContext({navigator:{mediaDevices:{enumerateDevices:()=>++calls===1?first.promise:second.promise,getUserMedia:async c=>{constraints=c;return permission.promise;}}},AudioContext:class{},document:{createElement:()=>({})},setTimeout:fn=>{timeout=fn;return 1;},clearTimeout(){}});
+vm.runInContext(source,context);
+const picker=context.microphonePicker(select,status),old=picker.refresh(),latest=picker.refresh();
+second.resolve([{kind:'audioinput',deviceId:'headset',label:'耳机麦克风'}]);await latest;
+first.resolve([{kind:'audioinput',deviceId:'old',label:'旧设备'}]);await old;
+assert.deepEqual(select.children.map(n=>n.textContent),['系统默认麦克风','耳机麦克风']);
+select.value='headset';const request=picker.acquire();
+assert.equal(constraints.audio.deviceId.exact,'headset');
+timeout();await assert.rejects(request,/授权超时/);
+permission.resolve({getTracks:()=>[{stop(){stopped++;}}]});await new Promise(setImmediate);
+assert.equal(stopped,1,'A late permission grant must never leave the microphone running');
+console.log('Passed: device-list race, selected input constraint, authorization timeout and late track release.');

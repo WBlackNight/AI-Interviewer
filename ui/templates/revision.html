@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>复习任务板 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/revision-board.js" defer></script>
+</head>
+<body class="notes-page">
+  <a class="skip" href="#board-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
+    <!-- @workspace-navigation -->
+  </div></header>
+  <main class="container notes-main board-main" id="board-main">
+    <section class="notes-intro board-intro" aria-labelledby="board-title"><div><p class="eyebrow">ONE STEP AT A TIME / REVISION</p><h1 id="board-title">把薄弱的那一点，<br>变成下一次的准备。</h1></div><div><p class="sec-lead">从报告留下待补强主题，安排日期、记下理解，再练一次。按自己的节奏，把每一项讲清楚。</p><p class="notes-boundary">手动标记只记录复习进度，不修改面试分数，也不代表能力提升。日历按北京时间计算，无自动提醒。</p></div></section>
+    <section id="board-login" class="notes-message" hidden aria-labelledby="board-login-title"><h2 id="board-login-title">登录后，接着上次的准备。</h2><p>任务保存在所属账户中。登录后返回本页即可读取；匿名报告需先到练习记录认领。</p><a class="link-arrow" href="/account">前往账户中心 ↗</a></section>
+    <!-- 搜索与筛选：显式提交，组合查询所属主题及已保存笔记，不搜索未保存草稿。 -->
+    <section id="board-toolbar" class="notes-toolbar" aria-label="复习任务筛选" hidden>
+      <div class="notes-toolbar-heading"><p id="board-account"></p><span id="board-today" class="mini-label"></span></div>
+      <form id="board-filters"><label class="board-search" for="board-query">搜索主题或笔记<input id="board-query" type="search" maxlength="100" placeholder="例如：MySQL、引用共享" autocomplete="off"></label><label for="board-note-filter">个人笔记<select id="board-note-filter"><option value="all">不限笔记</option><option value="with">有笔记</option><option value="without">无笔记</option></select></label><label for="board-status">任务状态<select id="board-status"><option value="todo">待复习</option><option value="done">已复习</option><option value="all">全部任务</option></select></label><label for="board-position">岗位<select id="board-position"><option value="">全部岗位</option></select></label><div class="board-filter-actions"><button class="notes-button notes-primary" type="submit">应用筛选</button><button class="notes-button" type="button" id="board-reset">重置筛选</button><button class="notes-button" type="button" id="board-refresh">刷新任务</button></div></form>
+      <p id="board-counts" class="board-counts" aria-live="polite"></p>
+      <div class="board-date-tabs" role="group" aria-label="复习日期视图"><button class="notes-button" type="button" data-due="all" aria-pressed="true">全部日期</button><button class="notes-button" type="button" data-due="today" aria-pressed="false">今日</button><button class="notes-button" type="button" data-due="overdue" aria-pressed="false">逾期</button><button class="notes-button" type="button" data-due="upcoming" aria-pressed="false">未来</button><button class="notes-button" type="button" data-due="unscheduled" aria-pressed="false">未安排</button></div>
+    </section>
+    <p id="board-alert" role="alert" class="notes-alert"></p><p id="board-notice" role="status" class="board-notice"></p><p id="board-loading" role="status" hidden>正在读取复习任务…</p>
+    <section id="board-empty" class="notes-message" hidden aria-labelledby="board-empty-title"><h2 id="board-empty-title">当前筛选下没有任务。</h2><p>可以清除关键词或调整筛选，也可以从已完成报告加入待补强主题。</p><a class="link-arrow" href="/history">选择一场报告 ↗</a></section>
+    <!-- 任务卡片：日期显式保存，完成与练习分别操作，个人笔记通过独立页面编辑。 -->
+    <section id="board-list" class="notes-list" aria-label="复习任务"></section>
+    <nav id="board-pagination" class="notes-pagination" aria-label="任务分页" hidden><button class="notes-button" type="button" id="board-previous">上一页</button><span id="board-page"></span><button class="notes-button" type="button" id="board-next">下一页</button></nav>
+  </main>
+  <!-- 日期草稿保护：默认保留当前输入，明确放弃后再刷新或跳转。 -->
+  <dialog id="board-discard" class="notes-discard" aria-labelledby="board-discard-title"><form method="dialog"><h2 id="board-discard-title">复习日期还没有保存</h2><p>继续操作会放弃尚未保存的日期。可以先留在本页保存。</p><div class="note-actions"><button class="notes-button notes-primary" value="cancel" autofocus>留在当前页</button><button class="notes-button" value="discard">放弃日期并继续</button></div></form></dialog>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 练习，复盘，再出发。</span><a href="/notes">留下自己的理解 ↗</a></div></footer>
+  <noscript><p class="no-script">开启JavaScript后可读取和管理所属账户的复习任务。</p></noscript>
+</body>
+</html>

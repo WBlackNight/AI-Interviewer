@@ -1,0 +1,53 @@
+{
+  "format_version": 1,
+  "activated": false,
+  "semantic_model": false,
+  "expert_review_verified": false,
+  "variants": {
+    "baseline": {
+      "question_count": 120,
+      "corpus_sha256": "2a05323c750ee2e70b6cd3948b8e5b92e7e68657abd7bea558c92537f98c3964",
+      "index_id": "d35934f96beec77942c4735468c58fa3a20bc0e05fe9ef2c2d7b257e21f5d657",
+      "warning_count": 108
+    },
+    "candidate": {
+      "question_count": 126,
+      "corpus_sha256": "0e9fc0fd6cd024783d55a0cb8443f3b82245dd45111c90d1b517953805472a79",
+      "index_id": "26098b499b5162c6736254d3c6954f68df513f2534b39c83a16850df01575879",
+      "warning_count": 108
+    }
+  },
+  "files": {
+    "baseline/question_bank/education.jsonl": "aedc4ecf06e90133f5490d68c8a5502bffbc7612fdc60b1d6f65a6bbf5b800ba",
+    "baseline/question_bank/english_interview.jsonl": "96f81a0393e2721d102f6534fdcd60ece4ea40d7df964f5255a7f312d728b9f7",
+    "baseline/question_bank/expanded_20261030_v4.jsonl": "c3c67051c81e9cc469c42c9389c9bb2d1e2571e9b9c79832b6d86d347595eae0",
+    "baseline/question_bank/java_backend.jsonl": "730b0cb6934dbd301e4769aadb47f4b3fe3e79af0de425a14209fea2e6996c1b",
+    "baseline/question_bank/java_fundamentals_v2.jsonl": "30e70dc77b79297c89804a83ea12356fad976df892a24fc9cb244c7553a371e8",
+    "baseline/question_bank/marketing.jsonl": "137bac62c390a5d81bd7cf665864ddbc021a48f3e3aebc78ce39dbd81454cfbd",
+    "baseline/question_bank/operations.jsonl": "c978c38f3b4914441c79b6e65cb7d0ae55343d1282d36f1413b99877c941626a",
+    "baseline/question_bank/python_backend.jsonl": "b92f620d0516253b81bb7dc9bacf3fcaa737d4da4d7c828078a7d80aac510b08",
+    "baseline/question_bank/python_fundamentals_v2.jsonl": "59a7b2e17faca5d3340f8096e3a5d8d03a5f4de700ee2b2f78d6d0f4dec60102",
+    "baseline/question_bank/source_registry.json": "888881ea179790740e67457a917d60fb96553d070eb99444ef234c7965e51d61",
+    "baseline/retrieval/hash-256.json": "24e34429bae2eef742e9adcd15420c6601fdb59d35d21a94e8ed19c9a2f41996",
+    "baseline/skill_tree/education.yaml": "240441e1a34d0e71dca66e80b559ce2dba3e829b31ff5d336f8870f43853719f",
+    "baseline/skill_tree/english_interview.yaml": "874b880afcd1d8b061a1f8d7b7914b58fb668ec888234a2a166b6320078b1e47",
+    "baseline/skill_tree/java_backend.yaml": "e882c387046b587ecb0796dd8a255c7ff7bbe518ccc19731ea95c821aa7f92e0",
+    "baseline/skill_tree/marketing.yaml": "e808ae713fa1ee877b4cf9b40f91a0373d51ee4b3b891d2688ea63d5d0e0e320",
+    "baseline/skill_tree/operations.yaml": "fd083acfbe0a5ee54c450c02df48f65cf45946b60d8192b7a17e0e5340503882",
+    "baseline/skill_tree/python_backend.yaml": "40b909a4581677a1fb205f0cf4482d2f604a751072ea250abcbb8d3b6e092c4d",
+    "candidate/question_bank/education.jsonl": "dd1df4b7ebac620162baf24217c3d8ff30796fb6c8bb66d5f6d1ff3739967223",
+    "candidate/question_bank/english_interview.jsonl": "c4090d8ffe81a76be1da1d735ef4a48c1d4245c464d4175b5867c5e5a5795b8a",
+    "candidate/question_bank/java_backend.jsonl": "e6f5fcc13c090309cc1674986add4092f1fd5bfba983c0f306aa4a2813b62759",
+    "candidate/question_bank/marketing.jsonl": "1cf88f7070021c799da95fdfd6cc3308941de3b877c1750eb0f4aa5e595f5a35",
+    "candidate/question_bank/operations.jsonl": "ffcbf3ea0dadbdc86d23d8934a5875bdcb3519ac62525da431fc6d09d9936a77",
+    "candidate/question_bank/python_backend.jsonl": "6f24cc191fe6bab9c569484100d54c77d14818cf48b4cd9207f16ce2f33b383a",
+    "candidate/question_bank/source_registry.json": "888881ea179790740e67457a917d60fb96553d070eb99444ef234c7965e51d61",
+    "candidate/retrieval/hash-256.json": "4767cbd54ea6ad432a8e8fb55f431e1f6c8bc67ed9f7638f299202c35dce227c",
+    "candidate/skill_tree/education.yaml": "240441e1a34d0e71dca66e80b559ce2dba3e829b31ff5d336f8870f43853719f",
+    "candidate/skill_tree/english_interview.yaml": "874b880afcd1d8b061a1f8d7b7914b58fb668ec888234a2a166b6320078b1e47",
+    "candidate/skill_tree/java_backend.yaml": "db9ab81474d593da2cb6550fe752e4b9d5bf69014742abe007b4436f1620c9fb",
+    "candidate/skill_tree/marketing.yaml": "e808ae713fa1ee877b4cf9b40f91a0373d51ee4b3b891d2688ea63d5d0e0e320",
+    "candidate/skill_tree/operations.yaml": "fd083acfbe0a5ee54c450c02df48f65cf45946b60d8192b7a17e0e5340503882",
+    "candidate/skill_tree/python_backend.yaml": "a47de5e5a888309e2edd1a55338ce1ffa43251b61274a737094112881acb702d"
+  }
+}

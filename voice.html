@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>语音练习室 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css">
+  <script src="/assets/voice.js" defer></script>
+<script src="/assets/account-menu.js" defer></script>
+</head>
+<body class="notes-page voice-page" data-ws-base="">
+  <!-- 语音状态文案：集中替换，保持脚本体积有界。 -->
+  <div id="voice-copy" hidden
+    data-main-question=" · 主问题"
+    data-finished="本场已结束，可查看报告。"
+    data-invalid-connection="连接配置不正确。"
+    data-invalid-config="语音配置无法读取。"
+    data-loading="正在检查语音服务…"
+    data-buffer-full="播报缓存已满，请重新朗读。"
+    data-incomplete-audio="播报分片不完整。"
+    data-invalid-audio="播报格式不匹配。"
+    data-incomplete-wave="WAV区块不完整。"
+    data-invalid-wave="WAV格式无效。"
+    data-oversize="录音超过时长限制。"
+    data-microphone-lost="麦克风断开，请同步。"
+    data-account-changed="账户已变化，请重新同步。"
+    data-empty-question="本场没有待回答题目。"
+    data-playing="正在播报本场题目"
+    data-saved="本轮回答已保存。"
+    data-sample-done="识别结束后将自动提交…"
+    data-fallback="语音不可用，可改用文字。"
+    data-idle-capture="麦克风未开启"
+    data-failed="语音失败，请同步或改用文字。"
+    data-sequence="播报序号缺口，请重新朗读。"
+    data-provider="豆包语音 · 语音转写与题目播报"
+    data-disabled="语音未启用，可返回文字作答。"
+    data-demo="离线替身，不代表识别或音质。"
+    data-denied="麦克风未授权，可用文字。"
+    data-saving="已识别，等待保存确认…"
+    data-ready="已同步，可以语音练习"
+    data-ended="本场已结束，可查看报告"
+    data-next="新题已保存，可以继续回答"
+    data-generating="正在生成本题播报…"
+    data-access="请登录所属账户，或在原匿名标签页打开。"
+    data-closed="连接已关闭，请同步确认保存状态。音频不重发。"
+    data-secure="无法安全采集，请用HTTPS或本机地址。"
+    data-wave="需要时长范围内的16kHz单声道PCM16 WAV。"
+    data-queue="音频积压，本段停止，请同步。"
+    data-hint="停顿后自动识别并保存；也可点击停止录音并提交。"
+    data-code="代码题请返回文字练习室。"
+    data-capture="正在采集，结束后自动提交。"
+    data-upload="正在上传录音，结束后提交。"
+    data-identity="连接或账户变化，请同步。"></div>
+  <a class="skip" href="#voice-main">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav">
+    <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
+    <nav class="notes-nav-links" aria-label="语音导航"><a id="voice-text-link" href="?mode=text">文字作答</a><a href="/history">练习记录</a><a href="/account">账户</a></nav>
+  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+  <main id="voice-main" class="container notes-main board-main">
+    <section class="notes-intro board-intro voice-intro"><div><p class="eyebrow">SAY IT IN YOUR OWN WORDS</p><h1>让思路，<br>自然说出来。</h1></div><div><p class="sec-lead">听一遍题目，组织好语言，再开始回答。语音转写沿用这一场的评分与记录。</p><p class="notes-boundary">音频由豆包处理，识别后自动保存并评分。代码题请使用文字作答。</p></div></section>
+    <!-- 服务与连接：配置不等于质量验证，不可用时保留文字入口。 -->
+    <section class="studio-connection voice-connection"><p id="voice-status" role="status">正在检查语音服务…</p><button id="voice-sync" type="button" class="notes-button">重新同步</button></section>
+    <div class="voice-service"><span class="voice-service-dot" aria-hidden="true"></span><p id="voice-provider" class="notes-boundary"></p><span class="voice-format">语音作答</span></div><p id="voice-error" class="notes-alert" role="alert"></p>
+    <nav class="practice-modes" aria-label="练习方式"><a href="?mode=text">文字作答</a><a href="?mode=realtime">实时对话<span>自由交流，不计分</span></a><a href="?mode=voice" aria-current="page">语音输入<span>转写后保存答案</span></a></nav>
+    <ol class="voice-steps" aria-label="语音练习流程"><li>01 <span>听题与思考</span></li><li>02 <span>说出你的思路</span></li><li>03 <span>保存后继续追问</span></li></ol>
+    <div class="voice-layout">
+      <section class="report-panel voice-question" aria-labelledby="voice-question"><p id="voice-meta" class="eyebrow">CURRENT QUESTION</p><h2 id="voice-question">正在同步当前题目…</h2><div class="note-actions"><button id="voice-read" type="button" class="notes-button" disabled>朗读本题</button><button id="voice-interrupt" type="button" class="notes-button" disabled>停止播报</button></div><p id="voice-playing" class="notes-boundary" role="status"></p></section>
+      <!-- 主动录音：每轮独立采集，结束或离页立即释放麦克风。 -->
+      <section class="note-card voice-controls" aria-labelledby="voice-answer-title"><div class="voice-control-top"><p class="eyebrow">YOUR TURN</p><span id="voice-timer" class="voice-timer" aria-label="本段音频时长">00:00</span></div><div class="voice-orb" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="12" y="4" width="8" height="15" rx="4"/><path d="M8 14v2a8 8 0 0 0 16 0v-2M16 24v5M11 29h10"/></svg><span></span><span></span><span></span><span></span><span></span></div><div class="voice-phase"><span data-phase="ready">准备好就开始</span><span data-phase="recording">正在作答</span><span data-phase="saving">正在识别与保存</span><span data-phase="speaking">正在播报题目</span><span data-phase="preparing">正在准备麦克风</span><span data-phase="offline">请先同步连接</span></div><h2 id="voice-answer-title">说出你的回答。</h2><div class="microphone-settings"><label for="voice-device">输入设备</label><div class="microphone-picker"><select id="voice-device"><option value="">系统默认麦克风</option></select><button id="voice-devices" class="notes-button" type="button">刷新设备</button></div><p id="voice-device-status" class="account-help" role="status"></p></div><p id="voice-hint" class="notes-boundary">停顿后识别并保存。切换模式前请先结束录音。</p><label for="voice-level" class="voice-level-label">输入电平</label><meter id="voice-level" min="0" max="1" value="0">0</meter><div class="note-actions"><button id="voice-start" class="notes-button notes-primary" type="button" disabled>开始语音回答</button><button id="voice-stop" class="notes-button" type="button" disabled>停止录音并提交</button></div><p id="voice-capture" class="notes-boundary" role="status">麦克风未开启</p><details class="report-answer"><summary>改用录音文件</summary><label for="voice-file">选择16kHz、单声道、PCM16 WAV文件</label><input id="voice-file" type="file" accept=".wav,audio/wav" disabled><p class="notes-boundary">选择后提交为本轮回答。支持16kHz单声道PCM16 WAV。</p></details></section>
+    </div>
+    <!-- 转写与保存：partial只作字幕，只有回答保存确认才显示已保存。 -->
+    <section class="notes-message voice-transcript"><div class="voice-transcript-heading"><div><p class="eyebrow">YOUR WORDS, SAVED</p><h2>这一次，你讲了什么</h2></div><span class="voice-format">TRANSCRIPT</span></div><p id="voice-transcript" role="status">识别文字会显示在这里。</p><p id="voice-saved" class="notes-boundary" role="status">完成一段回答后，这里会确认保存结果。</p><a id="voice-report" class="link-arrow" href="/history">查看本场报告 ↗</a></section>
+  </main>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 先讲清楚，再往前一步。</span><a href="/dashboard">练习概览 ↗</a></div></footer>
+  <noscript><p class="no-script">语音练习需要JavaScript、所属账户或本标签页的匿名访问凭据。</p></noscript>
+</body>
+</html>
