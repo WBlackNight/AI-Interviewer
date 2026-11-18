@@ -43,7 +43,7 @@
     "frontend/vite.config.mjs": "5a64cbabd89ebefe25a05eaeda51fc8c5c577c48345b8ed295a42f3fdce99286",
     "frontend/widget/WidgetApp.tsx": "1a8952c553c0584495f1a59522582ecea573c0c94cea54280bdc89d4cdb2a10f",
     "frontend/widget/entry.tsx": "61d7befac423b94281be074bc64eb34fc92fa86227e2315e207af5f90c7847d2",
-    "tools/build_frontend.mjs": "c06c3eb8f7350f5582237abc150bc580d54f77b8e080a6075040f5ee1cbd406f"
+    "tools/build_frontend.mjs": "5450abb9d0246cdc7fc1820e05dac0f3a8f97783bcdd59b5f1824df611dae982"
   },
   "sha256": "93305d3d908b0a8f5d86f545fda3fa536aa360e0d7f8f37464b998e6ac709dbc",
   "bytes": 162922

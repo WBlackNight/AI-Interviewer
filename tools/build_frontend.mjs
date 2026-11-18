@@ -88,7 +88,11 @@ for (const [name, entry] of Object.entries(entries)) {
         files: Object.fromEntries(
           inputs.map((file) => [
             file,
-            hash(fs.readFileSync(path.join(root, file), "utf8").replace(/\r\n?/g, "\n")),
+            hash(
+              fs
+                .readFileSync(path.join(root, file), "utf8")
+                .replace(/\r\n?/g, "\n"),
+            ),
           ]),
         ),
         sha256: hash(bytes),
