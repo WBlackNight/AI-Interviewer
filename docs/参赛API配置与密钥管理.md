@@ -18,6 +18,8 @@ python tools/project.py serve --offline --port 3000 --database backend/competiti
 
 ## 创建评委体验账号
 
+本机后台演示直接运行 `python tools/reviewer_admin_demo.py`。启动时输入 `admin` 的演示密码，随后打开 `http://localhost:3222/admin` 登录。脚本使用独立数据库 `backend/.reviewer-admin/demo.sqlite3`，该账号在此实例具备完整后台权限。
+
 该命令在当前配置的数据库创建普通用户 `admin`。密码在终端隐藏输入，以加盐散列保存。用户名已存在时命令会退出，保留原账户和密码。
 
 本地 Windows 演示库在项目根目录按以下方式初始化：
@@ -40,7 +42,7 @@ try {
 docker compose --env-file deploy/cloud/.env -f compose.cloud.yml exec app python -m app.manage_database create-reviewer
 ```
 
-将账号与密码填入赛事允许的评审专用字段，避免在仓库里公开。登录后可验证练习报告、小青和社区。后台角色由服务端的账户 ID 列表决定，体验账号保持普通用户权限。
+云端命令创建的是普通用户。若需要在独立公网演示站开放后台浏览，将该用户的实际账号 ID 加入 `ADMIN_VIEWER_ACCOUNT_IDS` 并重新创建应用容器。需要演示审校或举报处理时，在仅含合成数据的独立站点通过 `ADMIN_ACCOUNT_IDS` 授予完整权限。获取 ID 和重新创建容器的方法见 [云端部署指南](../deploy/cloud/README.md#8-配置更新与备份)。账号密码和公网入口通过赛事评审专用字段提供。
 
 ## 环境变量
 

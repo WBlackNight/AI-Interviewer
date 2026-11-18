@@ -16,6 +16,7 @@ dev.db*
 # 隔离演示服务的临时库、PID和停止标记
 backend/.native-preview-*/
 backend/.ui-review-*/
+backend/.reviewer-admin/
 # 可再生离线向量索引（以命令构建，不包含原始简历）
 data/retrieval/
 
