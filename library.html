@@ -6,20 +6,23 @@
   <meta name="color-scheme" content="light">
   <title>我的题单 · 青栈 QINGZHAN</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/assets/home.css">
-  <script src="/assets/library.js" defer></script>
-<script src="/assets/account-menu.js" defer></script>
+  <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+  <script src="/assets/library.js?v=a8483b6e8126" defer></script>
+<script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
 </head>
 <body class="notes-page">
   <a class="skip" href="#library-main">跳到主要内容</a>
   <header class="nav"><div class="container notes-nav">
     <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
-    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog">题库</a><a href="/plans">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library" aria-current="page">题单</a><a href="/account">账户</a></nav>
-  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a><details class="workspace-nav-more" data-navigation-menu><summary data-current-section><span class="desktop-nav-label">更多功能</span><span class="mobile-nav-label">菜单</span></summary><div class="workspace-nav-panel"><div class="workspace-nav-section mobile-nav-primary"><p>开始练习</p><a href="/#start">开始练习</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a></div><div class="workspace-nav-section"><p>记录与复盘</p><a href="/dashboard">练习概览</a><a href="/history">练习记录</a><a href="/review">跨场复盘</a></div><div class="workspace-nav-section"><p>我的准备</p><a href="/plans">准备计划</a><a href="/revision">复习任务</a><a href="/notes">复习笔记</a><a href="/library" aria-current="page">我的题单</a></div><div class="workspace-nav-section"><p>账户与帮助</p><a href="/account">账户中心</a><a href="/guide">使用指南</a></div></div></details></nav>
+  <details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>从题单回到值得再练的问题。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
   <main id="library-main" class="container notes-main board-main">
     <section class="notes-intro board-intro" aria-labelledby="library-title">
       <div><p class="eyebrow">A QUESTION TO RETURN TO</p><h1 id="library-title">把想再看一遍的，<br>留在自己的题单里。</h1></div>
-      <div><p class="sec-lead">先收藏，再按自己的节奏回看。看到值得展开的主题，也可以接着练一场。</p><p class="notes-boundary">用“待回看”和“已看过”整理题单，按自己的节奏复习。</p><a href="#library-discover" class="link-arrow">从题库挑选几道 ↗</a></div>
+      <div><p class="sec-lead">收藏值得回看的问题，批量整理复习进度。准备好之后，从感兴趣的主题开始练习。</p><p class="notes-boundary">选择当前页题目，一次收藏或整理多道。</p><a href="#library-discover" class="link-arrow">从题库挑选几道 ↗</a></div>
     </section>
     <!-- 身份检查：未登录或账户失效时隐藏题单，不把个人内容留在页面。 -->
     <p id="library-loading" class="report-loading" role="status">正在读取账户与题单…</p>
@@ -39,6 +42,12 @@
         </form>
         <p id="library-saved-error" class="notes-alert" role="alert"></p>
         <p id="library-counts" class="board-counts" role="status"></p>
+        <div id="library-selection" class="library-selection" role="group" aria-label="批量整理当前页收藏">
+          <label class="library-choice"><input type="checkbox" data-select-all aria-controls="library-list"><span>全选本页</span></label>
+          <span data-selection-count role="status" aria-live="polite">已选 0 道</span>
+          <div class="library-batch-actions"><button id="library-batch-done" class="notes-button" type="button" data-batch-action disabled>标记已看过</button><button id="library-batch-todo" class="notes-button" type="button" data-batch-action disabled>恢复待回看</button><button id="library-batch-remove" class="notes-button danger-button" type="button" data-batch-action disabled>移除所选</button><button class="notes-button" type="button" data-batch-action data-clear-selection disabled>取消选择</button></div>
+          <p>选择仅限本页；切页、筛选或刷新后清空。</p>
+        </div>
         <div id="library-list" class="library-list"></div>
         <p id="library-empty" class="notes-message" hidden>这个范围还没有收藏。可以调整筛选，或到下方题库挑选。</p>
         <nav id="library-pages" class="notes-pagination" aria-label="题单分页" hidden><button id="library-previous" class="notes-button" type="button">上一页</button><span id="library-page"></span><button id="library-next" class="notes-button" type="button">下一页</button></nav>
@@ -51,7 +60,13 @@
           <label for="library-query" class="board-search">关键词<input id="library-query" type="search" maxlength="200" placeholder="题干、主题、编号或来源" autocomplete="off"></label>
           <button class="notes-button notes-primary" type="submit">查找可收藏题目</button>
         </form>
-        <p id="library-bank-error" class="notes-alert" role="alert"></p><p id="library-bank-count" class="board-counts" role="status"></p><div id="library-bank-list" class="library-list library-bank-list"></div>
+        <p id="library-bank-error" class="notes-alert" role="alert"></p><p id="library-bank-count" class="board-counts" role="status"></p>
+        <div id="library-bank-selection" class="library-selection" role="group" aria-label="批量收藏当前页题目">
+          <label class="library-choice"><input type="checkbox" data-select-all aria-controls="library-bank-list"><span>全选本组</span></label><span data-selection-count role="status" aria-live="polite">已选 0 道</span>
+          <div class="library-batch-actions"><button id="library-batch-collect" class="notes-button notes-primary" type="button" data-batch-action disabled>收藏所选</button><button class="notes-button" type="button" data-batch-action data-clear-selection disabled>取消选择</button></div>
+          <p>重复收藏保留原来的状态与时间。</p>
+        </div>
+        <div id="library-bank-list" class="library-list library-bank-list"></div>
         <p id="library-bank-empty" class="notes-message" hidden>没有匹配题目，试试其他关键词。</p>
         <nav id="library-bank-pages" class="notes-pagination" aria-label="挑选题目分页" hidden><button id="library-bank-previous" class="notes-button" type="button">前一组</button><span id="library-bank-page"></span><button id="library-bank-next" class="notes-button" type="button">后一组</button></nav>
       </section>
@@ -60,8 +75,25 @@
     </div>
   </main>
   <!-- 移除确认：展示题号与影响；只有明确确认后才删除收藏，不删除题库或练习。 -->
-  <dialog id="library-remove-dialog" class="notes-discard" aria-labelledby="library-remove-title"><h2 id="library-remove-title">移除这道收藏？</h2><p id="library-remove-description"></p><p>只删除这条收藏及手动标记，无法恢复原收藏时间；题库、练习记录与复习任务不受影响。</p><div class="note-actions"><button id="library-keep" class="notes-button" type="button" autofocus>保留收藏</button><button id="library-remove-confirm" class="notes-button danger-button" type="button">确认移除收藏</button></div></dialog>
+  <dialog id="library-remove-dialog" class="notes-discard" aria-labelledby="library-remove-title" aria-describedby="library-remove-description"><h2 id="library-remove-title">移除所选收藏？</h2><p id="library-remove-description"></p><p>移除所选收藏及其手动标记，无法恢复原收藏时间；题库、练习记录与复习任务仍会保留。</p><div class="note-actions"><button id="library-keep" class="notes-button" type="button" autofocus>保留收藏</button><button id="library-remove-confirm" class="notes-button danger-button" type="button">确认移除收藏</button></div></dialog>
   <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 让下一次准备，有迹可循。</span><a href="/revision">回到复习任务 ↗</a></div></footer>
   <noscript><p class="no-script">开启JavaScript并登录后可管理个人题单。</p></noscript>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="library" data-tour-steps="[[&quot;找到已收藏的题&quot;, &quot;登录后查看自己的题单，按方向或筛选条件查找希望重新练习的题目。&quot;], [&quot;把题目放回练习&quot;, &quot;打开题目或对应主题，按页面入口开始专项练习。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">我的题单指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
 </body>
 </html>

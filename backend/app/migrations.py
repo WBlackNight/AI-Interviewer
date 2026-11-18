@@ -16,8 +16,10 @@
    "删库"没有任何可回归的面，同一个坑会再踩一次。
 """
 import logging
+from contextlib import contextmanager
 
 from sqlalchemy import MetaData, Table, func, inspect, select, text, update
+from sqlalchemy.engine import Connection
 from sqlalchemy.schema import CreateIndex, CreateTable
 
 from app.models.entities import Base, Interview, InterviewEvent
@@ -28,9 +30,19 @@ logger = logging.getLogger(__name__)
 _REBUILD_TEMP_TABLE = "interview__migration_new"
 
 
+@contextmanager
+def migration_connection(bind):
+    """Reuse the runner's transaction; keep legacy standalone callers compatible."""
+    if isinstance(bind, Connection):
+        yield bind
+    else:
+        with bind.begin() as connection:
+            yield connection
+
+
 def upgrade_event_sequences(engine):
     table = InterviewEvent.__table__
-    with engine.begin() as connection:
+    with migration_connection(engine) as connection:
         duplicates = connection.execute(select(table.c.interview_id).group_by(
             table.c.interview_id, table.c.seq).having(func.count() > 1)).scalars().all()
         for interview_id in set(duplicates):
@@ -76,7 +88,7 @@ def upgrade_interview_user_nullable(engine) -> bool:
     if engine.dialect.name == "sqlite":
         _rebuild_interview_sqlite(engine)
     else:
-        with engine.begin() as connection:
+        with migration_connection(engine) as connection:
             connection.execute(text("ALTER TABLE interview ALTER COLUMN user_id DROP NOT NULL"))
 
     logger.warning("已升级 interview.user_id 为可空（支持匿名面试）")
@@ -109,7 +121,7 @@ def _rebuild_interview_sqlite(engine) -> None:
     column_list = ", ".join(f'"{column.name}"' for column in source.columns)
     create_ddl = str(CreateTable(_rebuilt_table()).compile(engine))
 
-    with engine.begin() as connection:
+    with migration_connection(engine) as connection:
         # 上一次中断可能留下临时表：先清掉，保证幂等。
         connection.execute(text(f'DROP TABLE IF EXISTS "{_REBUILD_TEMP_TABLE}"'))
         connection.execute(text(create_ddl))

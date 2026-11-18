@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>小青助手 · 青栈</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/assets/assistant.css?v=25c9192d7184"><script src="/assets/assistant.js?v=c8a5a857e0bd" defer></script><script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
+</head>
+<body class="notes-page assistant-page">
+  <a class="skip" href="#assistant-root">跳到主要内容</a>
+  <header class="nav"><div class="container notes-nav"><a class="brand" href="/" aria-label="青栈首页"><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a><nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/assistant" aria-current="page">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a><details class="workspace-nav-more" data-navigation-menu><summary><span class="desktop-nav-label">更多功能</span><span class="mobile-nav-label">菜单</span></summary><div class="workspace-nav-panel"><div class="workspace-nav-section mobile-nav-primary"><p>开始练习</p><a href="/#start">开始练习</a><a href="/assistant" aria-current="page">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a></div><div class="workspace-nav-section"><p>记录与复盘</p><a href="/dashboard">练习概览</a><a href="/history">练习记录</a><a href="/review">跨场复盘</a></div><div class="workspace-nav-section"><p>我的准备</p><a href="/plans">准备计划</a><a href="/revision">复习任务</a><a href="/notes">复习笔记</a><a href="/library">我的题单</a></div><div class="workspace-nav-section"><p>账户与帮助</p><a href="/account">账户中心</a><a href="/guide">使用指南</a></div></div></details></nav><details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>带上一个具体问题，或请小青帮你梳理一段回答。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
+  <main id="assistant-root" class="container qing-root"><div class="qing-loading" role="status"><h1>小青助手</h1><p>正在准备你的面试工作台…</p></div></main>
+  <noscript><p>小青需要 JavaScript 支持。你也可以先<a href="/guide">阅读使用指南</a>。</p></noscript>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="assistant" data-tour-steps="[[&quot;登录后开始聊天&quot;, &quot;选择准备的岗位，再输入具体问题，例如「如何结构化说明项目难点」。&quot;], [&quot;把建议用在练习里&quot;, &quot;参考小青给出的题库线索和练习入口，回到练习室用自己的话作答。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">小青助手指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
+</body></html>

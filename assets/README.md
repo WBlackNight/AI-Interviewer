@@ -1,14 +1,14 @@
 # 青栈原生前端交付说明
 
-当前16页原生前端服务于练习、答题、对话、报告和复习，运行题库120题，Java、Python、市场营销、运营管理、教育教学与英语面试各20题。
+当前18页原生前端服务于练习、答题、对话、报告和复习，运行题库120题，Java、Python、市场营销、运营管理、教育教学与英语面试各20题。
 
 ## 维护与生成
 
-源代码在ui/：templates是页面、pages是各页业务、shared是会话/DOM/响应保护与账户菜单、styles是10个按序合并的样式模块。ui/manifest.json统一登记页面、脚本、工作区导航与本机网关白名单。
+源代码在ui/：templates是页面、pages是各页业务、shared是会话/DOM/响应保护与账户菜单、styles是12个按序合并的样式模块。ui/manifest.json统一登记页面、脚本、工作区导航与本机网关白名单。
 
 不要直接编辑生成后的HTML/CSS/JS。项目根目录运行`python tools/build_ui.py`，再运行`python tools/verify_ui.py`。构建不需要npm安装，生成器先验证全部产物，再写文件；--check拒绝源代码与产物不同步。
 
-交付为16个HTML、16个页面JS、共享account-menu.js、home.css和本说明，共35文件；单页4个静态请求，业务API/WS另计，默认页面JS原始字节小于15,000；首页和账户页显式配置26,000、语音页22,000字节预算，见manifest。公共账户菜单独立加载，源代码拆分不引入运行时imports或框架依赖。
+交付为18个HTML、18个页面JS、共享account-menu.js、home.css和本说明，共39文件；单页4个静态请求，业务API/WS另计，默认页面JS原始字节小于15,000；首页26,000、账户页42,000、语音页和题单页22,000字节预算，见manifest。公共账户菜单独立加载，源代码拆分不引入运行时imports或框架依赖。
 
 ## 接入
 
@@ -21,7 +21,7 @@
 ## 包与验证
 
 - qingzhan-native-home.zip：首页5文件。
-- qingzhan-native-workspace.zip：完整静态35文件。
+- qingzhan-native-workspace.zip：完整静态39文件。
 - qingzhan-native-source.zip：原生前端维护源码与构建/验证入口，与现有项目配合使用，不包含后端或凭据。
 
 发布前检查逐成员源文件一致性及凭据扫描。原题库、索引、评分和模型质量有独立版本与验收流程，本次重构不改写历史报告。

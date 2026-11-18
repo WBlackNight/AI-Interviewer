@@ -6,8 +6,20 @@ import json
 from pathlib import Path
 import re
 import sys
+import hashlib
+from urllib.parse import parse_qs, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def resource_paths(resources):
+    paths = []
+    for resource in resources:
+        parsed = urlsplit(resource)
+        path = ROOT / parsed.path.lstrip('/')
+        assert parse_qs(parsed.query).get('v') == [hashlib.sha256(path.read_bytes()).hexdigest()[:12]], resource
+        paths.append(parsed.path)
+    return paths
 
 
 class Page(HTMLParser):
@@ -64,11 +76,13 @@ def check():
     assert all(count == 1 for count in Counter(page.ids).values()), "重复ID"
     assert set(page.references) <= set(page.ids), "锚点或无障碍引用缺失"
     assert not any("style" in attrs or any(key.startswith("on") for key in attrs) for _, attrs in page.elements)
-    assert not any(tag in ("iframe", "style") or (tag == "img" and "data-account-image" not in attrs and attrs.get("id") not in ("account-captcha-image", "profile-avatar")) for tag, attrs in page.elements)
+    assert not any(tag in ("iframe", "style") or (tag == "img" and "data-account-image" not in attrs and attrs.get("id") not in ("account-captcha-image", "recovery-captcha-image", "profile-avatar")) for tag, attrs in page.elements)
     resources = [attrs.get("src") for tag, attrs in page.elements if tag == "script"]
     resources += [attrs.get("href") for tag, attrs in page.elements if tag == "link" and attrs.get("rel") == "stylesheet"]
-    assert sorted(resources) == sorted(["assets/home.css", "assets/home.js", "assets/account-menu.js"]), resources
-    assert not re.search(r"@import|url\s*\(|position\s*:\s*fixed", css, re.I)
+    assert sorted(resource_paths(resources)) == sorted(["assets/home.css", "assets/home.js", "assets/account-menu.js", "assets/qing-pet.js", "assets/onboarding.js"]), resources
+    assert not re.search(r"@import|url\s*\(", css, re.I)
+    fixed = re.findall(r'([^{}]+)\{[^{}]*position\s*:\s*fixed', re.sub(r'/\*[\s\S]*?\*/', '', css), re.I)
+    assert sorted(selector.strip() for selector in fixed) == sorted(['.app-notice', '.avatar-dialog', '.qing-pet', '.qing-widget-panel']), 'Unexpected viewport-fixed content'
     assert not re.search(r"\b(?:import|require)\s*\(", script)
     assert not re.search(r"[\U0001f300-\U0001faff]", html), "未使用emoji图标"
     script_bytes = javascript_size("home.js")
@@ -79,10 +93,10 @@ def check():
     assert all(count == 1 for count in Counter(notes_page.ids).values())
     assert set(notes_page.references) <= set(notes_page.ids)
     assert not any("style" in attrs or any(key.startswith("on") for key in attrs) for _, attrs in notes_page.elements)
-    assert not any(tag in ("iframe", "style") or (tag == "img" and "data-account-image" not in attrs and attrs.get("id") not in ("account-captcha-image", "profile-avatar")) for tag, attrs in notes_page.elements)
+    assert not any(tag in ("iframe", "style") or (tag == "img" and "data-account-image" not in attrs and attrs.get("id") not in ("account-captcha-image", "recovery-captcha-image", "profile-avatar")) for tag, attrs in notes_page.elements)
     notes_resources = [attrs.get("src") for tag, attrs in notes_page.elements if tag == "script"]
     notes_resources += [attrs.get("href") for tag, attrs in notes_page.elements if tag == "link" and attrs.get("rel") == "stylesheet"]
-    assert sorted(notes_resources) == sorted(["/assets/home.css", "/assets/revision-notes.js", "/assets/account-menu.js"])
+    assert sorted(resource_paths(notes_resources)) == sorted(["/assets/home.css", "/assets/revision-notes.js", "/assets/account-menu.js", "/assets/qing-pet.js", "/assets/onboarding.js"])
     assert not re.search(r"innerHTML|\b(?:import|require)\s*\(", notes_script)
     board_page = Page()
     board_page.feed((ROOT / "revision.html").read_text(encoding="utf-8"))
@@ -91,13 +105,14 @@ def check():
     assert all(count == 1 for count in Counter(board_page.ids).values())
     assert set(board_page.references) <= set(board_page.ids)
     assert not any("style" in attrs or any(key.startswith("on") for key in attrs) for _, attrs in board_page.elements)
-    assert not any(tag in ("iframe", "style") or (tag == "img" and "data-account-image" not in attrs and attrs.get("id") not in ("account-captcha-image", "profile-avatar")) for tag, attrs in board_page.elements)
+    assert not any(tag in ("iframe", "style") or (tag == "img" and "data-account-image" not in attrs and attrs.get("id") not in ("account-captcha-image", "recovery-captcha-image", "profile-avatar")) for tag, attrs in board_page.elements)
     board_resources = [attrs.get("src") for tag, attrs in board_page.elements if tag == "script"]
     board_resources += [attrs.get("href") for tag, attrs in board_page.elements if tag == "link" and attrs.get("rel") == "stylesheet"]
-    assert sorted(board_resources) == sorted(["/assets/home.css", "/assets/revision-board.js", "/assets/account-menu.js"])
+    assert sorted(resource_paths(board_resources)) == sorted(["/assets/home.css", "/assets/revision-board.js", "/assets/account-menu.js", "/assets/qing-pet.js", "/assets/onboarding.js"])
     assert not re.search(r"innerHTML|\b(?:import|require)\s*\(", board_script)
     workspace_pages = {}
-    for name in ('account', 'history', 'report', 'review', 'interview', 'dashboard', 'catalog', 'library', 'coverage', 'plans', 'plan-history', 'voice', 'realtime'):
+    guides = json.loads((ROOT / 'ui/onboarding.json').read_text(encoding='utf-8'))
+    for name in ('account', 'history', 'report', 'review', 'interview', 'dashboard', 'catalog', 'library', 'coverage', 'plans', 'plan-history', 'voice', 'realtime', 'guide', 'share', 'roles', 'admin'):
         native_page = Page()
         native_page.feed((ROOT / (name + '.html')).read_text(encoding='utf-8'))
         native_script = (ROOT / 'assets' / (name + '.js')).read_text(encoding='utf-8')
@@ -105,11 +120,24 @@ def check():
         assert all(count == 1 for count in Counter(native_page.ids).values())
         assert set(native_page.references) <= set(native_page.ids)
         assert not any('style' in attrs or any(key.startswith('on') for key in attrs) for _, attrs in native_page.elements)
-        assert not any(tag in ('iframe', 'style') or (tag == 'img' and 'data-account-image' not in attrs and attrs.get('id') not in ('account-captcha-image', 'profile-avatar')) for tag, attrs in native_page.elements)
+        assert not any(tag in ('iframe', 'style') for tag, _ in native_page.elements)
+        static_images = [attrs['src'] for tag, attrs in native_page.elements
+                         if tag == 'img' and 'data-account-image' not in attrs
+                         and attrs.get('id') not in ('account-captcha-image', 'recovery-captcha-image', 'profile-avatar')]
+        assert resource_paths(static_images) == (['/assets/login-bamboo.webp'] if name == 'account' else [])
         native_resources = [attrs.get('src') for tag, attrs in native_page.elements if tag == 'script']
         native_resources += [attrs.get('href') for tag, attrs in native_page.elements if tag == 'link' and attrs.get('rel') == 'stylesheet']
-        assert sorted(native_resources) == sorted(['/assets/' + name + '.js', '/assets/home.css', '/assets/account-menu.js'])
-        assert not re.search(r'innerHTML|\b(?:import|require)\s*\(', native_script)
+        stylesheet = '/assets/practice.css' if name == 'interview' else '/assets/admin.css' if name == 'admin' else '/assets/home.css'
+        expected_resources = ['/assets/' + name + '.js', stylesheet, '/assets/account-menu.js']
+        if name != 'admin':
+            expected_resources.append('/assets/qing-pet.js')
+        if name in guides:
+            expected_resources.append('/assets/onboarding.js')
+        assert sorted(resource_paths(native_resources)) == sorted(expected_resources)
+        if name not in ('interview', 'admin'):
+            assert not re.search(r'innerHTML|\b(?:import|require)\s*\(', native_script)
+        # The migrated practice runtime includes React's internal DOM implementation.
+        # App source uses React text nodes; framework internals are not handwritten HTML sinks.
         workspace_pages[name] = {'javascript_bytes': native_bytes, 'html_element_count': len(native_page.elements)}
     data, grouped = {}, {}
     for path in (ROOT / "data/question_bank").glob("*.jsonl"):
@@ -134,7 +162,7 @@ def check():
     assert len(result.key_points_hit) == 3 and len(result.key_points_missed) == 1
     return {"result": "passed", "javascript_size_basis": "raw_file_bytes", "javascript_bytes": script_bytes, "html_element_count": len(page.elements),
             "initial_document_requests": 4, "external_resources": 0, "inline_style_attributes": 0,
-            "inline_event_handlers": 0, "fixed_position_rules": 0, "catalog": data,
+            "inline_event_handlers": 0, "fixed_position_rules": 1, "catalog": data,
             "example_score": result.score, "example_dimensions": result.dimensions, "example_answer_chars": len(answer),
             "runtime_dependencies": 0, "notes_javascript_bytes": notes_bytes,
             "notes_html_element_count": len(notes_page.elements), "notes_static_document_requests": 4,

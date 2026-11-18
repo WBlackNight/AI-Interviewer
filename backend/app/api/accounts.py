@@ -14,7 +14,7 @@ from app.models.entities import (Account, AccountSession, AccessGrant, ResourceO
     Interview, InterviewEvent, InterviewRuntime, InterviewSubmission, QuestionScore,
     TurnMetadata, Resume, User, UserSkillProfile, ScoreOriginRecord, RevisionTask, RevisionPractice, RevisionSchedule, RevisionNote, QuestionMark, PreparationPlan, PreparationPractice)
 from app.security import has_access
-from app.services.accounts import (AuthThrottle, DUMMY_HASH, attach_owner, bearer_token,
+from app.services.accounts import (DUMMY_HASH, attach_owner, bearer_token,
     hash_password, issue_session, lock_account, require_account, token_hash, verify_password)
 from app.services.history import account_history
 from app.services.review import account_review
@@ -25,13 +25,13 @@ from app.services import account_security as security
 from app.models.entities import AccountProfile, AuthChallenge
 
 router = APIRouter(prefix="/api", tags=["accounts"])
-throttle = AuthThrottle()
+from app.api.dependencies import auth_work
 
 
 class Credentials(BaseModel):
     model_config = ConfigDict(extra="forbid")
     username: str = Field(min_length=3, max_length=32, pattern="^[a-z0-9_]+$")
-    password: SecretStr = Field(min_length=12, max_length=128)
+    password: SecretStr = Field(min_length=8, max_length=128)
 
     @field_validator("username", mode="before")
     @classmethod
@@ -45,7 +45,7 @@ class ClaimRequest(BaseModel):
 
 
 class Registration(Credentials):
-    password_confirm: SecretStr = Field(min_length=12,max_length=128)
+    password_confirm: SecretStr = Field(min_length=8,max_length=128)
     captcha_id: str = Field(pattern=r'^[a-f0-9]{32}$')
     captcha_code: str = Field(min_length=1,max_length=10)
 
@@ -58,7 +58,7 @@ class Registration(Credentials):
 
 class DeleteAccountRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    password: SecretStr = Field(min_length=12, max_length=128)
+    password: SecretStr = Field(min_length=8, max_length=128)
 
 
 class RevisionTaskUpdate(BaseModel):
@@ -96,19 +96,13 @@ class RevisionNoteUpdate(BaseModel):
         return value.replace("\r\n", "\n").replace("\r", "\n") if isinstance(value, str) else value
 
 
-def auth_work(request: Request):
-    # 不信任客户端X-Forwarded-For，反代部署另配可信代理和分布式配额。
-    throttle.check(request.client.host if request.client else "unknown")
-    if not throttle.work.acquire(blocking=False):
-        raise HTTPException(429, "登录服务繁忙，请稍后再试")
-    try:
-        yield
-    finally:
-        throttle.work.release()
 
-
-def session_response(db, account):
+def session_response(db, account, *, verified_hash=None):
     lock_account(db, account.id)
+    if verified_hash is not None:
+        db.refresh(account)
+        if account.password_hash != verified_hash:
+            raise HTTPException(401, "用户名或密码错误")
     token, expires = issue_session(db, account.id)
     db.commit()
     return {"account": security.profile_data(db,account),
@@ -131,15 +125,17 @@ def register(payload: Registration, db: Session = Depends(get_db)):
 @router.post("/auth/login", dependencies=[Depends(auth_work)])
 def login(payload: Credentials, db: Session = Depends(get_db)):
     account = db.scalar(select(Account).where(Account.username == payload.username))
-    valid = verify_password(payload.password.get_secret_value(), account.password_hash if account else DUMMY_HASH)
+    checked_hash = account.password_hash if account else DUMMY_HASH
+    valid = verify_password(payload.password.get_secret_value(), checked_hash)
     if not account or not valid:
         raise HTTPException(401, "用户名或密码错误")
-    return session_response(db, account)
+    return session_response(db, account, verified_hash=checked_hash)
 
 
 @router.get("/auth/me")
 def me(db: Session = Depends(get_db),account: Account = Depends(require_account)):
-    return security.profile_data(db,account)
+    from app.services.admin import can_access_admin
+    return {**security.profile_data(db,account), 'is_admin': can_access_admin(account.id)}
 
 
 @router.get('/auth/captcha',dependencies=[Depends(auth_work)])
@@ -256,6 +252,8 @@ def read_note(task_id: str, db: Session = Depends(get_db), account: Account = De
 def purge_interviews(db, ids):
     if not ids:
         return
+    from app.models.entities import ReportShare
+    db.execute(delete(ReportShare).where(ReportShare.interview_id.in_(ids)))
     score_ids = select(QuestionScore.id).where(QuestionScore.interview_id.in_(ids))
     task_ids = select(RevisionTask.id).where(RevisionTask.interview_id.in_(ids))
     db.execute(delete(PreparationPractice).where(PreparationPractice.interview_id.in_(ids)))
@@ -317,10 +315,19 @@ def delete_account(payload: DeleteAccountRequest, db: Session = Depends(get_db),
     db.execute(delete(AccountSession).where(AccountSession.account_id == account.id))
     db.execute(delete(AuthChallenge).where(AuthChallenge.account_id == account.id))
     db.execute(delete(AccountProfile).where(AccountProfile.account_id == account.id))
+    from app.models.entities import AccountDetails
+    db.execute(delete(AccountDetails).where(AccountDetails.account_id == account.id))
+    from app.models.entities import AssistantConversation
+    db.execute(delete(AssistantConversation).where(AssistantConversation.account_id == account.id))
     db.execute(delete(QuestionMark).where(QuestionMark.account_id == account.id))
     plan_ids = select(PreparationPlan.id).where(PreparationPlan.account_id == account.id)
+    from app.models.entities import PreparationGoal, ReportShare
+    db.execute(delete(PreparationGoal).where(PreparationGoal.plan_id.in_(plan_ids)))
+    db.execute(delete(ReportShare).where(ReportShare.account_id == account.id))
     db.execute(delete(PreparationPractice).where(PreparationPractice.plan_id.in_(plan_ids)))
     db.execute(delete(PreparationPlan).where(PreparationPlan.account_id == account.id))
+    from app.services.forum import purge_account
+    purge_account(db, account.id)
     db.execute(delete(Account).where(Account.id == account.id))
     db.commit()
     return {"deleted": True}

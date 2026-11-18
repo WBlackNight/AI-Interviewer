@@ -81,7 +81,7 @@ async function guardedFetch(url, options) {
 		saveAddress();
 		populateSelect(find('#review-position'), data.positions.map((item) => [item.id, item.display_name]), filters.position, data.positions.length ? null : '暂无已完成岗位');
 		themeOptions();
-		find('#review-note').textContent = data.note;
+		find('#review-note').textContent = '题目和难度不同，建议结合逐题表现解读分数。';
 		find('#review-aggregation').textContent = data.aggregation;
 		find('#review-count').textContent = '本页 ' + data.session_count + ' 场 / 共 ' + data.total + ' 场\n' + data.items.length + ' 条主题记录';
 		find('#review-repeat').textContent = '重复题口径：' + data.repeat_definition;
@@ -99,20 +99,11 @@ async function guardedFetch(url, options) {
 			});
 			card.append(stats, node('p', '实际主问题难度：' + Object.entries(row.question_difficulties).map(([level, count]) => (level === 'unknown' ? '未记录' : level) + ' ' + count + ' 题').join('、'), 'note-context'),
 				node('p', row.known_question_version_count + ' 题有版本；另 ' + row.unknown_question_version_count + ' 题版本未记录。', 'note-context'));
-			const profiles = row.scoring_profiles || [];
-			const names = { heuristic: '规则评分', llm: '模型评分', heuristic_fallback: '模型失败后规则回退' };
-			card.append(node('p', profiles.map((profile) => (names[profile.source] || '来源未记录') + ' ' + profile.answer_count + ' 轮' + (profile.cached_count ? '（缓存 ' + profile.cached_count + ' 轮）' : '') + (profile.sandbox_applied ? ' · 含判题合分' : '')).join('；'), 'review-origins'));
-			const detail = node('details', undefined, 'report-answer');
-			detail.append(node('summary', '评分来源与版本'), node('p', profiles.map((profile) => {
-				return [names[profile.source] || '来源未记录', profile.scorer_version, profile.model, profile.prompt_version,
-					profile.config_version && '配置 ' + profile.config_version, profile.prompt_digest && '提示词摘要 ' + profile.prompt_digest.slice(0, 12),
-					profile.fallback_reason && '回退类别 ' + profile.fallback_reason].filter(Boolean).join(' · ');
-			}).join('\n') || '历史来源与版本未记录', 'report-version'));
 			const links = node('div', undefined, 'note-links');
 			if (/^[a-f0-9]{32}$/.test(row.interview_id)) {
 				const link = node('a', '回看逐轮报告 ↗'); link.href = '/report/' + row.interview_id; links.append(link);
 			}
-			card.append(detail, links); find('#review-list').append(card);
+			card.append(links); find('#review-list').append(card);
 		});
 		find('#review-empty').hidden = data.items.length > 0;
 		find('#review-pagination').hidden = data.total <= pageSize;

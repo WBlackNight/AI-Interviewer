@@ -80,7 +80,7 @@ def test_voice_room_is_opt_in_with_same_interview_and_three_static_resources(ups
         path = '/interview/' + 'a' * 32
         normal = request(gateway, path)[2]
         voice = request(gateway, path + '?mode=voice')[2]
-        assert b'/assets/interview.js' in normal and b'?mode=voice' in normal
+        assert b'/assets/interview.js' in normal and b'id="practice-root"' in normal
         assert b'/assets/voice.js' in voice and b'data-ws-base="ws://localhost:' in voice
         assert request(gateway, '/assets/voice.js')[0] == 200
         realtime = request(gateway, path + '?mode=realtime')[2]
@@ -97,6 +97,7 @@ def test_page_aliases_redirect_without_losing_filters_or_interview_mode(upstream
         cases = {
             '/index.html': '/',
             '/catalog.html?position=python_backend&theme=async': '/catalog?position=python_backend&theme=async',
+            '/forum.html?view=new': '/forum?view=new',
             '/plans/?plan_id=example': '/plans?plan_id=example',
             '/revision-notes.html': '/notes',
             '/interview/' + 'a' * 32 + '/?mode=realtime': '/interview/' + 'a' * 32 + '?mode=realtime',
@@ -110,6 +111,16 @@ def test_page_aliases_redirect_without_losing_filters_or_interview_mode(upstream
         assert request(gateway, '/catalog/', 'POST', b'{}')[0] == 405
         for path in ('/unknown/', '/assets/home.css/', '/interview/invalid/', '/voice.html', '/realtime.html', '/report.html'):
             assert request(gateway, path)[0] == 404
+        assert calls == []
+
+
+def test_forum_assets_are_available_in_legacy_preview(upstream):
+    port, calls = upstream
+    with running(create_gateway(0, port, port)) as gateway:
+        page = request(gateway, '/forum?view=new')
+        assert page[0] == 200 and b'id="forum-content"' in page[2]
+        for path in ('/assets/forum.js', '/assets/forum.css'):
+            assert request(gateway, path)[0] == 200
         assert calls == []
 
 

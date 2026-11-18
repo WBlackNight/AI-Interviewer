@@ -7,7 +7,6 @@ import RadarChart from "@/components/RadarChart";
 import { createWeakPractice, exportReport, getReport } from "@/lib/api";
 import type { ReportData } from "@/lib/types";
 import { filterReportTurns, type ReviewKind } from "@/lib/report-filter";
-import { originLabel, originVersions } from "@/lib/score-origin";
 import CancelInterviewButton from "@/components/CancelInterviewButton";
 import { isInterviewTerminal } from "@/lib/interview-status";
 import AddRevisionTasks from "@/components/AddRevisionTasks";
@@ -178,8 +177,6 @@ export default function ReportPage() {
                   <p className="mt-2 text-xs leading-5 text-slate-500">
                     评分依据：{q.evidence}
                   </p>
-                  <p className="mt-2 text-xs leading-5 text-slate-600">{originLabel(q.scoring_origin)}</p>
-                  <details className="mt-1 text-xs leading-5 text-slate-500"><summary className="cursor-pointer">评分来源与版本</summary><p className="mt-1 break-all">{originVersions(q.scoring_origin)}</p></details>
                   {q.key_points_missed.length > 0 && (
                     <p className="mt-1 text-xs text-amber-700">
                       待补强：{q.key_points_missed.join("、")}

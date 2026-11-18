@@ -1,6 +1,6 @@
 # 检索smoke集
 
-2026-10-28新增candidate_answer_cases.jsonl：六道候选各有完整、部分、错误回答，question_sha256绑定题目版本，expected_hits为项目作者参考。运行evals/review_candidate_answers.py对照离线规则评分；12/18集合一致、4例多判、2例漏判的本轮结果是诊断，不是独立质量分数或激活建议。参考标签、三类完整性或题目版本不匹配会拒绝执行；报告不输出回答正文。详情见[本轮日志](../../docs/开发日志-2026-10-28-题库候选与发布链路.md)。
+2026-10-28新增candidate_answer_cases.jsonl：六道候选各有完整、部分、错误回答，question_sha256绑定题目版本，expected_hits为项目作者参考。运行evals/review_candidate_answers.py对照离线规则评分；12/18集合一致、4例多判、2例漏判的本轮结果是诊断，不是独立质量分数或激活建议。参考标签、三类完整性或题目版本不匹配会拒绝执行；报告不输出回答正文。详情见[本轮日志](../../docs/archive/development/开发日志-2026-10-28-题库候选与发布链路.md)。
 
 `retrieval_smoke.jsonl`为开发者根据当前11题示例题库编写的10条合成查询，固定`split=smoke`。
 

@@ -30,11 +30,14 @@ function microphoneError(error) {
 	return new Error(messages[error.name] || error.message || '麦克风暂不可用，请重试或上传录音。');
 }
 function microphonePicker(select, status) {
-	const supported = () => typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined';
+	const supported = () => globalThis.isSecureContext !== false && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined';
+	const unavailable = () => globalThis.isSecureContext === false
+		? '当前连接未加密，浏览器无法使用麦克风。请通过本站 HTTPS 地址打开后重试。'
+		: '当前浏览器未开放录音，请使用 Edge 或 Chrome 打开本页，或上传录音。';
 	let generation = 0;
 	async function refresh() {
 		const attempt = ++generation;
-		if (!supported()) { status.textContent = '当前浏览器未开放录音，请在 Edge 或 Chrome 中打开 localhost 页面。仍可上传录音。'; return; }
+		if (!supported()) { status.textContent = unavailable(); return; }
 		status.textContent = '使用系统默认麦克风；点击开始时才会请求录音授权。';
 		if (!navigator.mediaDevices.enumerateDevices) return;
 		try {
@@ -50,7 +53,7 @@ function microphonePicker(select, status) {
 		} catch { status.textContent = '暂时无法读取设备列表，可使用系统默认麦克风。'; }
 	}
 	async function acquire() {
-		if (!supported()) throw new Error('当前浏览器不支持录音，请用 Edge 或 Chrome 打开本页，或上传录音。');
+		if (!supported()) throw new Error(unavailable());
 		let expired = false, timer;
 		const pending = navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, ...(select.value ? { deviceId: { exact: select.value } } : {}) } });
 		pending.then(media => { if (expired) media.getTracks().forEach(track => track.stop()); }, () => {});
@@ -60,6 +63,19 @@ function microphonePicker(select, status) {
 	}
 	return { supported, refresh, acquire };
 }
+	function renderQuestionTitle(node, text, turnId) {
+		if (node.dataset.motionTurn === turnId && node.textContent === text) return;
+		if (!turnId) {
+			delete node.dataset.motionTurn;
+			node.textContent = text;
+			return;
+		}
+		node.dataset.motionTurn = turnId;
+		const title = document.createElement('span');
+		title.className = 'motion-question';
+		title.textContent = text;
+		node.replaceChildren(title);
+	}
 	const find = (id) => document.querySelector('#voice-' + id);
 	const copy = find('copy').dataset;
 	const interviewId = location.pathname.match(/^\/interview\/([a-f0-9]{32})$/)?.[1];
@@ -100,7 +116,6 @@ function microphonePicker(select, status) {
 		if (capture) { capture.port.onmessage = null; capture.disconnect(); capture = null; }
 		source?.disconnect(); source = null;
 		mute?.disconnect(); mute = null;
-		find('level').value = 0;
 		find('file').value = '';
 		say('capture', copy.idleCapture); render();
 	}
@@ -139,9 +154,7 @@ function microphonePicker(select, status) {
 			const merged = new Float32Array(samples.length + block.length);
 			merged.set(samples); merged.set(block, samples.length);
 			const size = Math.round(context.sampleRate / 10);
-			let offset = 0, energy = 0;
-			for (const value of block) energy += value * value;
-			find('level').value = Math.min(1, Math.sqrt(energy / block.length) * 4);
+			let offset = 0;
 			while (merged.length - offset >= size) {
 				const bytes = new Uint8Array(3200), view = new DataView(bytes.buffer);
 				for (let index = 0; index < 1600; index++) {
@@ -242,6 +255,7 @@ function microphonePicker(select, status) {
 			connecting = false; clearTimeout(connectionTimer);
 			question = event.current_question; version = event.version;
 			active = !event.finished && !event.cancelled;
+			find('complete').hidden = !event.finished || !!event.cancelled;
 			pending = false; say('status', active ? copy.ready : copy.ended);
 		} else if (event.type === 'question') {
 			stopCapture(); question = event; version = event.version; active = true; pending = false; blocked = false;
@@ -254,6 +268,7 @@ function microphonePicker(select, status) {
 		} else if (event.type === 'answer_ack') {
 			say('saved', copy.saved);
 		} else if (event.type === 'report_ready' || event.type === 'interview_cancelled') {
+			find('complete').hidden = event.type !== 'report_ready';
 			active = false; pending = false; stopCapture(); say('status', copy.finished);
 		} else if (event.type === 'tts_chunk') play(event);
 		else if (event.type === 'tts_end') { generating = false; if (!playing.size) { speech = ''; say('playing', ''); } }
@@ -262,7 +277,7 @@ function microphonePicker(select, status) {
 			fail(new Error(event.detail || copy.failed), event.type === 'voice_gap');
 		}
 		if (event.version !== undefined) version = event.version;
-		say('question', question?.content || copy.emptyQuestion);
+		renderQuestionTitle(find('question'), question?.content || copy.emptyQuestion, question?.turn_id);
 		say('meta', question ? question.theme + (question.is_probe ? ' · 追问' : copy.mainQuestion) : 'PRACTICE SAVED'); render();
 	}
 	async function connect() {
@@ -304,6 +319,7 @@ function microphonePicker(select, status) {
 	addEventListener('pageshow', (event) => { if (event.persisted) { disposed = false; void connect(); } });
 	find('text-link').href = '/interview/' + interviewId;
 	find('report').href = '/report/' + interviewId;
+	find('complete-report').href = find('report').href;
 	void microphone.refresh(); connect();
 	document.querySelectorAll('a[href*="mode="], #voice-text-link').forEach(link => link.addEventListener('click', event => {
 		if (recording || acquiring || pending) { event.preventDefault(); say('error', '请先停止录音并等待本轮保存，再切换对话模式。'); }

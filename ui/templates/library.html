@@ -18,7 +18,7 @@
   <main id="library-main" class="container notes-main board-main">
     <section class="notes-intro board-intro" aria-labelledby="library-title">
       <div><p class="eyebrow">A QUESTION TO RETURN TO</p><h1 id="library-title">把想再看一遍的，<br>留在自己的题单里。</h1></div>
-      <div><p class="sec-lead">先收藏，再按自己的节奏回看。看到值得展开的主题，也可以接着练一场。</p><p class="notes-boundary">用“待回看”和“已看过”整理题单，按自己的节奏复习。</p><a href="#library-discover" class="link-arrow">从题库挑选几道 ↗</a></div>
+      <div><p class="sec-lead">收藏值得回看的问题，批量整理复习进度。准备好之后，从感兴趣的主题开始练习。</p><p class="notes-boundary">选择当前页题目，一次收藏或整理多道。</p><a href="#library-discover" class="link-arrow">从题库挑选几道 ↗</a></div>
     </section>
     <!-- 身份检查：未登录或账户失效时隐藏题单，不把个人内容留在页面。 -->
     <p id="library-loading" class="report-loading" role="status">正在读取账户与题单…</p>
@@ -38,6 +38,12 @@
         </form>
         <p id="library-saved-error" class="notes-alert" role="alert"></p>
         <p id="library-counts" class="board-counts" role="status"></p>
+        <div id="library-selection" class="library-selection" role="group" aria-label="批量整理当前页收藏">
+          <label class="library-choice"><input type="checkbox" data-select-all aria-controls="library-list"><span>全选本页</span></label>
+          <span data-selection-count role="status" aria-live="polite">已选 0 道</span>
+          <div class="library-batch-actions"><button id="library-batch-done" class="notes-button" type="button" data-batch-action disabled>标记已看过</button><button id="library-batch-todo" class="notes-button" type="button" data-batch-action disabled>恢复待回看</button><button id="library-batch-remove" class="notes-button danger-button" type="button" data-batch-action disabled>移除所选</button><button class="notes-button" type="button" data-batch-action data-clear-selection disabled>取消选择</button></div>
+          <p>选择仅限本页；切页、筛选或刷新后清空。</p>
+        </div>
         <div id="library-list" class="library-list"></div>
         <p id="library-empty" class="notes-message" hidden>这个范围还没有收藏。可以调整筛选，或到下方题库挑选。</p>
         <nav id="library-pages" class="notes-pagination" aria-label="题单分页" hidden><button id="library-previous" class="notes-button" type="button">上一页</button><span id="library-page"></span><button id="library-next" class="notes-button" type="button">下一页</button></nav>
@@ -50,7 +56,13 @@
           <label for="library-query" class="board-search">关键词<input id="library-query" type="search" maxlength="200" placeholder="题干、主题、编号或来源" autocomplete="off"></label>
           <button class="notes-button notes-primary" type="submit">查找可收藏题目</button>
         </form>
-        <p id="library-bank-error" class="notes-alert" role="alert"></p><p id="library-bank-count" class="board-counts" role="status"></p><div id="library-bank-list" class="library-list library-bank-list"></div>
+        <p id="library-bank-error" class="notes-alert" role="alert"></p><p id="library-bank-count" class="board-counts" role="status"></p>
+        <div id="library-bank-selection" class="library-selection" role="group" aria-label="批量收藏当前页题目">
+          <label class="library-choice"><input type="checkbox" data-select-all aria-controls="library-bank-list"><span>全选本组</span></label><span data-selection-count role="status" aria-live="polite">已选 0 道</span>
+          <div class="library-batch-actions"><button id="library-batch-collect" class="notes-button notes-primary" type="button" data-batch-action disabled>收藏所选</button><button class="notes-button" type="button" data-batch-action data-clear-selection disabled>取消选择</button></div>
+          <p>重复收藏保留原来的状态与时间。</p>
+        </div>
+        <div id="library-bank-list" class="library-list library-bank-list"></div>
         <p id="library-bank-empty" class="notes-message" hidden>没有匹配题目，试试其他关键词。</p>
         <nav id="library-bank-pages" class="notes-pagination" aria-label="挑选题目分页" hidden><button id="library-bank-previous" class="notes-button" type="button">前一组</button><span id="library-bank-page"></span><button id="library-bank-next" class="notes-button" type="button">后一组</button></nav>
       </section>
@@ -59,7 +71,7 @@
     </div>
   </main>
   <!-- 移除确认：展示题号与影响；只有明确确认后才删除收藏，不删除题库或练习。 -->
-  <dialog id="library-remove-dialog" class="notes-discard" aria-labelledby="library-remove-title"><h2 id="library-remove-title">移除这道收藏？</h2><p id="library-remove-description"></p><p>只删除这条收藏及手动标记，无法恢复原收藏时间；题库、练习记录与复习任务不受影响。</p><div class="note-actions"><button id="library-keep" class="notes-button" type="button" autofocus>保留收藏</button><button id="library-remove-confirm" class="notes-button danger-button" type="button">确认移除收藏</button></div></dialog>
+  <dialog id="library-remove-dialog" class="notes-discard" aria-labelledby="library-remove-title" aria-describedby="library-remove-description"><h2 id="library-remove-title">移除所选收藏？</h2><p id="library-remove-description"></p><p>移除所选收藏及其手动标记，无法恢复原收藏时间；题库、练习记录与复习任务仍会保留。</p><div class="note-actions"><button id="library-keep" class="notes-button" type="button" autofocus>保留收藏</button><button id="library-remove-confirm" class="notes-button danger-button" type="button">确认移除收藏</button></div></dialog>
   <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 让下一次准备，有迹可循。</span><a href="/revision">回到复习任务 ↗</a></div></footer>
   <noscript><p class="no-script">开启JavaScript并登录后可管理个人题单。</p></noscript>
 </body>

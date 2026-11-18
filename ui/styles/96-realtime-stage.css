@@ -1,0 +1,55 @@
+.realtime-stage { position: relative; margin-top: 24px; }
+.realtime-stage > .voice-connection { margin-top: 0; }
+.realtime-view-toggle { display: block; margin: 12px 0 16px auto; }
+.realtime-view-toggle[hidden] { display: none; }
+.realtime-stage-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.realtime-lane { display: flex; flex-direction: column; min-width: 0; padding: clamp(20px, 3vw, 32px); border: 1px solid var(--line); border-radius: 20px; background: var(--card); }
+.realtime-lane h2 { margin-block: 12px; font: 500 clamp(21px, 2.4vw, 28px)/1.6 var(--serif); overflow-wrap: anywhere; }
+.realtime-candidate { background: #edf5ef; border-color: #bbcec1; }
+.realtime-page .realtime-live-log,
+.realtime-page #rt-messages { display: flex; flex-direction: column; gap: 10px; min-height: 100px; max-height: 42svh; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 4px; }
+.realtime-page .realtime-lane .realtime-bubble { flex-shrink: 0; align-self: stretch; width: auto; max-width: 100%; margin: 0; padding: 16px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
+.realtime-page .realtime-candidate .realtime-bubble { background: var(--card); }
+.realtime-lane .realtime-bubble p:last-child { font: 16px/1.8 var(--sans); color: var(--ink); white-space: pre-wrap; }
+.realtime-lane .realtime-bubble { animation: motion-enter var(--t-fast) var(--ease); }
+.realtime-stage > .voice-controls { margin-top: 20px; padding: 24px; }
+.realtime-stage .voice-orb { display: none; }
+.realtime-stage .microphone-settings { max-width: 560px; }
+.realtime-stage .voice-controls .note-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.realtime-stage .note-actions > button { flex: 1 1 150px; }
+.realtime-stage #rt-end { border-color: #b87459; color: #813c29; background: #fff6f2; }
+.realtime-page[data-immersive="true"] > .nav,
+.realtime-page[data-immersive="true"] .voice-intro,
+.realtime-page[data-immersive="true"] .practice-modes,
+.realtime-page[data-immersive="true"] > .site-foot { display: none; }
+.realtime-page[data-immersive="true"] { background: #e9efeb; }
+.realtime-page[data-immersive="true"] main { max-width: 1440px; padding-block: 20px 32px; }
+.realtime-page[data-immersive="true"] .realtime-stage { margin-top: 0; }
+.realtime-page[data-immersive="true"] .realtime-stage-grid { min-height: min(52svh, 600px); }
+.realtime-page[data-immersive="true"] .realtime-lane { animation: motion-enter var(--t-base) var(--ease); }
+.realtime-page[data-immersive="true"] .realtime-candidate { animation-delay: 35ms; animation-fill-mode: backwards; }
+.realtime-page[data-immersive="true"] .voice-controls { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -8px 24px #1028210d; }
+.realtime-page[data-conversation="active"] .voice-controls > h2,
+.realtime-page[data-conversation="active"] .voice-controls > details,
+.realtime-page[data-conversation="active"] #rt-start,
+.realtime-page[data-conversation="active"] #rt-sync,
+.realtime-page[data-conversation="active"] .microphone-picker,
+.realtime-page[data-conversation="active"] #rt-device-status,
+.realtime-page[data-conversation="active"] label[for="rt-device"] { display: none; }
+.voice-device-settings { margin-block: 12px; border-top: 1px solid var(--line); }
+.voice-device-settings > summary { display: list-item; padding-block: 14px; color: var(--sage-deep); cursor: pointer; font-size: 14px; }
+.voice-device-settings .microphone-settings { margin: 0 0 12px; }
+.voice-device-settings summary:focus-visible { outline: 2px solid var(--sage-deep); outline-offset: 4px; border-radius: 4px; }
+.realtime-stage #rt-hint { margin-block: 8px 16px; color: var(--ink); text-align: center; font-size: 16px; }
+.realtime-stage .voice-controls .note-actions { margin-top: 0; }
+.realtime-page[data-conversation="active"] .voice-controls .note-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media(max-width:760px) {
+  .realtime-stage-grid { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .realtime-page .realtime-live-log, .realtime-page #rt-messages { max-height: 26svh; }
+  .realtime-page[data-immersive="true"] main { padding-inline: 16px; }
+  .realtime-stage > .voice-controls { padding: 16px; }
+}
+@media(max-width:420px) {
+  .realtime-page[data-conversation="active"] .voice-controls .note-actions { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .realtime-page[data-conversation="active"] #rt-end { grid-column: 1 / -1; }
+}

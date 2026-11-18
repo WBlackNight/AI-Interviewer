@@ -213,6 +213,8 @@ section { scroll-margin-top: 76px; }
 .form-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
 .practice-form label { font-size: 14px; }
+.practice-form > label { display: block; margin-top: var(--form-item-gap); line-height: 1.6; }
+.practice-form .form-pair > label { line-height: 1.6; }
 
 .practice-form select, .practice-form textarea { display: block; width: 100%; min-height: 44px; margin-top: 8px; border: 1px solid var(--sage); border-radius: 10px; padding: 10px; background: var(--field-dark); color: var(--on-pine); font: 14px/1.5 var(--sans); color-scheme: dark; }
 
@@ -250,11 +252,12 @@ section { scroll-margin-top: 76px; }
 
 .practice-form input[type="file"] { display: block; width: 100%; margin-top: 12px; font: 14px var(--sans); }
 
-.form-help { margin-top: 12px; color: var(--on-pine-muted); font-size: 14px; line-height: 1.8; }
+.form-help { margin: var(--hint-gap) 0 0; color: var(--on-pine-muted); font-size: 14px; line-height: var(--copy-leading); overflow-wrap: anywhere; }
 
 .form-summary { margin-top: 20px; min-height: 24px; color: var(--on-pine-muted); font-size: 14px; }
 
-.form-error { margin-top: 8px; min-height: 26px; color: var(--on-pine); font-size: 14px; }
+.form-error { margin: 12px 0; color: var(--on-pine); font-size: 14px; line-height: var(--copy-leading); overflow-wrap: anywhere; }
+.form-help:empty, .form-error:empty { display: none; }
 
 .form-submit { width: 100%; border: 0; gap: 12px; }
 
@@ -278,13 +281,16 @@ dialog { max-width: min(480px, calc(100% - 32px)); width: 100%; padding: 28px; b
 
 dialog::backdrop { background: var(--overlay); }
 
+dialog[open] { animation: motion-enter var(--t-base) var(--ease); }
+dialog[open]::backdrop { animation: motion-fade var(--t-fast) var(--ease-state); }
+
 .dialog-heading { display: flex; align-items: center; justify-content: space-between; }
 
 .dialog-heading button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: var(--paper-2); color: var(--ink); font-size: 24px; cursor: pointer; }
 
-dialog h2 { margin-top: 20px; font: 500 28px/1.4 var(--serif); }
+dialog h2 { margin: 0; font: 500 28px/1.4 var(--serif); }
 
-dialog p { margin-top: 20px; font-size: 14px; line-height: 1.8; }
+dialog p { margin-top: 12px; font-size: 14px; line-height: var(--copy-leading); }
 
 dialog .btn { margin-top: 24px; }
 
@@ -301,7 +307,7 @@ dialog .btn { margin-top: 24px; }
 @media (max-width: 900px) {
   .container { width: calc(100% - 48px); }
   .nav-inner { gap: 16px; position: relative; }
-  .nav-links.is-open { display: flex; flex-direction: column; align-items: stretch; position: absolute; left: 0; right: 0; top: 56px; margin: 0; padding: 16px 24px; gap: 0; background: var(--card); border: 1px solid var(--line-strong); border-radius: 0 0 10px 10px; }
+  .nav-links.is-open { display: flex; flex-direction: column; align-items: stretch; position: absolute; left: 0; right: 0; top: 56px; margin: 0; padding: 16px 24px; gap: 0; background: var(--card); border: 1px solid var(--line-strong); border-radius: 0 0 10px 10px; --motion-y: -6px; animation: motion-enter var(--t-fast) var(--ease); }
   .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
   .hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .hero-visual { max-width: 560px; width: 100%; }
@@ -365,8 +371,4 @@ dialog .btn { margin-top: 24px; }
   .foot-col p { max-width: none; }
   .foot-col a { min-height: 44px; }
   .foot-row { gap: 12px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

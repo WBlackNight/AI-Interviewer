@@ -50,6 +50,23 @@
         <button id="dashboard-retry" type="button" class="notes-button">重试读取</button>
       </section>
       <div id="dashboard-content" hidden>
+        <section class="dashboard-next-step" aria-labelledby="dashboard-next-title">
+          <div>
+            <p class="eyebrow">YOUR NEXT STEP</p>
+            <h2 id="dashboard-next-title">今天，从这里继续</h2>
+            <p id="dashboard-next-description"></p>
+            <a id="dashboard-next-link" class="notes-button notes-primary" href="/#start">开始练习</a>
+          </div>
+          <div class="dashboard-quick-start">
+            <h3>按今天的空闲时间练一场</h3>
+            <p>选择后核对岗位和配置，再开始。</p>
+            <div class="note-actions">
+              <a href="/?duration=5#start" class="notes-button">约 5 分钟</a>
+              <a href="/?duration=10#start" class="notes-button">约 10 分钟</a>
+              <a href="/?duration=15#start" class="notes-button">约 15 分钟</a>
+            </div>
+          </div>
+        </section>
         <section class="dashboard-metrics" aria-label="账户练习与复习统计">
           <a href="/history">
             <span>已经完成的练习</span>
@@ -71,6 +88,12 @@
             <strong id="dashboard-notes">—</strong>
             <small>项 · 含已保存内容</small>
           </a>
+        </section>
+        <section class="dashboard-section" aria-labelledby="dashboard-focus-title">
+          <div class="dashboard-section-heading"><div><p class="eyebrow">FROM FEEDBACK TO PRACTICE</p><h2 id="dashboard-focus-title">下一场，练得更有方向</h2></div><a href="/review" class="link-arrow">对照更多报告</a></div>
+          <p id="dashboard-focus-note" class="notes-boundary"></p>
+          <div id="dashboard-focus-list" class="focus-grid"></div>
+          <p id="dashboard-focus-empty" class="notes-message">完成第一场练习后，这里会依据已保存的评分推荐复习主题。</p>
         </section>
         <div class="dashboard-layout">
           <section class="report-panel dashboard-week" aria-labelledby="dashboard-week-title">

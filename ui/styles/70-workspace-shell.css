@@ -1,11 +1,38 @@
+/* Headers share the same routes and responsive layout on landing and workspace pages. */
+.nav:has(.workspace-navigation) { height: auto; min-height: var(--nav-h); }
+.nav .notes-nav:has(.workspace-navigation) { min-height: var(--nav-h); padding-block: 4px; }
 /* One navigation shell for account, preparation and review pages. */
-.notes-page .workspace-navigation { gap: 0 8px; flex-wrap: nowrap; }
-.workspace-navigation a { padding: 8px 10px; border-radius: 10px; white-space: nowrap; text-decoration: none; }
-.workspace-navigation a[aria-current="page"] { background: var(--mint); color: var(--sage-deep); font-weight: 600; }
+.nav .workspace-navigation { position: relative; gap: 0 6px; flex-wrap: nowrap; min-width: 0; align-items: center; justify-content: center; }
+.workspace-navigation a { padding: 8px 10px; border-radius: 10px; white-space: nowrap; text-decoration: none; transition: color var(--t-fast) var(--ease-state), background-color var(--t-fast) var(--ease-state); }
+.workspace-navigation a[aria-current] { background: #e2efe6; color: var(--sage-deep); font-weight: 600; box-shadow: inset 0 0 0 1px #c4dccb66; }
 .workspace-navigation a:hover { background: var(--paper-2); }
+.workspace-nav-more { position: relative; }
+.workspace-nav-more > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 12px; border-radius: 10px; cursor: pointer; list-style: none; white-space: nowrap; }
+.workspace-nav-more > summary::-webkit-details-marker { display: none; }
+.workspace-nav-more > summary::after { content: ''; width: 6px; height: 6px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); transition: transform var(--t-fast) var(--ease-state); }
+.workspace-nav-more[open] > summary::after { transform: rotate(225deg); }
+.workspace-nav-more[open] > summary, .workspace-nav-more [data-current-section] { background: var(--mint); color: var(--sage-deep); }
+.workspace-nav-panel { position: absolute; top: calc(100% + 10px); right: 0; z-index: 40; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; width: min(580px, calc(100vw - 48px)); padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); box-shadow: var(--surface-shadow); animation: motion-enter var(--t-fast) var(--ease); }
+.workspace-nav-section { display: flex; flex-direction: column; min-width: 0; gap: 4px; }
+.workspace-nav-section p { padding: 0 10px 8px; color: var(--ink-2); font-size: 13px; }
+.workspace-nav-section a { font-size: 14px; }
 .notes-page main { min-height: calc(100svh - 180px); }
+.report-panel, .report-turn, .studio-question, .studio-saved-turn { overflow-wrap: anywhere; }
 [aria-busy="true"] { cursor: progress; }
-@media (max-width: 1100px) {
-  .notes-page .notes-nav:has(.workspace-navigation) { flex-wrap: wrap; padding-block: 12px; gap: 8px; }
-  .notes-page .workspace-navigation { width: 100%; overflow-x: auto; justify-content: flex-start; overscroll-behavior-x: contain; scrollbar-width: thin; padding-block: 2px; }
+@media (max-width: 1050px) {
+  .nav .notes-nav:has(.workspace-navigation) { flex-wrap: wrap; padding-block: 12px; gap: 8px; }
+  .nav .workspace-navigation { width: 100%; justify-content: space-between; padding-block: 2px; }
+  .nav .notes-nav:has(.workspace-navigation) .workspace-navigation { order: 3; flex: 0 0 100%; margin-inline: 0; }
+  .nav .notes-nav:has(.workspace-navigation) .user-menu-group { margin-inline-start: auto; max-width: 55%; }
+  .workspace-nav-more { position: static; }
+  .workspace-nav-panel { top: 100%; right: 0; width: 100%; max-height: calc(100svh - 160px); overflow-y: auto; }
+}
+@media (max-width: 480px) {
+  .nav .workspace-navigation { gap: 0; }
+  .workspace-navigation > a, .workspace-nav-more > summary { padding-inline: 6px; font-size: 13px; }
+  .workspace-nav-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 8px; padding: 18px; }
+}
+@media (max-width: 360px) {
+  .workspace-navigation > a, .workspace-nav-more > summary { padding-inline: 4px; font-size: 12px; }
+  .workspace-nav-more > summary { gap: 4px; }
 }

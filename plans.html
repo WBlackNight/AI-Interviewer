@@ -6,16 +6,19 @@
   <meta name="color-scheme" content="light">
   <title>准备计划 · 青栈 QINGZHAN</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/assets/home.css">
-  <script src="/assets/plans.js" defer></script>
-<script src="/assets/account-menu.js" defer></script>
+  <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+  <script src="/assets/plans.js?v=4ebfc1fe9a8e" defer></script>
+<script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
 </head>
 <body class="notes-page">
   <a class="skip" href="#plans-main">跳到主要内容</a>
   <header class="nav"><div class="container notes-nav">
     <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
-    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog">题库</a><a href="/plans" aria-current="page">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
-  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a><details class="workspace-nav-more" data-navigation-menu><summary data-current-section><span class="desktop-nav-label">更多功能</span><span class="mobile-nav-label">菜单</span></summary><div class="workspace-nav-panel"><div class="workspace-nav-section mobile-nav-primary"><p>开始练习</p><a href="/#start">开始练习</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a></div><div class="workspace-nav-section"><p>记录与复盘</p><a href="/dashboard">练习概览</a><a href="/history">练习记录</a><a href="/review">跨场复盘</a></div><div class="workspace-nav-section"><p>我的准备</p><a href="/plans" aria-current="page">准备计划</a><a href="/revision">复习任务</a><a href="/notes">复习笔记</a><a href="/library">我的题单</a></div><div class="workspace-nav-section"><p>账户与帮助</p><a href="/account">账户中心</a><a href="/guide">使用指南</a></div></div></details></nav>
+  <details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>确定练习目标，逐步跟进计划进度。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
   <main id="plans-main" class="container notes-main board-main">
     <section class="notes-intro board-intro" aria-labelledby="plans-title"><div><p class="eyebrow">GIVE YOUR PREPARATION A DIRECTION</p><h1 id="plans-title">给下一次面试，<br>留一份自己的准备。</h1></div><div><p class="sec-lead">选好岗位与主题，留一个目标日期。每次从这里开始，接着练，再回头看。</p><p class="notes-boundary">为自己安排练习节奏。目标日期仅作记录，不发送提醒。</p><a href="#plans-create-panel" class="link-arrow">建立一份准备计划 ↗</a></div></section>
     <!-- 身份状态：计划仅当前账户可见，失效后清除旧内容和编辑框。 -->
@@ -37,7 +40,7 @@
           <label for="plans-position">目标岗位<select id="plans-position"><option value="">正在读取岗位…</option></select></label>
           <fieldset><legend>知识主题</legend><div id="plans-themes"></div></fieldset><p id="plans-selected" class="plans-selection" role="status"></p>
           <label for="plans-difficulty">练习强度<select id="plans-difficulty"><option value="easy">轻松</option><option value="mid" selected>标准</option><option value="hard">挑战</option></select></label>
-          <label for="plans-target">目标日期（可不填）<input id="plans-target" type="date" min="2000-01-01" max="2100-12-31"></label>
+          <label for="plans-goal">阶段目标（完成场数，可不填）<input id="plans-goal" type="number" min="1" max="50" step="1" placeholder="例如：5"></label><label for="plans-target">目标日期（可不填）<input id="plans-target" type="date" min="2000-01-01" max="2100-12-31"></label>
           <p class="notes-boundary">保存后练习范围固定，每个主题最多两道主问题，包含追问。</p><button id="plans-create" class="notes-button notes-primary" type="submit" disabled>保存准备计划</button><button id="plans-clear" class="notes-button" type="button">清空草稿</button><p id="plans-create-error" class="notes-alert" role="alert"></p>
         </form></aside>
       </div>
@@ -45,12 +48,29 @@
     </div>
   </main>
   <!-- 编辑计划：只改名称和目标日，冲突保留输入，不覆盖其他页面。 -->
-  <dialog id="plans-edit" class="notes-discard plans-edit" aria-labelledby="plans-edit-title"><form id="plans-edit-form"><h2 id="plans-edit-title">调整名称与目标日期</h2><label for="plans-edit-name">计划名称<input id="plans-edit-name" required maxlength="160" autocomplete="off"></label><label for="plans-edit-target">目标日期（留空可清除）<input id="plans-edit-target" type="date" min="2000-01-01" max="2100-12-31"></label><p class="notes-boundary">练习范围保持原设置，已有练习不会改变。</p><p id="plans-edit-error" class="notes-alert" role="alert"></p><div class="note-actions"><button id="plans-edit-close" class="notes-button" type="button">返回列表</button><button class="notes-button notes-primary" type="submit">保存修改</button></div></form></dialog>
+  <dialog id="plans-edit" class="notes-discard plans-edit" aria-labelledby="plans-edit-title"><form id="plans-edit-form"><h2 id="plans-edit-title">调整名称与目标日期</h2><label for="plans-edit-name">计划名称<input id="plans-edit-name" required maxlength="160" autocomplete="off"></label><label for="plans-edit-goal">阶段目标（完成场数，留空可清除）<input id="plans-edit-goal" type="number" min="1" max="50" step="1"></label><label for="plans-edit-target">目标日期（留空可清除）<input id="plans-edit-target" type="date" min="2000-01-01" max="2100-12-31"></label><p class="notes-boundary">练习范围保持原设置，已有练习不会改变。</p><p id="plans-edit-error" class="notes-alert" role="alert"></p><div class="note-actions"><button id="plans-edit-close" class="notes-button" type="button">返回列表</button><button class="notes-button notes-primary" type="submit">保存修改</button></div></form></dialog>
   <!-- 草稿保护：关闭编辑前显式选择保留或放弃尚未保存的输入。 -->
   <dialog id="plans-discard" class="notes-discard" aria-labelledby="plans-discard-title"><h2 id="plans-discard-title">放弃尚未保存的修改？</h2><p>服务器里的计划保持原样。</p><div class="note-actions"><button id="plans-keep-edit" class="notes-button" type="button" autofocus>继续编辑</button><button id="plans-discard-edit" class="notes-button" type="button">放弃修改</button></div></dialog>
   <!-- 移除计划：仅归档计划可移除，明确保留关联练习与报告。 -->
   <dialog id="plans-remove" class="notes-discard" aria-labelledby="plans-remove-title"><h2 id="plans-remove-title">移除这份已归档计划？</h2><p id="plans-remove-name"></p><p>计划名称、日期和关联将被删除，无法恢复。练习、回答及报告继续保留在练习记录中。</p><div class="note-actions"><button id="plans-keep" class="notes-button" type="button" autofocus>保留计划</button><button id="plans-remove-confirm" class="notes-button danger-button" type="button">确认移除计划</button></div></dialog>
   <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 从一个明确的方向开始。</span><a href="/revision">报告里的待复习主题 ↗</a></div></footer>
   <noscript><p class="no-script">开启JavaScript并登录后可管理准备计划。</p></noscript>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="plans" data-tour-steps="[[&quot;创建准备计划&quot;, &quot;明确准备的岗位，再确定阶段目标和可投入的时间。&quot;], [&quot;用练习记录跟进进度&quot;, &quot;完成练习后回看计划进度，根据新的薄弱点调整下一场安排。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">准备计划指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
 </body>
 </html>

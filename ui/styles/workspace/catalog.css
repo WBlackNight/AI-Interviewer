@@ -1,0 +1,75 @@
+/* 题库探索：题目预览与主题篮在文档流内排布，窄屏顺序阅读。 */
+
+.catalog-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start; margin-top: 32px; }
+
+.catalog-results { min-width: 0; }
+
+.catalog-results h2 { font: 500 22px/1.7 var(--serif); }
+
+.catalog-results .notes-toolbar-heading { align-items: start; }
+
+.catalog-results .link-arrow { flex-shrink: 0; font-size: 14px; }
+
+.catalog-list { display: grid; gap: 18px; }
+
+.catalog-card { padding: 24px 28px; }
+
+.catalog-card .eyebrow { line-height: 1.9; }
+
+.catalog-card h3 { margin-top: 18px; font: 500 19px/1.9 var(--serif); white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.catalog-card > .notes-button { margin-top: 20px; }
+
+.catalog-card [aria-pressed="true"] { background: var(--mint); border-color: var(--sage); }
+
+.catalog-builder { padding: 28px 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--pine); color: var(--on-pine); min-width: 0; scroll-margin-top: 80px; }
+
+.catalog-builder h2 { margin-top: 20px; font: 500 25px/1.6 var(--serif); }
+
+.catalog-builder .eyebrow, .catalog-builder .notes-boundary { color: var(--on-pine-muted); }
+
+.catalog-builder fieldset { margin: 24px 0 0; padding: 0; border: 0; min-width: 0; }
+
+.catalog-builder legend { margin-bottom: 12px; font-size: 14px; }
+
+.catalog-topic { display: flex; align-items: center; gap: 10px; min-height: 46px; cursor: pointer; font-size: 14px; }
+
+.catalog-topic input { width: 17px; height: 17px; accent-color: var(--sage); flex-shrink: 0; }
+
+.catalog-topic { padding-block: 7px; }
+
+.catalog-topic small { display: block; margin-top: 4px; color: var(--on-pine-muted); font-size: 14px; line-height: 1.8; }
+
+.catalog-topic input:disabled + span { opacity: .6; }
+
+.catalog-builder select { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--sage); border-radius: 10px; color: var(--on-pine); background: var(--field-dark); font: 14px var(--sans); color-scheme: dark; }
+
+.catalog-builder .studio-label { margin-top: 24px; }
+
+.catalog-selection { margin-top: 24px; font-size: 14px; line-height: 1.9; overflow-wrap: anywhere; }
+
+.catalog-builder .notes-button { margin-top: 24px; width: 100%; background: var(--mint); color: var(--pine); }
+
+.catalog-builder .link-arrow { margin-top: 20px; color: var(--on-pine); font-size: 14px; }
+
+.catalog-builder .notes-alert { color: var(--on-pine); }
+
+.catalog-builder :focus-visible { outline-color: var(--on-pine); }
+
+#catalog-error:empty, #catalog-notice:empty, #catalog-create-error:empty { display: none; }
+
+@media (max-width: 900px) {
+  .catalog-layout { grid-template-columns: 1fr; }
+  #catalog-themes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+}
+
+@media (max-width: 560px) {
+  .catalog-card { padding: 22px; }
+  .catalog-card h3 { font-size: 18px; }
+  #catalog-filters select, #catalog-filters input, .catalog-builder select { font-size: 16px; }
+  .catalog-results .notes-toolbar-heading { flex-direction: column; }
+  .catalog-builder { padding: 24px 22px; }
+  .catalog-builder h2 { font-size: 24px; }
+  #catalog-themes { grid-template-columns: 1fr; }
+}
+

@@ -1,0 +1,86 @@
+/* 文字练习室：正常文档流，当前题与回看分开，不自动滚动打断输入。 */
+
+.studio-intro { display: flex; justify-content: space-between; align-items: end; gap: 48px; }
+
+.studio-intro h1 { margin-top: 16px; font: 600 clamp(30px, 3vw, 40px)/1.4 var(--serif); }
+
+.studio-intro > p { color: var(--ink-2); font-size: 14px; line-height: 1.9; }
+
+.studio-small-break { display: none; }
+
+.studio-connection { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 18px; margin-top: 28px; border-block: 1px solid var(--line); }
+
+.studio-connection > div { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.studio-connection p { font-size: 14px; color: var(--ink-2); }
+
+.studio-indicator { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: var(--clay); }
+
+.studio-indicator[data-state="active"] { background: var(--sage-deep); }
+
+.studio-indicator[data-state="finished"], .studio-indicator[data-state="cancelled"] { background: var(--ink-2); }
+
+#studio-error:empty, #studio-notice:empty { display: none; }
+
+.studio-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; margin-top: 24px; }
+
+.studio-grid > div, .studio-sidebar { min-width: 0; }
+
+.studio-question { padding: 32px; }
+
+.studio-question h2 { font-size: 23px; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.studio-question > .eyebrow { line-height: 1.9; }
+
+.studio-label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; margin-block: 28px 12px; font-size: 14px; }
+
+.studio-label span { color: var(--ink-2); font-size: 14px; }
+
+.studio-question textarea { width: 100%; min-width: 0; padding: 16px; resize: vertical; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--paper); color: var(--ink); font: 16px/1.9 var(--sans); }
+
+.studio-question textarea:disabled { background: var(--paper-2); color: var(--ink-2); }
+
+#studio-code { font: 14px/1.8 var(--mono); tab-size: 4; background: var(--pine); color: var(--on-pine); }
+
+.studio-composer-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; }
+
+.studio-composer-footer p { color: var(--ink-2); font: 14px/1.8 var(--mono); }
+
+.studio-draft-help { margin-top: 16px; font-size: 14px; line-height: 1.9; color: var(--ink-2); }
+
+.studio-sidebar .report-panel { padding: 28px 24px; }
+
+.studio-sidebar h2 { font: 500 20px/1.6 var(--serif); }
+
+.studio-last-score { display: block; margin-top: 24px; font: 500 48px/1.2 var(--mono); color: var(--sage-deep); }
+
+.studio-guide { margin-top: 24px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; }
+
+.studio-guide ol { list-style: decimal; padding-left: 20px; margin-block: 20px; color: var(--ink-2); font-size: 14px; line-height: 2; }
+
+.studio-guide p { margin-block: 16px; color: var(--ink-2); font-size: 14px; line-height: 1.9; }
+
+.studio-guide .notes-button { display: block; margin-top: 24px; width: 100%; }
+
+.studio-history { margin-top: 36px; }
+
+.studio-history h2 { font: 500 22px/1.6 var(--serif); }
+
+#studio-saved-count { color: var(--ink-2); font: 14px var(--mono); }
+
+.studio-turns { display: grid; gap: 12px; }
+
+.studio-saved-turn { padding: 8px 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); min-width: 0; }
+
+.studio-saved-turn summary, .studio-recovery summary { min-height: 48px; padding-block: 12px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+
+.studio-saved-turn h3 { margin-block: 8px 16px; font-size: 15px; line-height: 1.9; overflow-wrap: anywhere; }
+
+.studio-saved-turn .report-evidence { padding-bottom: 16px; }
+
+.studio-recovery { padding: 12px 24px; margin-top: 24px; border: 1px solid var(--danger-line); border-radius: 12px; }
+
+.studio-recovery pre, .studio-tests { margin: 0 0 16px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink-2); font: 14px/1.9 var(--mono); }
+
+.studio-recovery pre { max-height: 280px; overflow: auto; }
+

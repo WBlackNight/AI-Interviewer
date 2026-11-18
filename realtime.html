@@ -5,41 +5,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>实时语音陪练 · 青栈</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/assets/home.css">
-  <script src="/assets/realtime.js" defer></script>
-<script src="/assets/account-menu.js" defer></script>
+  <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+  <script src="/assets/realtime.js?v=c30fb55b1bac" defer></script>
+<script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
 </head>
-<body class="notes-page voice-page" data-ws-base="">
+<body class="notes-page voice-page realtime-page" data-ws-base="">
   <a class="skip" href="#realtime-main">跳到主要内容</a>
   <header class="nav"><div class="container notes-nav">
     <a class="brand" href="/">青栈 <span class="brand-en">QINGZHAN</span></a>
     <nav class="notes-nav-links" aria-label="陪练导航"><a href="?mode=voice">语音作答</a><a href="?mode=text">正式文字练习</a></nav>
-  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+  <details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>实时对话会显示双方内容，开始前可按页面提示检查麦克风。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
   <main id="realtime-main" class="container notes-main">
     <section class="notes-intro board-intro voice-intro">
-      <div><p class="eyebrow">A CONVERSATION, IN REAL TIME</p><h1>围绕这一题，<br>自然聊下去。</h1></div>
-      <div><p class="sec-lead">说出你的思路，停顿后听回复；也可以随时追问。</p><p class="notes-boundary">音频由豆包处理，字幕仅保留在本页。本模式不计分；建议佩戴耳机。</p></div>
+      <div><p class="eyebrow">A CONVERSATION, IN REAL TIME</p><h1>实时对话</h1></div>
+      <div><p class="sec-lead">点击开始后授权麦克风，说完停顿片刻即可听到回复。</p><p class="notes-boundary">音频用于转写和生成回复，字幕仅保留在本页。结束后可查看陪练反馈。建议佩戴耳机。本次对话用于陪练，正式评分请提交作答。</p></div>
     </section>
     <!-- 会话控制：先明确开始，再申请麦克风和建立供应商连接。 -->
-    <section class="studio-connection voice-connection"><p id="rt-status" role="status">正在检查实时语音服务…</p><span id="rt-clock" class="voice-timer" aria-label="本次对话剩余时间">--:--</span><button id="rt-sync" type="button" class="notes-button">重新检查</button></section>
     <p id="rt-error" class="notes-alert" role="alert"></p>
     <nav class="practice-modes" aria-label="练习方式"><a href="?mode=text">文字作答</a><a href="?mode=realtime" aria-current="page">实时对话<span>自由交流，不计分</span></a><a href="?mode=voice">语音输入<span>转写后保存答案</span></a></nav>
-    <div class="voice-layout">
-      <section class="report-panel voice-question" aria-labelledby="rt-title">
-        <p class="eyebrow">CURRENT QUESTION · 当前练习题</p><p id="rt-topic" class="notes-boundary">正在同步题目</p><h2 id="rt-title">正在读取本场练习题…</h2>
-        <p class="notes-boundary">先回答，再围绕没讲清楚的部分继续交流。</p>
-      </section>
+    <section id="rt-stage" class="realtime-stage" tabindex="-1" aria-label="实时面试对话">
+    <section class="studio-connection voice-connection"><p id="rt-status" role="status">正在准备…</p><span id="rt-clock" class="voice-timer" aria-label="本次对话剩余时间">--:--</span><button id="rt-sync" type="button" class="notes-button">重新检查</button></section>
+      <button id="rt-view" class="notes-button realtime-view-toggle" type="button" hidden>收起沉浸视图</button>
+      <div class="realtime-stage-grid">
+        <section class="realtime-lane realtime-interviewer" aria-labelledby="rt-title">
+          <p class="eyebrow">面试官</p>
+          <p id="rt-topic" class="notes-boundary">正在同步题目</p>
+          <h2 id="rt-title">正在读取本场练习题…</h2>
+          <div id="rt-questions" class="realtime-live-log" role="log" aria-label="面试官的提问与回复" aria-live="polite" aria-relevant="additions text"></div>
+        </section>
+        <section class="realtime-lane realtime-candidate" aria-labelledby="rt-captions">
+          <div class="voice-transcript-heading">
+            <div><p class="eyebrow">回答字幕</p><h2 id="rt-captions">你的回答</h2></div>
+            <label class="realtime-follow"><input id="rt-follow" type="checkbox" checked>跟随最新内容</label>
+          </div>
+          <p id="rt-empty" class="notes-boundary">点击开始后，你的回答会实时显示在这里。</p>
+          <div id="rt-messages" class="realtime-live-log" role="log" aria-label="你的回答字幕" aria-live="polite" aria-relevant="additions text"></div>
+        </section>
+      </div>
       <section class="note-card voice-controls" aria-label="实时对话控制">
         <div class="voice-orb" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="12" y="4" width="8" height="15" rx="4"/><path d="M8 14v2a8 8 0 0 0 16 0v-2M16 24v5M11 29h10"/></svg><span></span><span></span><span></span><span></span><span></span></div>
-        <h2>准备好，就开口。</h2><div class="microphone-settings"><label for="rt-device">输入设备</label><div class="microphone-picker"><select id="rt-device"><option value="">系统默认麦克风</option></select><button id="rt-devices" class="notes-button" type="button">刷新设备</button></div><p id="rt-device-status" class="account-help" role="status"></p><label for="rt-level" class="voice-level-label">输入电平</label><meter id="rt-level" min="0" max="1" value="0">0</meter></div><p id="rt-hint" class="notes-boundary">麦克风尚未开启</p>
-        <div class="note-actions"><button id="rt-start" class="notes-button notes-primary" type="button">开始实时对话</button><button id="rt-pause" class="notes-button" type="button" disabled>暂停麦克风</button><button id="rt-interrupt" class="notes-button" type="button" disabled>打断回复</button><button id="rt-end" class="notes-button" type="button" disabled>结束对话</button></div>
-        <details class="report-answer"><summary>改用录音文件</summary><label for="rt-file">16kHz单声道PCM16 WAV，最长10秒</label><input id="rt-file" type="file" accept=".wav,audio/wav"><p class="notes-boundary">适合麦克风暂不可用时使用。选择后立即发送，不申请麦克风权限。</p></details><details class="voice-troubleshooting"><summary>麦克风无法使用？</summary><ol><li>在地址栏的站点权限中允许麦克风，并检查系统隐私设置。</li><li>选择正确的输入设备，关闭占用麦克风的其他应用。</li><li>内置浏览器不支持时，用 Edge 或 Chrome 打开本页；也可上传录音。</li></ol></details>
+        <h2>对话控制</h2><details class="voice-device-settings"><summary>麦克风设置</summary><div class="microphone-settings"><label for="rt-device">麦克风</label><div class="microphone-picker"><select id="rt-device"><option value="">系统默认麦克风</option></select><button id="rt-devices" class="notes-button" type="button">重新查找</button></div><p id="rt-device-status" class="account-help" role="status"></p></div></details><p id="rt-hint" class="notes-boundary">麦克风尚未开启</p>
+        <div class="note-actions"><button id="rt-start" class="notes-button notes-primary" type="button">开始对话</button><button id="rt-pause" class="notes-button" type="button" disabled>暂停</button><button id="rt-interrupt" class="notes-button" type="button" disabled>打断回复</button><button id="rt-end" class="notes-button" type="button" disabled>结束对话</button></div>
+        <details class="report-answer"><summary>改用录音文件</summary><label for="rt-file">选择 WAV 录音，最长 10 秒</label><input id="rt-file" type="file" accept=".wav,audio/wav"><p class="notes-boundary">选择后发送录音并等待回复。录音需为 16kHz 单声道 WAV 格式。</p></details><details class="voice-troubleshooting"><summary>麦克风无法使用？</summary><ol><li>在地址栏的站点权限中允许麦克风，并检查系统隐私设置。</li><li>选择正确的麦克风，关闭占用麦克风的其他应用。</li><li>内置浏览器不支持时，用 Edge 或 Chrome 打开本页；也可上传录音。</li></ol></details>
       </section>
-    </div>
-    <!-- 对话字幕：最多保留八条，只在当前页面展示。 -->
-    <section class="notes-message voice-transcript" aria-labelledby="rt-captions"><div class="voice-transcript-heading"><h2 id="rt-captions">对话字幕</h2><label class="realtime-follow"><input id="rt-follow" type="checkbox" checked>跟随最新对话</label></div><p id="rt-empty" class="notes-boundary">你的话和陪练的回复会出现在这里。</p><div id="rt-messages" role="log" aria-live="polite" aria-relevant="additions text"></div></section>
+    </section>
+    <section id="rt-review" class="notes-message realtime-review" aria-labelledby="rt-review-title" aria-live="polite" tabindex="-1" hidden>
+      <h2 id="rt-review-title">本次陪练反馈</h2>
+      <p class="notes-boundary">根据本次已确认字幕识别表达线索，供复练参考。</p>
+      <ul id="rt-review-list"></ul>
+    </section>
   </main>
   <footer class="site-foot"><div class="container foot-row"><span>青栈 · 实时陪练</span><a href="?mode=voice">返回语音作答</a></div></footer>
 <noscript><p class="no-script">请启用JavaScript以读取练习数据和提交操作。<a href="/">返回首页</a></p></noscript>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="realtime" data-tour-steps="[[&quot;开始语音对话&quot;, &quot;确认麦克风可用后点击开始。沉浸式页面左侧显示问题，右侧显示你的回答。&quot;], [&quot;结束后看建议&quot;, &quot;对话完成后可查看表达上的优点与待改进之处。正式作答和评分请使用文字或语音输入。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">实时对话指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
 </body>
 </html>

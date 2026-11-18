@@ -1,6 +1,7 @@
 /* 复习笔记：原生DOM、账户授权、显式保存与版本冲突处理。 */
 (function () {
   'use strict';
+/* @include notice */
 /* @include session */
 /* @include element */
 /* @include fetch */
@@ -97,9 +98,11 @@
       state.input.value = state.note.content;
       state.conflict.hidden = true;
       state.message.textContent = state.note.content ? '笔记已保存。' : '笔记已清空。';
+      notify(state.message.textContent);
       showSaved(state);
     } catch (error) {
       state.message.textContent = error.message || '保存失败，草稿保留，请重试。';
+      notify(state.message.textContent, 'error');
       if (error.status === 409) state.conflict.hidden = false;
       if (error.status === 401) showError(error);
     } finally {

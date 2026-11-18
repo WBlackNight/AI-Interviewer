@@ -8,11 +8,15 @@
 
 - [account_menu_check.mjs](account_menu_check.mjs)
 - [account_ui_check.mjs](account_ui_check.mjs)
+- [avatar_crop_check.mjs](avatar_crop_check.mjs)
+- [batch_selection_check.mjs](batch_selection_check.mjs)
 - [carousel_check.mjs](carousel_check.mjs)
 - [home_interaction_check.mjs](home_interaction_check.mjs)
 - [microphone_check.mjs](microphone_check.mjs)
 - [native_home_check.py](native_home_check.py)
-- [native_interview_test.cjs](native_interview_test.cjs)
+- [练习室状态回归](../frontend/tests/studio-state.test.ts)：React迁移后的轮次、保存确认、重放、草稿与账户隔离。
+- [vite_proxy_smoke.py](vite_proxy_smoke.py)：检查离线开发环境的 HMR、论坛、语音模式与 HTTP/WebSocket 代理。以本机隔离测试账号的会话设置 `QINGZHAN_SMOKE_TOKEN` 时，也检查小青的 SSE。
+- [assistant_quality.py](assistant_quality.py)：已知知识错误的离线规则回归，不等同于整体回答质量评测。
 - [realtime_ui_check.mjs](realtime_ui_check.mjs)
 - [test_native_home_gateway.py](test_native_home_gateway.py)
 - [ui_core_check.mjs](ui_core_check.mjs)

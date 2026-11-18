@@ -24,6 +24,20 @@ class Settings(BaseSettings):
 
     app_name: str = "Mock Interviewer"
     debug: bool = True
+    # Explicit account IDs; no first-user or username-based administrator promotion.
+    admin_account_ids: str = Field(default='', max_length=3300)
+    admin_viewer_account_ids: str = Field(default='', max_length=3300)
+    forum_featured_likes: int = Field(default=10, ge=2, le=10000)
+    forum_blocked_terms: list[str] = Field(default_factory=lambda: ['刷单返利', '代办假证'])
+
+    @field_validator('admin_account_ids', 'admin_viewer_account_ids')
+    @classmethod
+    def validate_admin_ids(cls, value):
+        import re
+        ids = [item.strip() for item in value.split(',') if item.strip()]
+        if any(not re.fullmatch(r'[a-f0-9]{32}', item) for item in ids):
+            raise ValueError('ADMIN_ACCOUNT_IDS must contain comma-separated account IDs')
+        return ','.join(dict.fromkeys(ids))
 
     # ---- 存储 ----
     # 开发默认 SQLite；生产/演示切 postgresql+psycopg://... 或经 Docker Compose

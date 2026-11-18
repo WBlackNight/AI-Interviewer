@@ -1,17 +1,25 @@
 /* 原生账户：沿用已有会话契约，登录、退出与删除分别操作。 */
 (function () {
   'use strict';
+/* @include notice */
 /* @include session */
 /* @include fetch */
 /* @include element */
+/* @include avatarcrop */
+/* @include recovery */
   const find = (selector) => document.querySelector(selector);
   let mode = 'login';
   let busy = false;
   let checking = false;
   let account = null;
+  let profileEditing = new URLSearchParams(location.search).get('view') === 'profile';
+  let profileVersion = 0;
+  let profileDiscardAction = 'back';
   let captcha=null,captchaLoading=false,securityConfig=null,avatarUrl='',selectedFile=null,loadedAccount='',nicknameDirty=false;
   let emailChallenge='',passwordChallenge='';
   const cooldown=new Map();
+  const crop=avatarCropEditor(find,()=>!busy);
+  const recovery=setupRecovery(find,request,setBusy,()=>busy);
   function announceSession(data) {
     const current=session();if(!current)return;
     account=data;sessionStorage.setItem('account:session',JSON.stringify({...current,account:data}));
@@ -24,11 +32,12 @@
     if (!value || !/^\/(?!\/)/.test(value)) return '';
     try {
       const target = new URL(value, location.origin);
-      if (target.origin !== location.origin || !(/^(?:\/|\/(?:dashboard|catalog|plans|history|revision|notes|library|coverage|review|plan-history))$/.test(target.pathname) || /^\/(?:interview|report)\/[a-f0-9]{32}$/.test(target.pathname))) return '';
+      target.pathname = target.pathname.replace(/\/+$/, '') || '/';
+      if (target.origin !== location.origin || !(/^(?:\/|\/(?:dashboard|catalog|plans|history|revision|notes|library|coverage|review|plan-history|guide|assistant|admin|forum))$/.test(target.pathname) || /^\/(?:interview|report)\/[a-f0-9]{32}$/.test(target.pathname))) return '';
       return target.pathname + target.search + target.hash;
     } catch { return ''; }
   }
-  const returnPath = safeReturn(collection.get('next'));
+  const returnPath=safeReturn(collection.get('next'));
   const collectPosition = collection.get('collect_position') || '';
   const collectQuestion = collection.get('collect_question') || '';
   const returnCollection = /^[a-z][a-z0-9_]{0,63}$/.test(collectPosition) && /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/.test(collectQuestion)
@@ -56,31 +65,54 @@
   }
   function setBusy(value) {
     busy = value;
-    document.querySelectorAll('#account-main button, #account-main input, #account-delete-dialog button, #account-delete-dialog input').forEach((node) => { node.disabled = value; });
+    document.querySelectorAll('#account-main textarea, #profile-discard button').forEach(node => { node.disabled = value; });
+    document.querySelectorAll('#account-logout-dialog button').forEach(node => { node.disabled = value; });
+    document.querySelectorAll('#account-main button, #account-main input, #account-main select, #account-delete-dialog button, #account-delete-dialog input').forEach((node) => { node.disabled = value; });
     find('#account-submit').textContent = value ? '处理中…' : mode === 'login' ? '登录' : '注册并登录';
     find('#account-submit').disabled=value||(mode==='register'&&(!captcha||captchaLoading));
     find('#avatar-submit').disabled=value||!selectedFile;
+    find('#avatar-crop').setAttribute('aria-busy',String(value));
     for(const id of ['email-send','password-send'])find('#'+id).disabled=value||!securityConfig?.email_available||cooldown.has(id);
+    recovery.update();
   }
   function render() {
+    document.body.dataset.profileEditing = String(!!account && profileEditing);
+    find('#account-art').hidden = checking || Boolean(account);
+    find('#profile-settings').hidden = !account || !profileEditing;
     find('#account-checking').hidden = !checking;
     find('#account-auth').hidden = checking || !!account;
     find('#account-profile').hidden = checking || !account;
+    find('#account-recovery').hidden=checking||!!account||mode!=='login';
     find('#account-return-collection').hidden = !account || !returnCollection;
     if (returnCollection) find('#account-return-collection').href = returnCollection;
     if (account) {
       find('#account-name').textContent = account.nickname||account.username;
       find('#profile-username').textContent='@'+account.username;
       find('#profile-initial').textContent=Array.from(account.nickname||account.username)[0];
-      if(loadedAccount!==account.id){nicknameDirty=false;loadedAccount=account.id;}
-      if(!nicknameDirty)find('#profile-nickname').value=account.nickname||account.username;
+      if(loadedAccount!==account.id){nicknameDirty=false;loadedAccount=account.id;find('#email-editor').open=!account.email;}
+      if(!nicknameDirty) {
+        find('#profile-nickname').value=account.nickname||account.username;
+        find('#profile-gender').value = account.gender || '';
+        find('#profile-age').value = account.age ?? '';
+        find('#profile-bio').value = account.bio || '';
+        profileVersion = account.profile_version || 0;
+      }
+      find('#profile-gender-text').textContent = ({male:'男', female:'女', other:'其他'})[account.gender] || '未填写';
+      find('#profile-age-text').textContent = account.age == null ? '未填写' : account.age + ' 岁';
+      find('#profile-bio-text').textContent = account.bio || '可以在编辑资料中添加一句自我介绍。';
       find('#profile-email').textContent=account.email?'已验证：'+account.email:'尚未绑定邮箱';
-      find('#email-form').hidden=!!account.email;
+      find('#email-form').hidden=false;
+      find('#email-action').textContent=account.email?'更换绑定邮箱':'绑定邮箱';
+      find('label[for="profile-email-input"]').textContent=account.email?'新邮箱地址':'邮箱地址';
       find('#password-email-fields').hidden=!account.email;
       find('#password-code').required=!!account.email;
       find('#avatar-remove').hidden=!account.avatar_version;
       const expiry = session()?.expires_at;
       find('#account-expiry').textContent = expiry ? '本次登录有效至 ' + new Date(expiry).toLocaleString('zh-CN') + '，仅限当前标签页。' : '';
+    } else if (!checking) {
+      nicknameDirty = false; profileEditing = false;
+      for (const id of ['profile-nickname','profile-age','profile-bio','profile-gender']) find('#'+id).value = '';
+      for (const id of ['profile-gender-text','profile-age-text','profile-bio-text']) find('#'+id).textContent = '';
     }
   }
 
@@ -145,9 +177,10 @@
       catch { throw new Error('浏览器无法保留当前会话，请检查标签页存储设置后重新登录。'); }
       account = result.account; render();
       dispatchEvent(new Event('account:changed'));
+      notify(mode==='register'?'注册成功':'登录成功','success',!!(returnCollection||returnPath));
       if(returnCollection||returnPath){find('#account-notice').textContent='登录成功，正在返回…';location.assign(returnCollection||returnPath);}
       else {await Promise.allSettled([overview(),loadSecurity(),loadAvatar()]);find('#account-notice').textContent=mode==='register'?'账户已创建，开始你的第一场练习吧。':'欢迎回来。';render();find('#account-name').focus();}
-    } catch (error) { find('#account-alert').textContent = error.message; if(mode==='register')void loadCaptcha(); }
+    } catch (error) { find('#account-alert').textContent = error.message; notify(error.message,'error'); if(mode==='register')void loadCaptcha(); }
     finally { find('#account-password').value = '';find('#account-password-confirm').value='';resetPassword(); setBusy(false); render(); }
   });
   document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => {
@@ -167,10 +200,37 @@
     find('#account-password').value = ''; resetPassword(); find('#account-alert').textContent = ''; setBusy(false);
     find('#account-username').focus();
     if(mode==='register')void loadCaptcha();
+    render();
   }));
   function resetPassword() {
+    document.querySelectorAll('.password-strength').forEach(node => { node.hidden = true; });
     document.querySelectorAll('[data-password-toggle]').forEach(button=>{
       find('#'+button.dataset.passwordToggle).type='password';button.setAttribute('aria-pressed','false');button.setAttribute('aria-label','显示密码');
+    });
+  }
+  for (const id of ['account-password', 'security-new', 'recovery-new']) {
+    const input = find('#' + id);
+    const strength = document.createElement('div');
+    strength.className = 'password-strength';
+    strength.hidden = true;
+    const meter = document.createElement('meter');
+    meter.min = 0;
+    meter.max = 3;
+    meter.setAttribute('aria-label', '密码强度估计');
+    const label = document.createElement('span');
+    label.setAttribute('role', 'status');
+    strength.append(meter, label);
+    input.closest('.password-control').after(strength);
+    input.addEventListener('input', () => {
+      const value = input.value;
+      const length = Array.from(value).length;
+      strength.hidden = !length || (id === 'account-password' && mode !== 'register');
+      const variety = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z0-9\s]/].filter(pattern => pattern.test(value)).length;
+      const predictable = /^(.)\1+$/u.test(value) || /^(12345678|password|qwerty|abcdefgh)/i.test(value);
+      const level = length < 8 ? 0 : predictable ? 1 : length >= 14 && variety >= 3 ? 3 : length >= 12 || variety >= 3 ? 2 : 1;
+      meter.value = level;
+      strength.dataset.level = String(level);
+      label.textContent = ['至少 8 个字符', '强度较弱 · 建议加长并避开常见组合', '强度中等', '强度较强'][level];
     });
   }
   document.querySelectorAll('[data-password-toggle]').forEach(button=>button.addEventListener('click',()=>{
@@ -191,7 +251,7 @@
     const password=find('#account-password').value,confirm=find('#account-password-confirm');
     const mismatch=!!confirm.value&&confirm.value!==password;
     confirm.setAttribute('aria-invalid',String(mismatch));
-    find('#account-password-status').textContent=mismatch?'两次密码还不一致，请检查。':password.length<12?'至少12个字符，建议使用不易猜到的组合。':'密码长度符合要求。';
+    find('#account-password-status').textContent=mismatch?'两次密码还不一致，请检查。':Array.from(password).length<8?'至少8个字符，建议使用不易猜到的组合。':'密码长度符合要求。';
   });
   find('#account-username').addEventListener('blur',async()=>{
     const username=find('#account-username').value.trim();if(mode!=='register'||!/^[A-Za-z0-9_]{3,32}$/.test(username))return;
@@ -199,6 +259,7 @@
   });
   async function loadSecurity(){
     securityConfig=await request('/account/security');
+    find('#profile-session-count').textContent='当前有效登录会话：'+securityConfig.active_sessions+' 个';
     find('#mail-delivery').textContent=securityConfig.email_mode==='local_test'?'本机测试模式：邮件只进入测试收件箱，不会发送至外部邮箱。':securityConfig.email_available?'验证码将发送至你填写的邮箱。':'邮件服务尚未配置，暂时无法发送验证码。';
     find('#test-mail-link').hidden=securityConfig.email_mode!=='local_test';
   }
@@ -210,27 +271,73 @@
     const blob=await response.blob();if(session()?.access_token!==identity||!response.ok||blob.type!=='image/png')return;
     avatarUrl=URL.createObjectURL(blob);find('#profile-avatar').src=avatarUrl;find('#profile-avatar').hidden=false;find('#profile-initial').hidden=true;
   }
-  find('#profile-nickname').addEventListener('input',()=>{nicknameDirty=true;});
+  function editProfile(value) {
+    profileEditing = value;
+    const address = new URL(location.href);
+    if (value) address.searchParams.set('view', 'profile');
+    else address.searchParams.delete('view');
+    address.hash = '';
+    history.replaceState(null, '', address.pathname + address.search);
+    render();
+    find(value ? '#profile-editor-title' : '#profile-edit-open').focus();
+  }
+  find('#profile-edit-open').addEventListener('click', () => { if (!busy) editProfile(true); });
+  find('#profile-edit-back').addEventListener('click', () => {
+    if (busy) return;
+    profileDiscardAction = 'back';
+    if (nicknameDirty || selectedFile) find('#profile-discard').showModal();
+    else editProfile(false);
+  });
+  find('#profile-discard-keep').addEventListener('click', () => find('#profile-discard').close());
+  find('#profile-discard-confirm').addEventListener('click', () => {
+    nicknameDirty = false; selectedFile = null; crop.clear(); find('#profile-file').value = '';
+    find('#profile-message').textContent = '';
+    find('#profile-discard').close();
+    if (profileDiscardAction === 'reload') { void reloadProfile(); }
+    else { editProfile(false); setBusy(false); }
+  });
+  async function reloadProfile() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const data = await request('/auth/me');
+      nicknameDirty = false; announceSession(data);
+      find('#profile-message').textContent = '已读取最新资料。';
+    } catch(error) { find('#profile-message').textContent = error.message; }
+    finally { setBusy(false); }
+  }
+  find('#profile-reload').addEventListener('click', () => {
+    if (busy) return;
+    if (nicknameDirty || selectedFile) { profileDiscardAction = 'reload'; find('#profile-discard').showModal(); }
+    else void reloadProfile();
+  });
+  find('#profile-form').addEventListener('input',()=>{nicknameDirty=true;});
+  find('#session-form').addEventListener('submit',async event=>{
+    event.preventDefault();if(busy)return;setBusy(true);find('#session-message').textContent='正在处理…';
+    try{
+      await request('/account/sessions/revoke-others',{method:'POST',body:JSON.stringify({current_password:find('#session-password').value})});
+      find('#session-message').textContent='已退出其他会话，当前标签页可继续使用。';notify('已退出其他登录会话');
+      await loadSecurity().catch(()=>{find('#profile-session-count').textContent='会话数量暂时无法读取，请刷新页面。';});
+    }catch(error){find('#session-message').textContent=error.message;notify(error.message,'error');}
+    finally{find('#session-password').value='';setBusy(false);}
+  });
   find('#profile-form').addEventListener('submit',async event=>{
     event.preventDefault();if(busy)return;setBusy(true);
-    try{const data=await request('/account/profile',{method:'PATCH',body:JSON.stringify({nickname:find('#profile-nickname').value.trim()})});nicknameDirty=false;announceSession(data);find('#profile-message').textContent='昵称已保存。';}
-    catch(error){find('#profile-message').textContent=error.message;}finally{setBusy(false);}
-  });
-  find('#profile-file').addEventListener('change',async()=>{
-    selectedFile=null;find('#avatar-message').textContent='';setBusy(busy);const file=find('#profile-file').files[0];if(!file)return;
     try{
-      if(!/^image\/(png|jpeg|webp)$/.test(file.type)||! /\.(png|jpe?g|webp)$/i.test(file.name))throw new Error('请选择JPG、PNG或WebP图片');
-      if(file.size>2097152||!file.size)throw new Error('头像不能为空且不能超过2MB');
-      const image=await createImageBitmap(file);const valid=image.width>=32&&image.height>=32&&image.width<=4096&&image.height<=4096;image.close();if(!valid)throw new Error('图片尺寸应为32–4096像素');
-      if(find('#profile-file').files[0]!==file)return;selectedFile=file;find('#avatar-message').textContent=file.name+' · '+Math.ceil(file.size/1024)+'KB，点击上传后保存。';
-    }catch(error){find('#profile-file').value='';find('#avatar-message').textContent=error.message||'图片无法读取';}finally{setBusy(busy);}
+      const rawAge = find('#profile-age').value.trim();
+      const age = rawAge ? Number(rawAge) : null;
+      if (age !== null && (!Number.isInteger(age) || age < 1 || age > 120)) throw new Error('年龄请填写1至120的整数，或留空。');
+      const data=await request('/account/profile',{method:'PATCH',body:JSON.stringify({
+        nickname:find('#profile-nickname').value.trim(), gender:find('#profile-gender').value || null,
+        age, bio:find('#profile-bio').value.trim(), expected_version:profileVersion
+      })});
+      nicknameDirty=false;announceSession(data);
+      find('#profile-message').textContent='资料已保存。';notify('个人资料已保存');
+      find('#account-notice').textContent='个人资料已更新。';
+    }
+    catch(error){find('#profile-message').textContent=error.message;notify(error.message,'error');}finally{setBusy(false);}
   });
-  find('#avatar-form').addEventListener('submit',async event=>{
-    event.preventDefault();if(busy||!selectedFile)return;setBusy(true);
-    try{announceSession(await request('/account/avatar',{method:'POST',body:selectedFile,headers:{'Content-Type':selectedFile.type}}));selectedFile=null;find('#profile-file').value='';await loadAvatar();find('#avatar-message').textContent='头像已保存，右上角已同步更新。';}
-    catch(error){find('#avatar-message').textContent=error.message;}finally{setBusy(false);}
-  });
-  find('#avatar-remove').addEventListener('click',async()=>{if(busy)return;setBusy(true);try{announceSession(await request('/account/avatar',{method:'DELETE'}));await loadAvatar();find('#avatar-message').textContent='已恢复默认头像。';}catch(error){find('#avatar-message').textContent=error.message;}finally{setBusy(false);}});
+/* @module account/avatar */
   function startCooldown(id,seconds){
     const button=find('#'+id),label=button.textContent,end=Date.now()+seconds*1000;
     function tick(){const left=Math.ceil((end-Date.now())/1000);if(left<=0){clearInterval(cooldown.get(id));cooldown.delete(id);button.textContent=label;setBusy(busy);}else{button.textContent=left+'秒后可重发';button.disabled=true;}}
@@ -239,6 +346,7 @@
   async function sendEmail(purpose){
     if(busy)return;const bind=purpose==='email_bind',id=bind?'email-send':'password-send',message=find(bind?'#email-message':'#password-message');
     const password=find(bind?'#email-password':'#security-current');if(!password.reportValidity())return;
+    if(bind&&account.email)purpose='email_change';
     if(bind&&!find('#profile-email-input').reportValidity())return;
     setBusy(true);message.textContent='正在发送…';
     try{const data=await request('/account/email/code',{method:'POST',body:JSON.stringify({purpose,current_password:password.value,...(bind?{email:find('#profile-email-input').value.trim()}: {})})});if(bind)emailChallenge=data.challenge_id;else passwordChallenge=data.challenge_id;startCooldown(id,data.retry_after);message.textContent= data.delivery==='local_test'?'已投递到本机测试收件箱，请打开收件箱查看验证码。':'验证码已发送，10分钟内有效。';}
@@ -249,8 +357,8 @@
   find('#password-send').addEventListener('click',()=>sendEmail('password_change'));
   find('#email-form').addEventListener('submit',async event=>{
     event.preventDefault();if(busy)return;if(!emailChallenge){find('#email-message').textContent='请先获取邮箱验证码';return;}setBusy(true);
-    try{announceSession(await request('/account/email/confirm',{method:'POST',body:JSON.stringify({purpose:'email_bind',current_password:find('#email-password').value,email:find('#profile-email-input').value.trim(),challenge_id:emailChallenge,code:find('#email-code').value})}));emailChallenge='';find('#email-form').reset();resetPassword();find('#email-message').textContent='邮箱已验证并绑定。';}
-    catch(error){find('#email-message').textContent=error.message;}finally{setBusy(false);}
+    try{announceSession(await request('/account/email/confirm',{method:'POST',body:JSON.stringify({purpose:account.email?'email_change':'email_bind',current_password:find('#email-password').value,email:find('#profile-email-input').value.trim(),challenge_id:emailChallenge,code:find('#email-code').value})}));emailChallenge='';find('#email-form').reset();find('#email-editor').open=false;resetPassword();find('#email-message').textContent='邮箱已验证并保存。';notify('邮箱绑定成功');}
+    catch(error){find('#email-message').textContent=error.message;notify(error.message,'error');}finally{setBusy(false);}
   });
   find('#password-form').addEventListener('submit',async event=>{
     event.preventDefault();if(busy)return;
@@ -258,20 +366,41 @@
     if(account.email&&!passwordChallenge){find('#password-message').textContent='请先获取已绑定邮箱的验证码';return;}
     setBusy(true);
     try{const data=await request('/account/password',{method:'POST',body:JSON.stringify({current_password:find('#security-current').value,new_password:find('#security-new').value,password_confirm:find('#security-confirm').value,...(account.email?{challenge_id:passwordChallenge,code:find('#password-code').value}: {})})});
-      if(!/^[a-f0-9]{64}$/.test(data.access_token))throw new Error('会话无法更新，请重新登录');sessionStorage.setItem('account:session',JSON.stringify(data));account=data.account;dispatchEvent(new Event('account:changed'));find('#password-form').reset();passwordChallenge='';resetPassword();render();find('#password-message').textContent='密码已更新，所有旧会话已退出，当前会话已更新。';}
-    catch(error){find('#password-message').textContent=error.message;}finally{setBusy(false);}
+      if(!/^[a-f0-9]{64}$/.test(data.access_token))throw new Error('会话无法更新，请重新登录');sessionStorage.setItem('account:session',JSON.stringify(data));account=data.account;dispatchEvent(new Event('account:changed'));find('#password-form').reset();passwordChallenge='';resetPassword();render();find('#password-message').textContent='密码已更新，所有旧会话已退出，当前会话已更新。';notify('密码已更新');}
+    catch(error){find('#password-message').textContent=error.message;notify(error.message,'error');}finally{setBusy(false);}
   });
 
   // 退出：服务端撤销成功后再清当前会话，保留本标签页的匿名资源凭据。
-  find('#account-logout').addEventListener('click', async () => {
+  find('#account-export').addEventListener('click',async()=>{
+    if(busy)return;setBusy(true);find('#account-export-status').textContent='正在准备下载…';
+    try{
+      const data=await request('/account/revision-export');
+      const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+      const link=document.createElement('a');link.href=url;link.download='qingzhan-revision-data.json';document.body.append(link);
+      try{link.click();}finally{link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+      find('#account-export-status').textContent='下载已开始，请妥善保管文件。';notify('资料下载已开始');
+    }catch(error){find('#account-export-status').textContent=error.message;notify(error.message,'error');}finally{setBusy(false);}
+  });
+  const logoutDialog = find('#account-logout-dialog');
+  find('#account-logout').addEventListener('click', () => {
     if (busy) return;
-    setBusy(true); find('#account-alert').textContent = '';
+    find('#account-logout-error').textContent = '';
+    logoutDialog.showModal();
+  });
+  find('#account-logout-cancel').addEventListener('click', () => logoutDialog.close());
+  logoutDialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
+  find('#account-logout-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    find('#account-logout-error').textContent = '';
     try {
       try { await request('/auth/logout', { method: 'POST' }); }
       catch (error) { if (error.status !== 401) throw error; }
-      clearSession(); account = null;dispatchEvent(new Event('account:changed'));void loadAvatar();
-      find('#account-notice').textContent = '已退出当前会话。账户记录仍保留，重新登录可找回。';
-    } catch (error) { find('#account-alert').textContent = error.message; }
+      clearSession(); account = null;selectedFile=null;crop.clear();find('#profile-file').value='';dispatchEvent(new Event('account:changed'));void loadAvatar();
+      logoutDialog.close();
+      find('#account-notice').textContent = '已退出当前会话。账户记录仍保留，重新登录可找回。'; notify('已退出登录');
+    } catch (error) { find('#account-logout-error').textContent = error.message; notify(error.message,'error'); }
     finally { setBusy(false); render(); }
   });
 
@@ -289,7 +418,7 @@
     setBusy(true); find('#account-delete-error').textContent = '';
     try {
       await request('/account', { method: 'DELETE', body: JSON.stringify({ password: find('#account-delete-password').value }) });
-      clearSession(); account = null; dialog.close();
+      clearSession(); account = null;selectedFile=null;crop.clear();find('#profile-file').value='';dialog.close();
       find('#account-notice').textContent = '账户及所属内容已删除。';
     } catch (error) { find('#account-delete-error').textContent = error.message; }
     finally { find('#account-delete-password').value = ''; setBusy(false); render(); }
@@ -297,10 +426,14 @@
   find('#account-retry').addEventListener('click', () => void check());
   find('#account-overview-retry').addEventListener('click',()=>void overview());
   find('#account-username').addEventListener('input',()=>{find('#account-username').removeAttribute('aria-invalid');find('#account-username-status').textContent='';});
-  document.querySelectorAll('.profile-sections a').forEach(link=>link.addEventListener('click',()=>{const target=find(link.getAttribute('href'));if(target?.tagName==='DETAILS')target.open=true;}));
+  document.querySelectorAll('.profile-sections a').forEach(link=>link.addEventListener('click',event=>{
+    if(link.getAttribute('href')==='#profile-settings') { event.preventDefault(); if(!busy)editProfile(true); return; }
+    const target=find(link.getAttribute('href'));if(target?.tagName==='DETAILS')target.open=true;
+  }));
+  addEventListener('beforeunload',event=>{if(nicknameDirty||selectedFile){event.preventDefault();event.returnValue='';}});
   addEventListener('pageshow', event => { if (event.persisted) void check(); });
-  addEventListener('pagehide',()=>{if(avatarUrl)URL.revokeObjectURL(avatarUrl);cooldown.forEach(clearInterval);cooldown.clear();});
-  addEventListener('account:expired',()=>{account=null;loadedAccount='';setBusy(false);render();void loadAvatar();find('#account-alert').textContent='登录已失效，请重新登录。';});
+  addEventListener('pagehide',()=>{selectedFile=null;crop.clear();find('#profile-file').value='';if(avatarUrl)URL.revokeObjectURL(avatarUrl);cooldown.forEach(clearInterval);cooldown.clear();});
+  addEventListener('account:expired',()=>{account=null;loadedAccount='';selectedFile=null;crop.clear();find('#profile-file').value='';setBusy(false);render();void loadAvatar();find('#account-alert').textContent='登录已失效，请重新登录。';});
   if (returnPath || returnCollection) find('#account-form-description').textContent = '登录成功后返回刚才的页面，继续你的操作。';
   void check();
 })();

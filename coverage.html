@@ -6,16 +6,19 @@
   <meta name="color-scheme" content="light">
   <title>题库覆盖 · 青栈 QINGZHAN</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/assets/home.css">
-  <script src="/assets/coverage.js" defer></script>
-<script src="/assets/account-menu.js" defer></script>
+  <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+  <script src="/assets/coverage.js?v=a7802866a500" defer></script>
+<script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
 </head>
 <body class="notes-page">
   <a class="skip" href="#coverage-main">跳到主要内容</a>
   <header class="nav"><div class="container notes-nav">
     <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
-    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog">题库</a><a href="/plans">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
-  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog" aria-current="location">题库探索</a><a href="/forum">面试社区</a><details class="workspace-nav-more" data-navigation-menu><summary><span class="desktop-nav-label">更多功能</span><span class="mobile-nav-label">菜单</span></summary><div class="workspace-nav-panel"><div class="workspace-nav-section mobile-nav-primary"><p>开始练习</p><a href="/#start">开始练习</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog" aria-current="location">题库探索</a><a href="/forum">面试社区</a></div><div class="workspace-nav-section"><p>记录与复盘</p><a href="/dashboard">练习概览</a><a href="/history">练习记录</a><a href="/review">跨场复盘</a></div><div class="workspace-nav-section"><p>我的准备</p><a href="/plans">准备计划</a><a href="/revision">复习任务</a><a href="/notes">复习笔记</a><a href="/library">我的题单</a></div><div class="workspace-nav-section"><p>账户与帮助</p><a href="/account">账户中心</a><a href="/guide">使用指南</a></div></div></details></nav>
+  <details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>查看不同岗位的题量和主题分布。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
   <main id="coverage-main" class="container notes-main board-main">
     <section class="notes-intro board-intro" aria-labelledby="coverage-title"><div><p class="eyebrow">KNOW THE SHAPE OF THE BANK</p><h1 id="coverage-title">先看清题库，<br>再补好下一题。</h1></div><div><p class="sec-lead">哪些主题已有题目，哪些难度仍留着空白？把当前可练范围和来源放在一起看。</p><p class="notes-boundary">这里统计正在运行的题库。题数不代表知识覆盖质量，参考资料核对也不等于专家审题或独立评测。</p><a href="/catalog" class="link-arrow">回到题干，选择一场练习 ↗</a></div></section>
     <!-- 范围选择：只读取公开岗位条件，刷新可恢复；缺口视图在当前统计中筛选。 -->
@@ -33,5 +36,22 @@
   </main>
   <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 先有可核查的题，再有扎实的练习。</span><a href="/catalog">回到题库探索 ↗</a></div></footer>
   <noscript><p class="no-script">开启JavaScript后可读取当前题库覆盖统计。</p></noscript>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="coverage" data-tour-steps="[[&quot;找考察重点&quot;, &quot;在主题覆盖表中核对题量和难度分布。准备特定岗位时，先看对应的主题。&quot;], [&quot;回题库看实际题目&quot;, &quot;记下要补强的主题，再回到题库按方向与主题筛选。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">主题覆盖指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
 </body>
 </html>

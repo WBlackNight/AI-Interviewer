@@ -1,8 +1,40 @@
 """专项大纲只使用当前岗位可出题的知识主题，不调用模型规划。"""
+from dataclasses import replace
+
 from app.domain import PlanItem
 from app.agent.skill_tree import SkillTree
 from app.rag.question_bank import QuestionBank
 from app.rag.retriever import QuestionFilter
+from app.practice_policy import DURATION_QUESTIONS
+
+
+def timed_plan(plan: list[PlanItem], bank: QuestionBank, position: str,
+               duration_minutes: int | None) -> list[PlanItem]:
+    if duration_minutes is not None and duration_minutes not in DURATION_QUESTIONS:
+        raise ValueError('请选择5、10或15分钟的练习')
+    capacities = [len(bank.available(QuestionFilter(position=position, theme=item.theme, is_coding=False)))
+                  for item in plan]
+    if duration_minutes is None:
+        sized = [replace(item, question_count=min(item.question_count, capacity))
+                 for item, capacity in zip(plan, capacities) if capacity]
+        return _normalize_weights(sized)
+    remaining = DURATION_QUESTIONS[duration_minutes]
+    counts = [0] * len(plan)
+    for _ in range(remaining):
+        available = [index for index, capacity in enumerate(capacities) if counts[index] < capacity]
+        if not available:
+            break
+        # Cover themes first, then allocate remaining questions in proportion to plan weights.
+        index = min(available, key=lambda index: counts[index] / max(plan[index].weight, .000001))
+        counts[index] += 1
+    sized = [replace(item, question_count=count, include_coding=False)
+             for item, count in zip(plan, counts) if count]
+    return _normalize_weights(sized)
+
+
+def _normalize_weights(plan):
+    total = sum(item.weight for item in plan)
+    return [replace(item, weight=item.weight / total if total else 1 / len(plan)) for item in plan]
 
 
 def available_themes(tree: SkillTree, bank: QuestionBank, position: str) -> list[str]:

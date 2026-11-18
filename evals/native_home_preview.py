@@ -20,6 +20,16 @@ from review_ui_preview import assert_port_free, seed
 from smoke_e2e import BACKEND, ROOT, Server, OPENER, request
 
 
+def preview_database(backend_dir, task_dir, persist, seed_requested):
+    path = backend_dir / 'preview-data.sqlite3' if persist else task_dir / 'preview.sqlite3'
+    if path.is_symlink() or not path.resolve().is_relative_to(backend_dir.resolve()):
+        raise ValueError('preview database must stay within backend')
+    existing = path.exists()
+    if persist and seed_requested:
+        raise ValueError('持久化预览不支持演示种子；请移除seed参数')
+    return path, existing
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--preview-minutes", type=int, choices=range(1, 1441), default=240, metavar="1..1440")
@@ -29,7 +39,9 @@ def main():
     parser.add_argument("--seed-plan-history", action="store_true", help="补充一份含10场合成练习的计划以验收分页")
     parser.add_argument("--voice-provider", choices=('disabled', 'dummy', 'doubao'), default='disabled', help='显式选择语音替身或真实豆包；默认关闭')
     parser.add_argument('--local-mail',action='store_true',help='启动127.0.0.1测试SMTP和8025收件箱，不向外发送邮件')
-    parser.add_argument('--restore-db',type=Path,help='从backend内的隔离预览数据库副本恢复，跳过基础种子创建')
+    database_mode = parser.add_mutually_exclusive_group()
+    database_mode.add_argument('--restore-db',type=Path,help='从backend内的隔离预览数据库副本恢复，跳过基础种子创建')
+    database_mode.add_argument('--persist',action='store_true',help='使用backend/preview-data.sqlite3，停止预览后保留数据')
     args = parser.parse_args()
     if not (ROOT / "frontend/.next/BUILD_ID").is_file():
         raise RuntimeError("未找到现有生产构建；此脚本不会自动构建")
@@ -37,7 +49,9 @@ def main():
         assert_port_free(port)
     with tempfile.TemporaryDirectory(prefix=".native-preview-", dir=BACKEND) as directory:
         task_dir = Path(directory).resolve()
-        backend = Server(task_dir / "preview.sqlite3", voice_provider=args.voice_provider,test_captcha=False)
+        db_path, _ = preview_database(BACKEND, task_dir, args.persist,
+            args.seed_notes or args.seed_history_states or args.seed_plan_history or args.extended_history)
+        backend = Server(db_path, voice_provider=args.voice_provider,test_captcha=False)
         if args.restore_db:
             source=args.restore_db.resolve()
             if not source.is_relative_to(BACKEND.resolve()) or not source.is_file():
@@ -55,7 +69,7 @@ def main():
                 os.environ.update(MAIL_MODE='local_test',SMTP_HOST='127.0.0.1',SMTP_PORT='1025',SMTP_SECURITY='none')
             os.environ["CORS_ORIGINS"] = '["http://localhost:3000"]'
             backend.start()
-            if not args.restore_db:
+            if not args.restore_db and not args.persist:
                 asyncio.run(seed(backend, extended=args.extended_history, seed_tasks=True, seed_dates=True))
             if args.seed_notes:
                 account = request(backend.base, '/api/auth/login', {'username': 'ui_review_demo', 'password': 'local-demo-password-2026'})
@@ -101,6 +115,7 @@ def main():
                 "seed_history_states": args.seed_history_states, "seed_plan_history": args.seed_plan_history,
                 "plan_history_url": plan_history_url,
                 "voice_provider": args.voice_provider,
+                "persistent_database": args.persist,
                 "test_mail_url":'http://localhost:8025/' if args.local_mail else None,
                 "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=args.preview_minutes)).isoformat()}
             state_path = ROOT / "docs/logs/2026-10-24/native-home/integrated-preview.json"

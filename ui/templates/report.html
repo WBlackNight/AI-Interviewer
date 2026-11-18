@@ -1,24 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>面试报告 · 青栈 QINGZHAN</title><link rel="icon" href="data:,"><link rel="stylesheet" href="/assets/home.css"><script src="/assets/report.js" defer></script></head>
-<body class="notes-page">
+<body class="notes-page report-page">
   <a class="skip" href="#report-main">跳到主要内容</a>
   <header class="nav"><div class="container notes-nav"><a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a><nav class="notes-nav-links" aria-label="报告导航"><a href="/history">练习记录</a><a href="/revision">复习任务</a><a href="/account">账户</a></nav></div></header>
   <main id="report-main" class="container notes-main board-main">
-    <section class="notes-intro board-intro" aria-labelledby="report-title"><div><p class="eyebrow">YOUR INTERVIEW, REFLECTED</p><h1 id="report-title">从回答的证据，<br>找到下一次的重点。</h1></div><div><p class="sec-lead">保留每一轮的回答、评分依据与来源。把待补强的主题接到复习计划里。</p><p class="notes-boundary">同一主问题先汇总各轮，再在主题内等权聚合。追问数量不会增加主问题权重。</p><a href="/history" class="link-arrow">返回练习记录 ↗</a></div></section>
+    <section class="notes-intro board-intro" aria-labelledby="report-title"><div><p class="eyebrow">YOUR INTERVIEW, REFLECTED</p><h1 id="report-title">练习报告</h1></div><div><p class="sec-lead">回看表现、改进建议和逐轮回答。</p><a href="/history" class="link-arrow">返回练习记录 ↗</a></div></section>
     <!-- 报告读取：失败时保留地址和筛选，主动重试不会提交回答。 -->
     <p id="report-loading" class="report-loading" role="status">正在读取报告…</p><section id="report-error-panel" class="notes-message" hidden><h2>暂时无法读取这份报告。</h2><p id="report-error" role="alert"></p><div class="note-actions"><button id="report-retry" type="button" class="notes-button">重试读取</button><a class="link-arrow" href="/account">检查账户 ↗</a></div></section>
     <div id="report-content" hidden>
+
+      <section id="report-comparison" class="report-panel retry-comparison" aria-labelledby="report-comparison-title" hidden>
+        <p class="eyebrow">PRACTICE AGAIN</p>
+        <h2 id="report-comparison-title">同一道题，看看这次怎么回答</h2>
+        <p class="notes-boundary">对照两次主问题的回答、得分和待补强要点。先找出具体变化，再决定下一次练什么。</p>
+        <div id="report-comparison-cards" class="retry-comparison-grid"></div>
+        <a id="report-comparison-source" class="link-arrow" href="/history">回看上次完整报告</a>
+      </section>
       <section class="report-overview" aria-labelledby="report-overview-title"><div><p id="report-state" class="eyebrow"></p><h2 id="report-overview-title">面试复盘报告</h2><p id="report-meta" class="note-context"></p><p id="report-time" class="note-context"></p></div><div class="report-score"><strong id="report-score">—</strong><span>综合得分 / 10</span></div></section>
+      <section id="report-assessment" class="report-panel assessment-panel" hidden aria-labelledby="report-assessment-title"><p class="eyebrow">YOUR NEXT STEP</p><h2 id="report-assessment-title">表现与改进</h2><p id="report-assessment-summary" class="notes-boundary"></p><div class="assessment-grid"><div><h3>已体现的能力</h3><ul id="report-strengths"></ul></div><div><h3>优先补强</h3><ul id="report-priorities"></ul></div></div></section>
       <!-- 来源与部分报告：保持原始任务关系，取消前用独立确认框。 -->
       <section id="report-source" class="report-callout" hidden><h2>从复习任务回到练习</h2><p id="report-source-copy">来自「<span id="report-source-theme"></span>」任务。练习完成不改变手动复习状态。</p><div class="note-actions"><a href="/revision" class="link-arrow">返回任务板 ↗</a><a id="report-source-link" class="link-arrow">原始报告 ↗</a></div></section>
       <!-- 准备来源：当前计划独立读取，移除计划后练习报告仍然保留。 -->
       <section id="report-preparation" class="report-callout" hidden><h2>这场练习，来自自己的准备</h2><p id="report-preparation-name"></p><p class="notes-boundary">展示计划当前名称与状态。练习完成不改变目标日期；计划信息不进入评分或导出。</p><a id="report-preparation-link" href="/plans" class="link-arrow">返回来源计划 ↗</a></section>
       <section id="report-partial" class="report-callout" hidden><h2 id="report-partial-title"></h2><p id="report-partial-copy"></p><div id="report-active-actions" class="note-actions"><a id="report-continue" class="notes-button notes-primary">继续面试</a><button id="report-cancel" type="button" class="notes-button danger-button">取消本场面试</button></div></section>
-      <div class="report-insight-grid"><section class="report-panel" aria-labelledby="report-dimensions-title"><p class="eyebrow">EVIDENCE AT A GLANCE</p><h2 id="report-dimensions-title">能力维度</h2><div id="report-dimensions" class="report-dimensions"></div><p id="report-aggregation" class="notes-boundary"></p></section><section class="report-panel report-plan" aria-labelledby="report-plan-title"><p class="eyebrow">YOUR NEXT FOCUS</p><h2 id="report-plan-title">下一次，重点准备</h2><ul id="report-recommendations" class="report-recommendations"></ul>
+      <div class="report-insight-grid"><section class="report-panel" aria-labelledby="report-dimensions-title"><p class="eyebrow">EVIDENCE AT A GLANCE</p><h2 id="report-dimensions-title">能力维度</h2><div id="report-dimensions" class="report-dimensions"></div><p id="report-aggregation" class="notes-boundary"></p></section><section class="report-panel report-plan" aria-labelledby="report-plan-title"><p class="eyebrow">YOUR NEXT FOCUS</p><h2 id="report-plan-title">下次练习重点</h2><ul id="report-recommendations" class="report-recommendations"></ul>
         <!-- 后续练习：显式创建或加入任务，不自动改变复习状态。 -->
         <p id="report-practice-copy" class="notes-boundary" hidden>待补强：<span id="report-practice-themes"></span>。沿用岗位与强度，每主题最多2题，保留追问；题目可能重复。</p><div class="note-actions"><button id="report-practice" type="button" class="notes-button notes-primary" hidden>开始薄弱项复练</button><button id="report-add-tasks" type="button" class="notes-button" hidden>加入复习任务</button><a href="/revision" class="link-arrow">查看任务板 ↗</a></div><p id="report-task-help" class="notes-boundary" hidden>登录账户后，在练习记录页认领本场，即可保存复习任务。</p><p id="report-action-message" role="status" class="board-notice"></p><p id="report-action-error" role="alert" class="notes-alert"></p></section></div>
       <!-- 导出：始终导出完整报告，筛选仅影响当前页面。 -->
+      <details id="report-sharing" class="report-panel report-sharing" aria-labelledby="report-sharing-title" hidden>
+        <summary id="report-sharing-title">分享这份报告</summary>
+        <p class="notes-boundary">默认只分享分数和改进建议。链接持有者可在有效期内查看，撤销后链接失效。</p>
+        <form id="report-share-form" class="share-form">
+          <label for="report-share-hours">有效期<select id="report-share-hours"><option value="24">1天</option><option value="72">3天</option><option value="168">7天</option></select></label>
+          <label class="share-answer-choice"><input id="report-share-answers" type="checkbox">同时分享题目与我的回答</label>
+          <p class="notes-boundary">勾选后，链接持有者能阅读回答原文。请先确认其中适合分享的内容。</p>
+          <button type="submit" class="notes-button notes-primary">生成分享链接</button>
+        </form>
+        <div id="report-share-created" hidden><label for="report-share-url">新链接（请及时保存）</label><input id="report-share-url" readonly><p class="notes-boundary">此处仅展示本次生成的链接。请只发给你希望邀请的人。</p><button id="report-share-copy" class="notes-button" type="button">复制链接</button></div>
+        <p id="report-share-message" role="status"></p>
+        <p id="report-share-error" class="notes-alert" role="alert"></p>
+        <div id="report-share-list" class="share-list"></div>
+      </details>
       <section class="report-export" aria-label="报告导出与对照"><p>把完整证据留在手边。</p><div class="note-actions"><button type="button" class="notes-button" data-export="markdown">导出 Markdown</button><button type="button" class="notes-button" data-export="json">导出 JSON</button><a id="report-review" href="/review" class="link-arrow">同主题跨场复盘 ↗</a></div><p id="report-export-error" role="alert" class="notes-alert"></p></section>
       <!-- 逐轮探索：主题与回答类型组合筛选，四轮一页控制页面规模。 -->
       <section class="notes-toolbar" aria-labelledby="report-turns-title"><div class="notes-toolbar-heading"><h2 id="report-turns-title">逐轮回答与依据</h2><button id="report-refresh" type="button" class="notes-button">刷新报告</button></div><form id="report-filter-form"><label for="report-theme">题目主题<select id="report-theme"><option value="">全部主题</option></select></label><button id="report-reset" type="button" class="notes-button">清除筛选</button></form><div class="board-date-tabs" role="group" aria-label="回答范围"><button type="button" class="notes-button" data-kind="all" aria-pressed="true">全部回答</button><button type="button" class="notes-button" data-kind="weak" aria-pressed="false">待补强</button><button type="button" class="notes-button" data-kind="probe" aria-pressed="false">追问</button></div><p id="report-filter-count" class="board-counts" role="status"></p></section>

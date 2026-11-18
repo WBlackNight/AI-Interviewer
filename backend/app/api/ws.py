@@ -240,7 +240,7 @@ def process_message(interview_id: str, message, credential: str | None = None) -
         return error("沙箱暂不可用，本轮未提交，请稍后重试或联系管理员", "sandbox_"+exc.code,
                      retryable=exc.retryable)
     except BudgetExceeded:
-        return error("模型预算暂停、耗尽或请求繁忙；本轮未提交，请核对用量后再继续", "llm_budget_blocked")
+        return error("评分暂不可用，本轮回答未保存，请稍后重试。", "llm_budget_blocked")
     except AssetVersionError:
         return error("题库、技能树或检索策略已更新，请恢复原配置或从首页创建新面试", "assets_changed")
     except ConcurrentTurnError:
@@ -526,7 +526,8 @@ async def interview_ws(websocket: WebSocket, interview_id: str) -> None:
     token = protocols[1] if len(protocols) == 2 and protocols[0] == "interview" else None
     with SessionLocal() as db:
         authorized = has_access(db, "interview", interview_id, token)
-    if not authorized or origin and origin not in settings.cors_origins:
+    from app.services.web_origin import allowed_origin
+    if not authorized or origin and not allowed_origin(websocket, settings.cors_origins):
         await websocket.close(code=4403)
         return
     await websocket.accept(subprotocol="interview")

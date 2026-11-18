@@ -30,11 +30,14 @@ function microphoneError(error) {
 	return new Error(messages[error.name] || error.message || '麦克风暂不可用，请重试或上传录音。');
 }
 function microphonePicker(select, status) {
-	const supported = () => typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined';
+	const supported = () => globalThis.isSecureContext !== false && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined';
+	const unavailable = () => globalThis.isSecureContext === false
+		? '当前连接未加密，浏览器无法使用麦克风。请通过本站 HTTPS 地址打开后重试。'
+		: '当前浏览器未开放录音，请使用 Edge 或 Chrome 打开本页，或上传录音。';
 	let generation = 0;
 	async function refresh() {
 		const attempt = ++generation;
-		if (!supported()) { status.textContent = '当前浏览器未开放录音，请在 Edge 或 Chrome 中打开 localhost 页面。仍可上传录音。'; return; }
+		if (!supported()) { status.textContent = unavailable(); return; }
 		status.textContent = '使用系统默认麦克风；点击开始时才会请求录音授权。';
 		if (!navigator.mediaDevices.enumerateDevices) return;
 		try {
@@ -50,7 +53,7 @@ function microphonePicker(select, status) {
 		} catch { status.textContent = '暂时无法读取设备列表，可使用系统默认麦克风。'; }
 	}
 	async function acquire() {
-		if (!supported()) throw new Error('当前浏览器不支持录音，请用 Edge 或 Chrome 打开本页，或上传录音。');
+		if (!supported()) throw new Error(unavailable());
 		let expired = false, timer;
 		const pending = navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, ...(select.value ? { deviceId: { exact: select.value } } : {}) } });
 		pending.then(media => { if (expired) media.getTracks().forEach(track => track.stop()); }, () => {});
@@ -67,11 +70,16 @@ function microphonePicker(select, status) {
 	let samples = new Float32Array(0), sequence = 0, epoch = 0, nextPlay = 0, startedAt = 0, timer;
 	let userCaption, assistantCaption, speaking = false, connectionTimer, rejectConnection;
 	const playing = new Set();
+	const completedAnswers = new Map();
+	function immersive(value) {
+		document.body.dataset.immersive = String(value);
+		find('view').textContent = value ? '收起沉浸视图' : '进入沉浸视图';
+	}
 	const token = () => interviewToken(interviewId);
 	const microphone = microphonePicker(find('device'), find('device-status'));
 	async function loadContext() {
 		const identity = token(); available = false; render();
-		find('error').textContent = ''; find('status').textContent = '正在检查实时语音服务…';
+		find('error').textContent = ''; find('status').textContent = '正在准备…';
 		try {
 			if (!interviewId || !identity) throw new Error('请登录所属账户，或回到原匿名练习标签页。');
 			const response = await fetch('/api/interview/' + interviewId + '/realtime-context', { headers: { 'X-Interview-Token': token() || '' }, cache: 'no-store', signal: AbortSignal.timeout(8000) });
@@ -81,7 +89,7 @@ function microphonePicker(select, status) {
 			available = config.ok && (await config.json()).realtime_enabled === true;
 			if (identity !== token()) throw new Error('账户已变化，请重新检查本场访问。');
 			showContext(data);
-			find('status').textContent = available ? '语音服务已启用，选择麦克风后点击开始。' : '实时服务尚未启用，可重新检查或切换文字作答。';
+			find('status').textContent = available ? '准备就绪' : '暂时无法开始，请稍后重试或改用文字作答。';
 			find('hint').textContent = available ? '麦克风尚未开启' : '当前无法连接实时服务';
 		} catch (error) { available = false; find('error').textContent = error.name === 'TimeoutError' ? '服务检查超时，请重新检查。' : error.message; find('status').textContent = '暂未就绪，请重新检查。'; }
 		finally { render(); }
@@ -91,6 +99,8 @@ function microphonePicker(select, status) {
 		find('topic').textContent = data.question?.theme || '自由陪练';
 	}
 	function render() {
+		find('view').hidden = !ready;
+		document.body.dataset.conversation = ready ? 'active' : 'idle';
 		find('start').disabled = !available || !microphone.supported() || !!ready || !!opening || !!uploading;
 		find('device').disabled = !!stream || !!opening || !!uploading;
 		find('devices').disabled = !!stream || !!opening || !!uploading;
@@ -112,17 +122,50 @@ function microphonePicker(select, status) {
 		playing.clear(); nextPlay = 0; speaking = false;
 	}
 	function stop() {
+		immersive(false);
 		epoch++; ready = opening = uploading = false; clearInterval(timer);
 		clearTimeout(connectionTimer); rejectConnection?.(new Error('会话已结束。')); rejectConnection = null;
 		stream?.getTracks().forEach((track) => track.stop()); stream = null;
-		find('level').value = 0;
 		processor?.disconnect(); source?.disconnect(); mute?.disconnect(); processor = source = mute = null;
 		samples = new Float32Array(0); clearPlayback();
 		find('file').value = '';
 		if (socket) { socket.onerror = socket.onclose = socket.onmessage = null; socket.close(); socket = null; }
 		void context?.close(); context = null; userCaption = assistantCaption = null;
-		find('status').textContent = '对话已结束，可重新开始；正式练习记录未改变。';
-		find('hint').textContent = '麦克风已释放'; render();
+		find('status').textContent = '本次对话已结束';
+		find('hint').textContent = '麦克风已关闭'; render();
+	}
+	function finish() {
+		const answers = token() === credential ? [...completedAnswers.values()] : [];
+		stop();
+		const review = find('review');
+		const list = find('review-list');
+		list.replaceChildren();
+		const add = (label, value) => {
+			const item = document.createElement('li');
+			item.textContent = label + ' · ' + value;
+			list.append(item);
+		};
+		if (!answers.length) {
+			add('暂无反馈', '本次还没有完整的识别字幕。可以回答一个问题，等字幕确认后再结束。');
+		} else {
+			const signals = [
+				['推理说明', /因为|所以|因此|原因|because|therefore|as a result/i, '说明你为什么这样做，并补充一个取舍。'],
+				['案例细节', /例如|比如|举例|当时|for example|for instance/i, '选一个具体案例，依次说明场景、你的行动和结果。'],
+				['量化结果', /\d+(?:\.\d+)?\s*(?:%|％|毫秒|秒|分钟|天|倍|人|次|ms\b|seconds?\b)/i, '尝试用前后对比或一个可核实的指标说明结果。']
+			];
+			for (const [label, pattern, tip] of signals) {
+				const evidence = answers.find(answer => pattern.test(answer));
+				if (evidence) {
+					const start = Math.max(0, evidence.search(pattern) - 24);
+					add('优点 · ' + label, '字幕中出现了「' + evidence.slice(start, start + 90) + '」。');
+				} else {
+					add('待完善 · ' + label, tip);
+				}
+			}
+			add('下一次练习', '选一轮回答，用“结论、理由、案例、结果”的顺序重新说一遍。');
+		}
+		review.hidden = false;
+		find('review').focus();
 	}
 	function fail(error) { stop(); find('error').textContent = error.message || '实时语音暂不可用，请返回正式练习。'; }
 	async function audioContext() {
@@ -133,10 +176,16 @@ function microphonePicker(select, status) {
 	async function connect() {
 		if (!available) throw new Error('实时陪练尚未就绪。');
 		if (ready) return;
+		completedAnswers.clear();
+		find('review').hidden = true;
+		find('review-list').replaceChildren();
+		find('messages').replaceChildren();
+		find('questions').replaceChildren();
+		find('empty').hidden = false;
 		credential = token();
 		if (!/^[a-f0-9]{64}$/.test(credential || '') || !interviewId) throw new Error('请从所属场次进入实时陪练。');
 		sequence = 0; opening = true; render();
-		find('status').textContent = '正在连接豆包实时会话…'; find('error').textContent = '';
+		find('status').textContent = '正在连接实时陪练…'; find('error').textContent = '';
 		const base = document.body.dataset.wsBase || location.origin.replace(/^http/, 'ws');
 		const target = new URL(base);
 		if (!['ws:', 'wss:'].includes(target.protocol) || target.username || target.password || target.search || target.hash) throw new Error('连接配置无效。');
@@ -154,7 +203,9 @@ function microphonePicker(select, status) {
 							const seconds = Math.max(0, Math.ceil(event.max_seconds - (Date.now() - startedAt) / 1000));
 							find('clock').textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0');
 						}; countdown(); timer = setInterval(countdown, 1000);
-						find('status').textContent = '实时连接已建立 · 本次最长 ' + event.max_seconds + ' 秒';
+						find('status').textContent = '对话进行中';
+						immersive(true);
+						find('stage').focus();
 						render(); resolve();
 					} else receive(event);
 				} catch (error) { clearTimeout(deadline); reject(error); fail(error); }
@@ -164,31 +215,37 @@ function microphonePicker(select, status) {
 		});
 	}
 	function caption(role, text, final) {
+		if (!['user', 'assistant'].includes(role) || typeof text !== 'string') return;
+		const log = find(role === 'user' ? 'messages' : 'questions');
 		let node = role === 'user' ? userCaption : assistantCaption;
 		if (!node) {
 			const article = document.createElement('article'), label = document.createElement('p');
 			article.className = 'realtime-bubble'; article.dataset.role = role;
-			label.className = 'eyebrow'; label.textContent = role === 'user' ? '你说' : '豆包陪练';
-			node = document.createElement('p'); article.append(label, node); find('messages').append(article);
-			while (find('messages').children.length > 8) find('messages').firstElementChild.remove();
+			label.className = 'eyebrow'; label.textContent = role === 'user' ? '你的回答' : '面试官';
+			node = document.createElement('p'); article.append(label, node); log.append(article);
+			while (log.children.length > 8) log.firstElementChild.remove();
 			if (role === 'user') userCaption = node; else assistantCaption = node;
-			find('empty').hidden = true;
+			if (role === 'user') find('empty').hidden = true;
 		}
 		node.textContent = (final && text ? text : node.textContent + text).slice(0, 20000);
-		if (find('follow').checked) find('messages').scrollTop = find('messages').scrollHeight;
+		if (role === 'user' && final && node.textContent.trim()) {
+			completedAnswers.set(node, node.textContent.trim());
+			if (completedAnswers.size > 24) completedAnswers.delete(completedAnswers.keys().next().value);
+		}
+		if (find('follow').checked) log.scrollTop = log.scrollHeight;
 	}
 	function receive(event) {
 		if (token() !== credential) throw new Error('账户已变化，请重新连接。');
 		if (event.type === 'listening') {
 			clearPlayback(); userCaption = assistantCaption = null;
-			find('hint').textContent = '正在听你说，停顿后自动回复';
+			find('hint').textContent = '正在听你说';
 		} else if (event.type === 'caption') caption(event.role, event.text, event.final);
 		else if (event.type === 'speaking') { speaking = true; find('hint').textContent = '陪练正在回复，可以继续开口打断'; }
 		else if (event.type === 'audio') play(event.data);
 		else if (event.type === 'interrupted') { clearPlayback(); find('hint').textContent = '已打断，继续说说你的想法'; }
-		else if (event.type === 'audio_end') { speaking = false; if (!playing.size) find('hint').textContent = '回复已结束，可以继续说话'; }
-		else if (event.type === 'ended') stop();
-		else if (event.type === 'error') throw new Error(({realtime_disabled:'实时服务未启用，请切换文字或稍后重试。',capacity:'语音连接已满，请先结束其他页面的语音，再重新开始。',provider_auth:'语音服务鉴权失败，请检查服务端语音配置。',provider_timeout:'语音服务响应超时，请稍后重新开始。'})[event.code] || '语音连接中断，请重新开始；如果反复失败，请检查网络或使用录音上传。');
+		else if (event.type === 'audio_end') { speaking = false; if (!playing.size) find('hint').textContent = '轮到你了'; }
+		else if (event.type === 'ended') finish();
+		else if (event.type === 'error') throw new Error(({realtime_disabled:'实时服务未启用，请切换文字或稍后重试。',capacity:'语音连接已满，请先结束其他页面的语音，再重新开始。',provider_auth:'语音暂不可用，请稍后重试或切换文字作答。',provider_timeout:'语音服务响应超时，请稍后重新开始。'})[event.code] || '语音连接中断，请重新开始；如果反复失败，请检查网络或使用录音上传。');
 		render();
 	}
 	function play(encoded) {
@@ -199,7 +256,7 @@ function microphonePicker(select, status) {
 		const buffer = context.createBuffer(1, bytes.length / 2, 24000), values = buffer.getChannelData(0), view = new DataView(bytes.buffer);
 		for (let index = 0; index < values.length; index++) values[index] = view.getInt16(index * 2, true) / 32768;
 		const node = context.createBufferSource(); node.buffer = buffer; node.connect(context.destination); playing.add(node);
-		node.onended = () => { playing.delete(node); if (!playing.size && !speaking) find('hint').textContent = '回复已结束，可以继续说话'; render(); }; node.start(nextPlay); nextPlay += buffer.duration;
+		node.onended = () => { playing.delete(node); if (!playing.size && !speaking) find('hint').textContent = '轮到你了'; render(); }; node.start(nextPlay); nextPlay += buffer.duration;
 	}
 	function interrupt() {
 		clearPlayback(); send({ type: 'interrupt' }); render();
@@ -211,8 +268,6 @@ function microphonePicker(select, status) {
 	function block(input) {
 		if (!ready || paused) return;
 		try {
-			let energy = 0; for (const value of input) energy += value * value;
-			find('level').value = Math.min(1, Math.sqrt(energy / input.length) * 4);
 			const merged = new Float32Array(samples.length + input.length); merged.set(samples); merged.set(input, samples.length);
 			const size = Math.round(context.sampleRate / 10); let offset = 0;
 			while (merged.length - offset >= size) {
@@ -247,7 +302,7 @@ function microphonePicker(select, status) {
 			mute = context.createGain(); mute.gain.value = 0;
 			source.connect(processor); processor.connect(mute); mute.connect(context.destination); processor.port.onmessage = event => block(event.data);
 			media.getTracks().forEach(track => track.addEventListener('ended', () => { if (stream === media) fail(new Error('麦克风已断开，请检查设备后重新开始。')); }));
-			find('hint').textContent = '麦克风已开启，连续对话中'; render();
+			find('hint').textContent = '正在听你说'; render();
 		} catch (error) { if (attempt === epoch) fail(microphoneError(error)); }
 	}
 	async function upload(file) {
@@ -282,14 +337,28 @@ function microphonePicker(select, status) {
 	find('start').addEventListener('click', start);
 	find('devices').addEventListener('click', () => void microphone.refresh());
 	find('sync').addEventListener('click', loadContext);
-	find('end').addEventListener('click', stop);
+	find('end').addEventListener('click', finish);
+	find('view').addEventListener('click', () => {
+		if (ready) {
+			immersive(document.body.dataset.immersive !== 'true');
+			find('stage').focus();
+		}
+	});
 	find('interrupt').addEventListener('click', () => { try { interrupt(); } catch (error) { fail(error); } });
 	find('pause').addEventListener('click', () => {
-		try { paused = !paused; samples = new Float32Array(0); find('level').value=0; stream.getAudioTracks().forEach(track => { track.enabled = !paused; }); if (paused) send({ type: 'pause' }); find('hint').textContent = paused ? '已暂停收音，点击结束可释放麦克风。' : '正在听你说'; render(); }
+		try { paused = !paused; samples = new Float32Array(0); stream.getAudioTracks().forEach(track => { track.enabled = !paused; }); if (paused) send({ type: 'pause' }); find('hint').textContent = paused ? '已暂停，准备好后继续说话。' : '正在听你说'; render(); }
 		catch (error) { fail(error); }
 	});
 	find('file').addEventListener('change', () => void upload(find('file').files[0]));
-	addEventListener('pagehide', stop);
+	addEventListener('pagehide', () => {
+		stop();
+		completedAnswers.clear();
+		find('messages').replaceChildren();
+		find('questions').replaceChildren();
+		find('review-list').replaceChildren();
+		find('review').hidden = true;
+		find('empty').hidden = false;
+	});
 	addEventListener('pageshow', event => { if (event.persisted) void loadContext(); });
 	document.querySelectorAll('a[href*="mode="]').forEach(link => link.addEventListener('click', event => {
 		if (opening || uploading || stream) { event.preventDefault(); find('error').textContent = '请先结束对话，再切换练习方式。'; }

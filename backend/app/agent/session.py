@@ -61,6 +61,7 @@ class InterviewSession:
         sandbox=None,  # SandboxProtocol | None
     ) -> None:
         self.interview_id = interview_id
+        self._selection_seed = interview_id
         self.position = position
         self.plan = plan
         self.bank = bank
@@ -115,6 +116,7 @@ class InterviewSession:
             "reaction_cursor": self._reaction_cursor, "turn_id": self._turn_id,
             "question_event": self._question_event, "skill_node_id": self._skill_node_id,
             "plan": [asdict(p) for p in self.plan],
+            "selection_seed": self._selection_seed,
             "strategy": {"pass_score": self.pass_score, "probe_score": self.probe_score,
                          "probe_depth_limit": self.probe_depth_limit},
         }
@@ -142,6 +144,7 @@ class InterviewSession:
         self._question_event = snapshot["question_event"]
         self._skill_node_id = snapshot["skill_node_id"]
         self.plan = [PlanItem(**p) for p in snapshot["plan"]]
+        self._selection_seed = snapshot.get('selection_seed', '')
         for key, value in snapshot["strategy"].items():
             setattr(self, key, value)
 
@@ -291,8 +294,8 @@ class InterviewSession:
     def _greeting_text(self) -> str:
         themes = "、".join(item.theme for item in self.plan)
         return (
-            f"你好，我是今天的面试官，接下来我们进行一场约 15 分钟的"
-            f"{self.position} 岗位模拟面试，主要围绕 {themes} 展开。"
+            f"你好，接下来主要围绕 {themes} 展开，共安排 "
+            f"{sum(item.question_count for item in self.plan)} 道主问题，并根据回答继续追问。"
             "放松一点，就当正式面试来练，准备好了我们就开始。"
         )
 
@@ -340,12 +343,20 @@ class InterviewSession:
         events: list[dict] = []
         while self._theme_index < len(self.plan):
             item = self.plan[self._theme_index]
-            question = self.bank.next_question(
-                position=self.position,
-                theme=item.theme,
-                difficulty=item.difficulty,
-                exclude=self._asked,
-            )
+            if item.question_id:
+                question = self.bank.get(item.question_id)
+                if question is not None and (question.position != self.position or question.theme != item.theme or question.is_coding):
+                    raise ValueError("复练题目与计划不匹配")
+                if question is not None and question.id in self._asked:
+                    question = None
+            else:
+                question = self.bank.next_question(
+                    position=self.position,
+                    theme=item.theme,
+                    difficulty=item.difficulty,
+                    exclude=self._asked,
+                    selection_seed=self._selection_seed,
+                )
             if question is not None:
                 if self.state is not InterviewState.QUESTIONING:
                     self._move(events, InterviewState.QUESTIONING)  # CODING→QUESTIONING

@@ -10,10 +10,22 @@
     "60-layout.css",
     "70-workspace-shell.css",
     "80-multidomain.css",
-    "90-account-security.css"
+    "85-practice-experience.css",
+    "90-account-security.css",
+    "91-avatar-dialog.css",
+    "95-guide.css",
+    "96-realtime-stage.css",
+    "99-qing-pet.css",
+    "101-mobile-ux.css",
+    "102-home-device.css",
+    "104-account-entry.css",
+    "105-onboarding.css"
   ],
+  "images": ["login-bamboo.webp"],
   "shared_scripts": [
-    "account-menu.js"
+    "account-menu.js",
+    "qing-pet.js",
+    "onboarding.js"
   ],
   "navigation": [
     {
@@ -22,45 +34,116 @@
     },
     {
       "path": "/dashboard",
-      "label": "概览"
+      "label": "练习概览",
+      "group": "记录与复盘"
+    },
+    {
+      "path": "/assistant",
+      "label": "小青助手"
+    },
+    {
+      "path": "/roles",
+      "label": "练习方向"
     },
     {
       "path": "/catalog",
-      "label": "题库"
+      "label": "题库探索"
+    },
+    {
+      "path": "/forum",
+      "label": "面试社区"
     },
     {
       "path": "/plans",
-      "label": "计划"
+      "label": "准备计划",
+      "group": "我的准备"
     },
     {
       "path": "/history",
-      "label": "记录"
+      "label": "练习记录",
+      "group": "记录与复盘"
     },
     {
       "path": "/revision",
-      "label": "复习"
+      "label": "复习任务",
+      "group": "我的准备"
     },
     {
       "path": "/notes",
-      "label": "笔记"
+      "label": "复习笔记",
+      "group": "我的准备"
     },
     {
       "path": "/library",
-      "label": "题单"
+      "label": "我的题单",
+      "group": "我的准备"
     },
     {
       "path": "/account",
-      "label": "账户"
+      "label": "账户中心",
+      "group": "账户与帮助"
+    },
+    {
+      "path": "/guide",
+      "label": "使用指南",
+      "group": "账户与帮助"
+    },
+    {
+      "path": "/review",
+      "label": "跨场复盘",
+      "group": "记录与复盘"
     }
   ],
   "pages": [
+    {
+      "key": "forum",
+      "route": "/forum",
+      "template": "forum.html",
+      "script": "forum.js",
+      "stylesheet": "forum.css",
+      "style_source": "103-forum.css",
+      "workspace_navigation": true,
+      "javascript_budget": 29000,
+      "shared_scripts": ["account-menu.js"]
+    },
+    {
+      "key": "assistant",
+      "route": "/assistant",
+      "template": "assistant.html",
+      "script": "assistant.js",
+      "javascript_budget": 190000,
+      "stylesheet": "assistant.css",
+      "style_source": "97-assistant.css",
+      "workspace_navigation": true
+    },
+    {
+      "key": "roles",
+      "route": "/roles",
+      "template": "roles.html",
+      "script": "roles.js",
+      "workspace_navigation": true
+    },
+    {
+      "key": "share",
+      "route": "/share",
+      "template": "share.html",
+      "script": "share.js",
+      "workspace_navigation": false
+    },
+    {
+      "key": "guide",
+      "route": "/guide",
+      "template": "guide.html",
+      "script": "guide.js",
+      "workspace_navigation": true
+    },
     {
       "key": "home",
       "route": "/",
       "template": "index.html",
       "script": "home.js",
       "workspace_navigation": false,
-      "javascript_budget": 26000
+      "javascript_budget": 39000
     },
     {
       "key": "notes",
@@ -82,14 +165,15 @@
       "template": "account.html",
       "script": "account.js",
       "workspace_navigation": true,
-      "javascript_budget": 26000
+      "javascript_budget": 46000
     },
     {
       "key": "history",
       "route": "/history",
       "template": "history.html",
       "script": "history.js",
-      "workspace_navigation": true
+      "workspace_navigation": true,
+      "javascript_budget": 16000
     },
     {
       "key": "review",
@@ -117,6 +201,7 @@
       "route": "/library",
       "template": "library.html",
       "script": "library.js",
+      "javascript_budget": 22000,
       "workspace_navigation": true
     },
     {
@@ -124,13 +209,15 @@
       "route": "/coverage",
       "template": "coverage.html",
       "script": "coverage.js",
-      "workspace_navigation": true
+      "workspace_navigation": true,
+      "navigation_parent": "/catalog"
     },
     {
       "key": "plans",
       "route": "/plans",
       "template": "plans.html",
       "script": "plans.js",
+      "javascript_budget": 17000,
       "workspace_navigation": true
     },
     {
@@ -138,20 +225,26 @@
       "route": "/plan-history",
       "template": "plan-history.html",
       "script": "plan-history.js",
-      "workspace_navigation": true
+      "workspace_navigation": true,
+      "navigation_parent": "/plans"
     },
     {
       "key": "interview",
       "route": null,
       "template": "interview.html",
       "script": "interview.js",
-      "workspace_navigation": false
+      "javascript_budget": 190000,
+      "workspace_navigation": true,
+      "navigation_parent": "/dashboard",
+      "stylesheet": "practice.css",
+      "style_source": "98-react-practice.css"
     },
     {
       "key": "report",
       "route": null,
       "template": "report.html",
       "script": "report.js",
+      "javascript_budget": 24000,
       "workspace_navigation": false
     },
     {
@@ -168,7 +261,20 @@
       "template": "realtime.html",
       "script": "realtime.js",
       "workspace_navigation": false,
-      "javascript_budget": 22000
+      "javascript_budget": 24500
+    },
+    {
+      "key": "admin",
+      "route": "/admin",
+      "template": "admin.html",
+      "script": "admin.js",
+      "javascript_budget": 190000,
+      "workspace_navigation": false,
+      "stylesheet": "admin.css",
+      "style_source": "100-admin.css",
+      "shared_scripts": [
+        "account-menu.js"
+      ]
     }
   ]
 }

@@ -4,7 +4,7 @@
 
 .notes-page h1 { font-weight: 650; letter-spacing: -.025em; text-wrap: balance; }
 
-.notes-page :is(h2, h3) { font-weight: 600; letter-spacing: -.01em; }
+.notes-page :is(h2, h3) { font-weight: 600; letter-spacing: 0; }
 
 .notes-page :is(input, select, button) { font-family: var(--sans); }
 
@@ -43,6 +43,12 @@
 .notes-message .realtime-bubble .eyebrow { color: var(--sage-deep); font-size: 14px; }
 
 .notes-page .notes-alert:empty { display: none; }
+
+/* Hints belong to the preceding control; sections retain a larger reading gap. */
+.notes-page :is(.notes-alert, .board-notice, .note-result) { margin-block: 12px 0; line-height: var(--copy-leading); overflow-wrap: anywhere; }
+.notes-page :is(.notes-boundary, .account-help, .note-context, .note-time) { line-height: var(--copy-leading); }
+.notes-page :is(.board-notice, .note-result):empty { display: none; }
+.notes-page :is(.notes-toolbar, .plans-toolbar, .library-filters) label { line-height: 1.6; }
 
 @media (max-width: 560px) {
   .notes-page .notes-nav-links { gap: 12px; font-size: 14px; }
@@ -105,3 +111,10 @@
   .product-toolbar { flex-wrap: wrap; gap: 4px 12px; padding-block: 10px; }
   .landing .hero-caption { flex-wrap: wrap; }
 }
+.realtime-conversation { min-width: 0; display: grid; gap: 16px; }
+.realtime-page .realtime-conversation .voice-transcript { margin-top: 0; }
+.realtime-page #rt-messages { display: flex; flex-direction: column; gap: 8px; max-height: clamp(180px, 36vh, 420px); }
+.realtime-page .realtime-bubble { width: fit-content; max-width: 92%; margin: 0; align-self: flex-start; }
+.realtime-page .realtime-bubble[data-role="user"] { align-self: flex-end; background: var(--mint); }
+.realtime-page .realtime-bubble[data-role="assistant"] { background: var(--paper-2); }
+.realtime-page .voice-transcript-heading { justify-content: space-between; flex-wrap: wrap; gap: 8px; }

@@ -1,0 +1,62 @@
+name: ai-interviewer
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: deploy/cloud/Dockerfile
+    image: ai-interviewer:cloud
+    restart: unless-stopped
+    init: true
+    env_file:
+      - path: ./deploy/cloud/app.env
+        format: raw
+    environment:
+      TZ: Asia/Shanghai
+      PUBLIC_ORIGIN: https://${SITE_HOST:?Run python3 tools/cloud_setup.py first}
+    expose:
+      - "8000"
+    volumes:
+      - app_data:/srv/state
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  caddy:
+    image: caddy:2.11.9-alpine
+    restart: unless-stopped
+    environment:
+      SITE_HOST: ${SITE_HOST:?Run python3 tools/cloud_setup.py first}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/cloud/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  app_data:
+  caddy_data:
+  caddy_config:

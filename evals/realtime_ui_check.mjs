@@ -10,6 +10,8 @@ function setup(enabled = true, resume = null, mediaError = null, permission = nu
   const elements = new Map(), sockets = [], nodes = [], tracks = [], sent = [];
   let mediaRequests = 0;
   function element() { return { textContent: '', disabled: false, checked: true, children: [], dataset: {},
+    focus() { this.focused = true; },
+    replaceChildren(...items) { this.children = items; },
     append(...items) { this.children.push(...items); }, addEventListener(name, fn) { this[name] = fn; } }; }
   for (const match of html.matchAll(/id="rt-([^"]+)"/g)) elements.set(match[1], element());
   class Socket {
@@ -33,8 +35,9 @@ function setup(enabled = true, resume = null, mediaError = null, permission = nu
     createBufferSource() { const n = { connect() {}, start() {}, stop() { this.stopped = true; } }; nodes.push(n); return n; }
   }
   class Worklet { port = {}; connect() {} disconnect() {} }
+  const body = { dataset: {} };
   vm.runInNewContext(script, {
-    document: { querySelectorAll: () => [modeLink], querySelector: q => elements.get(q.slice(4)), createElement: element, body: { dataset: {} } },
+    document: { querySelectorAll: () => [modeLink], querySelector: q => elements.get(q.slice(4)), createElement: element, body },
     location: { pathname: '/interview/' + 'a'.repeat(32), origin: 'http://localhost' },
     sessionStorage: { getItem: k => k === 'account:session' ? null : 'b'.repeat(64) },
     fetch: async path => ({ ok: true, json: async () => path === '/api/voice/config' ? { realtime_enabled: enabled } : { question: { content: '测试题', theme: 'MySQL' } } }),
@@ -43,7 +46,7 @@ function setup(enabled = true, resume = null, mediaError = null, permission = nu
     setInterval: () => 1, clearInterval() {}, setTimeout, clearTimeout,
     atob, btoa, Uint8Array, Float32Array, DataView, addEventListener() {},
   });
-  return { elements, sockets, nodes, tracks, sent, modeLink, mediaRequests: () => mediaRequests };
+  return { elements, sockets, nodes, tracks, sent, modeLink, body, mediaRequests: () => mediaRequests };
 }
 const disabled = setup(false); await tick();
 assert.equal(disabled.elements.get('start').disabled, true);
@@ -65,6 +68,16 @@ const started = live.elements.get('start').click(); await tick();
 live.sockets[0].emit({ type: 'ready', max_seconds: 120, question: { content: '新题', theme: 'MySQL' } }); await started;
 assert.equal(live.elements.get('title').textContent, '新题');
 assert.equal(live.elements.get('clock').textContent, '02:00', 'Countdown must display the server limit immediately');
+assert.equal(live.body.dataset.immersive, 'true');
+assert.equal(live.elements.get('stage').focused, true);
+live.elements.get('view').click();
+assert.equal(live.body.dataset.immersive, 'false');
+assert.equal(live.sockets[0].readyState, 1);
+live.elements.get('view').click();
+assert.equal(live.body.dataset.immersive, 'true');
+live.sockets[0].emit({ type: 'caption', role: 'assistant', text: '请说明一个具体案例。', final: true });
+assert.equal(live.elements.get('questions').children.length, 1);
+assert.equal(live.elements.get('messages').children.length, 0);
 live.elements.get('pause').click(); assert.equal(live.tracks[0].enabled, false);
 assert.equal(live.sent.at(-1).type, 'pause');
 live.elements.get('pause').click(); assert.equal(live.tracks[0].enabled, true);
@@ -72,7 +85,15 @@ let blocked=false;live.modeLink.click({preventDefault(){blocked=true;}});assert.
 live.sockets[0].emit({ type: 'speaking' }); live.sockets[0].emit({ type: 'audio', data: 'ABAQEA==' });
 live.elements.get('interrupt').click(); assert.equal(live.nodes[0].stopped, true);
 assert.equal(live.sent.at(-1).type, 'interrupt');
+live.sockets[0].emit({ type: 'caption', role: 'user', text: '因为缓存减少了重复查询，延迟降低了30%。', final: true });
+assert.equal(live.elements.get('messages').children.length, 1);
+assert.equal(live.elements.get('questions').children.length, 1);
 live.elements.get('end').click(); assert.equal(live.tracks[0].stopped, true);
+assert.equal(live.body.dataset.immersive, 'false');
+assert.equal(live.elements.get('review').focused, true);
+assert.equal(live.elements.get('review').hidden, false);
+assert.ok(live.elements.get('review-list').children.some(item => item.textContent.includes('30%')));
+assert.ok(live.elements.get('review-list').children.some(item => item.textContent.includes('待完善 · 案例细节')));
 assert.equal(live.sockets[0].readyState, 3);
 assert.equal(live.elements.get('start').disabled, false);
 assert.equal(live.sent.some(e => /submit|score/.test(e.type)), false);

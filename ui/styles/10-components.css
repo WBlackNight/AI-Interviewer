@@ -77,7 +77,9 @@
     white-space: nowrap;
     transition: background-color var(--t-fast) var(--ease-state),
                 color var(--t-fast) var(--ease-state),
-                border-color var(--t-fast) var(--ease-state);
+                border-color var(--t-fast) var(--ease-state),
+                transform var(--t-press) var(--ease),
+                box-shadow var(--t-fast) var(--ease-state);
   }
 
 .btn-primary { color: var(--paper); }
@@ -200,11 +202,6 @@
     border: 1px solid var(--line);
     border-radius: 16px;
     box-shadow: 0 24px 60px -24px rgba(20, 32, 27, .18);
-  }
-
-@keyframes mist-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
   }
 
 .iv-top {
@@ -727,15 +724,4 @@
     .site-foot { padding-top: 40px; padding-bottom: 28px; }
     .foot-legal { margin-top: 28px; padding-top: 18px; }
     .foot-row { margin-top: 14px; }
-  }
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 1ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 1ms !important;
-      transition-delay: 0ms !important;
-    }
-    .interview-card { animation: none; }
-    [data-reveal] { opacity: 1; transform: none; }
   }

@@ -1,8 +1,11 @@
 /* 原生报告：逐轮分页不改变评分。 */
 (function () {
   'use strict';
+/* @include notice */
 /* @include session */
 /* @include element */
+/* @include reportshare */
+/* @include assessment */
   const find = (id) => document.querySelector('#report-' + id);
   const reportId = location.pathname.match(/^\/report\/([a-f0-9]{32})$/)?.[1];
   function setText(id, value) { find(id).textContent = value; }
@@ -14,6 +17,7 @@
   let busy = false;
   let loading = false;
   let loadVersion = 0;
+  const sharing = reportSharing(find, request, reportId);
 
   // 凭据：账户优先，失败不切换身份。
   const session = readSession;
@@ -32,7 +36,8 @@
     const timer = setTimeout(() => controller.abort(), 20000);
     try {
       const response = await fetch('/api' + path, { ...options, cache: 'no-store', signal: controller.signal,
-        headers: { 'X-Interview-Token': access.token, ...(access.account ? { Authorization: 'Bearer ' + access.token } : {}) } });
+        headers: { 'X-Interview-Token': access.token, ...(access.account ? { Authorization: 'Bearer ' + access.token } : {}),
+          ...(options.body ? { 'Content-Type': 'application/json' } : {}) } });
       const data = blob && response.ok ? await response.blob() : await response.json().catch(() => null);
       if (!response.ok) throw new Error(typeof data?.detail === 'string' ? data.detail : '读取失败，请检查账户。');
       if (credential(accountOnly).token !== access.token) throw new Error('会话已变化，请刷新。');
@@ -44,14 +49,6 @@
     } finally { clearTimeout(timer); }
   }
   const node = createNode;
-  function originText(origin = {}) {
-    const names = { heuristic: '规则评分', llm: '模型评分', heuristic_fallback: '模型失败后规则回退' };
-    return (names[origin.source] || '来源未记录') + (origin.cached ? ' · 缓存命中，本轮未调用评分模型' : '') + (origin.sandbox_applied ? ' · 含客观判题合分' : '');
-  }
-  function versions(origin = {}) {
-    return [origin.scorer_version, origin.model, origin.prompt_version, origin.config_version && '配置 ' + origin.config_version,
-      origin.prompt_digest && '提示词摘要 ' + origin.prompt_digest.slice(0, 12), origin.fallback_reason && '回退类别 ' + origin.fallback_reason].filter(Boolean).join(' · ') || '历史来源与版本未记录';
-  }
   function setBusy(value) {
     busy = value;
     document.querySelectorAll('#report-content button, #report-confirm button').forEach((button) => { button.disabled = value; });
@@ -60,6 +57,10 @@
 
   // 概览：原生刻度，未评分保留空值。
   function render() {
+    setHidden('sharing', !session() || !report.is_complete);
+    if (!find('sharing').hidden) void sharing.refresh();
+    renderComparison();
+    renderAssessment(report, find);
     const complete = report.is_complete;
     const active = !['finished', 'cancelled'].includes(report.status);
     const states = { created: '尚未开始', finished: '已完成', cancelled: '已取消' };
@@ -76,7 +77,10 @@
       if (report.overall != null) row.append(meter);
       find('dimensions').append(row);
     });
-    setText('aggregation', report.aggregation || '');
+    const rubric = report.dimensions?.['证据支撑'] != null
+      ? '五维评分按内容 35%、表达 20%、岗位 15%、证据 15%、应用 15% 加权。新增维度只汇总实际有分数的回答。'
+      : '当前记录展示三项评分，逐题详情包含得分依据。';
+    setText('aggregation', [report.aggregation, report.answer_count ? rubric : ''].filter(Boolean).join(' '));
     setHidden('source', !report.revision_source);
     if (report.revision_source) {
       setText('source-theme', report.revision_source.theme);
@@ -103,6 +107,28 @@
     find('theme').value = selected;
     if (find('theme').selectedIndex < 0) find('theme').value = '';
     updateReviewLink(); renderTurns();
+  }
+
+  function renderComparison() {
+    const comparison = report.retry_comparison;
+    setHidden('comparison', !comparison);
+    find('comparison-cards').replaceChildren();
+    if (!comparison) return;
+    for (const [label, result] of [['上次回答', comparison.original], ['本次回答', comparison.current]]) {
+      const card = node('article', undefined, 'retry-answer');
+      card.append(node('h3', label));
+      if (result) {
+        card.append(node('strong', Number(result.score).toFixed(1) + ' / 10', 'retry-score'));
+        card.append(node('p', result.content));
+        card.append(node('p', result.answer_text || '本轮未记录回答文本。', 'report-answer-text'));
+        card.append(node('p', '已覆盖：' + (result.key_points_hit?.join('、') || '暂无'), 'report-evidence'));
+        card.append(node('p', '待补强：' + (result.key_points_missed?.join('、') || '本轮未记录待补强要点'), 'report-missed'));
+      } else {
+        card.append(node('p', '完成本次主问题作答后，在这里对照两次表现。'));
+      }
+      find('comparison-cards').append(card);
+    }
+    if (/^[a-f0-9]{32}$/.test(comparison.source_interview_id)) find('comparison-source').href = '/report/' + comparison.source_interview_id;
   }
   function updateReviewLink() {
     const query = new URLSearchParams({ position: report.position });
@@ -145,13 +171,22 @@
       const answer = node('details', undefined, 'report-answer');
       answer.append(node('summary', '查看你的回答'), node('p', turn.answer_text || '本轮未记录回答文本。', 'report-answer-text'));
       card.append(answer, node('p', '评分依据：' + (turn.evidence || '未记录'), 'report-evidence'));
+      if (turn.dimensions) {
+        const scores = Object.entries(turn.dimensions).map(([label, value]) => label + ' ' + Number(value).toFixed(1));
+        if (scores.length) card.append(node('p', scores.join(' · '), 'report-evidence'));
+      }
       if (turn.key_points_hit?.length) card.append(node('p', '已覆盖：' + turn.key_points_hit.join('、'), 'report-evidence'));
       if (turn.key_points_missed?.length) card.append(node('p', '待补强：' + turn.key_points_missed.join('、'), 'report-missed'));
       if (turn.sandbox) card.append(node('p', '客观判题：' + turn.sandbox.passed + ' / ' + turn.sandbox.total + ' 通过', 'note-context'));
-      card.append(node('p', originText(turn.scoring_origin), 'note-context'));
-      const source = node('details', undefined, 'report-answer');
-      source.append(node('summary', '评分来源与版本'), node('p', versions(turn.scoring_origin), 'report-version'));
-      card.append(source);
+      if (turn.can_retry && session()) {
+        const retry = node('button', '重新回答这道题', 'notes-button');
+        retry.type = 'button'; retry.disabled = busy;
+        retry.addEventListener('click', () => action('/interview/' + reportId + '/question-practice', true, (data) => {
+          if (!data.account_owned || !/^[a-f0-9]{32}$/.test(data.interview_id)) throw new Error('创建结果不完整，请先查看练习记录。');
+          location.assign('/interview/' + data.interview_id);
+        }, { question_id: turn.question_id }));
+        card.append(retry, node('p', '从原题重新作答。已有未完成的同题复练时，将继续该场练习。', 'notes-boundary'));
+      }
       find('turns').append(card);
     });
     setHidden('empty', visible.length > 0);
@@ -185,15 +220,16 @@
   find('retry').addEventListener('click', load);
 
   // 复练：锁定操作，保存凭据后进入练习室。
-  async function action(path, accountOnly, done) {
+  async function action(path, accountOnly, done, body) {
     if (busy || loading) return;
     setBusy(true); setText('action-error', ''); setText('action-message', '');
-    try { await done(await request(path, { method: 'POST' }, accountOnly)); }
-    catch (error) { setText('action-error', error.message); }
+    try { await done(await request(path, { method: 'POST', ...(body ? { body: JSON.stringify(body) } : {}) }, accountOnly)); }
+    catch (error) { setText('action-error', error.message); notify(error.message, 'error'); }
     finally { setBusy(false); }
   }
   find('add-tasks').addEventListener('click', () => action('/account/interviews/' + reportId + '/revision-tasks', true, (data) => {
     setText('action-message', '新增 ' + data.added + ' 项，已有 ' + data.existing + ' 项。已有完成状态保持。');
+    notify('复习任务已更新');
   }));
   find('practice').addEventListener('click', () => action('/interview/' + reportId + '/practice', false, (data) => {
     if (!/^[a-f0-9]{32}$/.test(data.interview_id)) throw new Error('请查记录核对结果。');
@@ -214,7 +250,8 @@
       const link = node('a'); link.href = url; link.download = 'interview-' + reportId + (format === 'json' ? '.json' : '.md');
       document.body.append(link);
       try { link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
-    } catch (error) { setText('export-error', error.message); }
+      notify('报告下载已开始');
+    } catch (error) { setText('export-error', error.message); notify(error.message, 'error'); }
     finally { setBusy(false); }
   }));
 

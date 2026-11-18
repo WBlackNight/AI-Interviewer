@@ -17,9 +17,9 @@ from app.schemas import AnswerMessage
 @pytest.fixture
 def api(monkeypatch):
     from app import main
-    from app.api import ws, routes, accounts
+    from app.api import ws, routes, accounts, dependencies
     from app.services.accounts import AuthThrottle
-    monkeypatch.setattr(accounts,'throttle',AuthThrottle())
+    monkeypatch.setattr(dependencies,'throttle',AuthThrottle())
     from app.services import account_security
     monkeypatch.setattr(account_security,'generate_code',lambda:'TEST2')
     engine = create_engine('sqlite://', connect_args={'check_same_thread': False}, poolclass=StaticPool)
@@ -72,6 +72,28 @@ def receive_turn(socket):
         if event['type'] in ('question', 'report_ready', 'error'):
             return events
     raise AssertionError(events)
+
+
+@pytest.mark.parametrize("minutes, expected", [(5, 2), (10, 3), (15, 4)])
+def test_duration_controls_main_question_count_and_completion(api, minutes, expected):
+    client, _ = api
+    response = client.post('/api/interview', json={'position': 'java_backend', 'duration_minutes': minutes})
+    assert response.status_code == 200
+    interview = response.json()
+    assert sum(item['question_count'] for item in interview['plan']) == expected
+    with connect(client, interview) as (socket, snapshot):
+        for index in range(expected):
+            socket.send_json(answer(snapshot, text='跳过'))
+            events = receive_turn(socket)
+            end = events[-1]
+            if index + 1 < expected:
+                assert end['type'] == 'question' and not end.get('is_probe')
+                snapshot = {'current_question': end, 'version': end['version']}
+            else:
+                assert end['type'] == 'report_ready'
+    report = client.get('/api/interview/' + interview['interview_id'] + '/report',
+                        headers={'X-Interview-Token': interview['access_token']})
+    assert report.status_code == 200 and report.json()['question_count'] == expected
 
 
 def test_resume_pii_and_access_controls(api):

@@ -139,6 +139,8 @@ class PlanItem:
     difficulty: str
     question_count: int
     include_coding: bool = False
+    question_id: str | None = None
+    source_interview_id: str | None = None
 
 
 @dataclass

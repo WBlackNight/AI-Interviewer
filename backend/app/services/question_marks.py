@@ -1,6 +1,6 @@
 """个人题单：账户内去重、版本保护，题目内容按当前运行资产解析。"""
 from fastapi import HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from app.models.entities import QuestionMark
 from app.services.accounts import lock_account, now_utc
@@ -52,21 +52,32 @@ def list_marks(db, account_id, trees, bank, *, position=None, status=None, query
 
 
 def add_mark(db, account_id, position, question_id, trees, bank):
+    return add_marks(db, account_id, [(position, question_id)], trees, bank)[0]
+
+
+def add_marks(db, account_id, identities, trees, bank):
+    """先核对整个批次，再写入；重复收藏保留状态和时间。"""
     lock_account(db, account_id)
-    existing = db.scalar(select(QuestionMark).where(QuestionMark.account_id == account_id,
-        QuestionMark.position == position, QuestionMark.question_id == question_id))
-    if existing:
-        return {'id': existing.id, 'reused': True}  # 重复收藏不重置状态、时间或版本。
-    if position not in trees or not any(q.position == position and q.id == question_id for q in bank.questions):
+    rows = list(db.scalars(select(QuestionMark).where(QuestionMark.account_id == account_id)))
+    existing = {(row.position, row.question_id): row for row in rows}
+    available = {(q.position, q.id) for q in bank.questions if q.position in trees}
+    additions = set(identities) - existing.keys()
+    if additions - available:
         raise HTTPException(404, '当前题库没有这道题，无法新增收藏')
-    count = db.scalar(select(func.count()).select_from(QuestionMark).where(QuestionMark.account_id == account_id))
-    if count >= MAX_MARKS:
+    if additions and len(rows) + len(additions) > MAX_MARKS:
         raise HTTPException(409, '个人题单最多500道，请先移除部分收藏')
-    row = QuestionMark(account_id=account_id, position=position, question_id=question_id,
-                       status='todo', version=0, created_at=now_utc())
-    db.add(row)
+    results = []
+    for position, question_id in identities:
+        key = (position, question_id)
+        reused = key in existing
+        if not reused:
+            row = QuestionMark(account_id=account_id, position=position, question_id=question_id,
+                               status='todo', version=0, created_at=now_utc())
+            db.add(row)
+            existing[key] = row
+        results.append((existing[key], reused))
     db.flush()
-    return {'id': row.id, 'reused': False}
+    return [{'id': row.id, 'reused': reused} for row, reused in results]
 
 
 def owned_mark(db, account_id, mark_id, expected_version):
@@ -81,8 +92,34 @@ def owned_mark(db, account_id, mark_id, expected_version):
 
 def update_mark(db, account_id, mark_id, status, expected_version):
     row = owned_mark(db, account_id, mark_id, expected_version)
+    return set_status(row, status)
+
+
+def set_status(row, status):
     if row.status != status:
         row.status = status
         row.reviewed_at = now_utc() if status == 'done' else None
         row.version += 1
     return {'id': row.id, 'status': row.status, 'version': row.version}
+
+
+def batch_update_marks(db, account_id, references, action):
+    """账户锁下校验全部版本；任一冲突时整批不修改。"""
+    lock_account(db, account_id)
+    ids = [mark_id for mark_id, _ in references]
+    rows = {row.id: row for row in db.scalars(select(QuestionMark).where(
+        QuestionMark.account_id == account_id, QuestionMark.id.in_(ids)))}
+    if len(rows) != len(ids):
+        raise HTTPException(404, '部分收藏已移除或不可访问，请刷新题单')
+    if any(rows[mark_id].version != version for mark_id, version in references):
+        raise HTTPException(409, '部分题目已在其他页面更新，本次未修改任何收藏，请刷新后重新选择')
+    changed = 0
+    for mark_id in ids:
+        row = rows[mark_id]
+        if action == 'remove':
+            db.delete(row)
+            changed += 1
+        else:
+            changed += row.status != action
+            set_status(row, action)
+    return {'action': action, 'selected': len(ids), 'changed': changed}

@@ -1,0 +1,8 @@
+{
+  "java_backend": {"name": "Java 后端", "group": "技术研发", "summary": "从语言基础到并发、数据存储与服务设计。", "focus": "原理、边界与工程取舍"},
+  "python_backend": {"name": "Python 后端", "group": "技术研发", "summary": "围绕 Python、异步编程与接口服务展开。", "focus": "实现思路与可靠性"},
+  "marketing": {"name": "市场营销", "group": "业务与管理", "summary": "练习用户定位、品牌传播与活动效果分析。", "focus": "目标、行动与效果"},
+  "operations": {"name": "运营管理", "group": "业务与管理", "summary": "梳理流程协作、用户服务与数据增长案例。", "focus": "问题分析与落地改进"},
+  "education": {"name": "教育教学", "group": "教育与语言", "summary": "通过教学设计、课堂场景与评价练习表达。", "focus": "情境判断与沟通"},
+  "english_interview": {"name": "英语面试", "group": "教育与语言", "summary": "用英语讲述经历、职业动机与解决问题的过程。", "focus": "清晰表达与具体案例"}
+}

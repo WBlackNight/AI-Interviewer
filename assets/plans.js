@@ -2,6 +2,13 @@
 /* 准备计划：范围与练习入口。 */
 (function () {
 	'use strict';
+function notify(message, type = 'success', nextPage = false) {
+	const detail = { message: String(message || '').slice(0, 240), type };
+	if (!detail.message) return;
+	if (nextPage) {
+		try { sessionStorage.setItem('ui:notice', JSON.stringify({ ...detail, expires: Date.now() + 10000 })); } catch {}
+	} else if (typeof CustomEvent === 'function') dispatchEvent(new CustomEvent('app:notice', { detail }));
+}
 function readSession() {
 	try {
 		const value = JSON.parse(sessionStorage.getItem('account:session'));
@@ -105,6 +112,13 @@ async function guardedFetch(url, options) {
 			card.append(element('p', row.themes.join(' / ') + ' · ' + levels[row.difficulty], 'plans-topics'));
 			card.append(element('p', row.target_date ? '目标日期：' + row.target_date + (row.target_date < data.today ? ' · 已过目标日期' : row.target_date === data.today ? ' · 今天' : '') : '尚未设置目标日期', 'notes-boundary'));
 			card.append(element('p', '已完成练习 ' + row.finished_count + ' 场', 'notes-boundary'));
+			if (row.target_sessions) {
+				const progress = element('progress', undefined, 'plan-goal-progress');
+				progress.max = row.target_sessions;
+				progress.value = Math.min(row.finished_count, row.target_sessions);
+				progress.setAttribute('aria-label', '阶段目标完成进度');
+				card.append(element('p', (row.finished_count >= row.target_sessions ? '阶段目标已达成' : '阶段目标') + ' · ' + row.finished_count + ' / ' + row.target_sessions + ' 场', 'plan-goal-label'), progress);
+			}
 			const pending = row.latest_practice && ['created', 'running'].includes(row.latest_practice.status);
 			const actions = element('div', undefined, 'note-actions');
 			if (row.status === 'active') {
@@ -140,8 +154,8 @@ async function guardedFetch(url, options) {
 	async function mutate(action, notice, errorId = 'error') {
 		if (busy || created) return;
 		busy = writing = true; lock(); find(errorId).textContent = '';
-		try { await action(); setText('notice', notice); await readList(); }
-		catch (error) { find(errorId === 'edit-error' && !find('edit').open ? 'error' : errorId).textContent = error.message; if (error.status === 409 && errorId === 'error') { try { await readList(); } catch { hidePrivate(); } } }
+		try { await action(); setText('notice', notice); notify(notice); await readList(); }
+		catch (error) { notify(error.message, 'error'); find(errorId === 'edit-error' && !find('edit').open ? 'error' : errorId).textContent = error.message; if (error.status === 409 && errorId === 'error') { try { await readList(); } catch { hidePrivate(); } } }
 		finally { busy = writing = false; lock(); }
 	}
 	function planName(id) {
@@ -150,6 +164,7 @@ async function guardedFetch(url, options) {
 		return name;
 	}
 	function openEdit(row) {
+		find('edit-goal').value = row.target_sessions || '';
 		editing = row; editDirty = false; find('edit-name').value = row.name; find('edit-target').value = row.target_date || '';
 		setText('edit-error', ''); find('edit').showModal();
 	}
@@ -162,11 +177,17 @@ async function guardedFetch(url, options) {
 	find('edit-form').addEventListener('submit', async (event) => {
 		event.preventDefault(); if (busy || !editing) return;
 		await mutate(async () => {
-			await request(endpoint + '/' + editing.id, 'PATCH', { name: planName('edit-name'), target_date: find('edit-target').value || null, expected_version: editing.version });
+			await request(endpoint + '/' + editing.id, 'PATCH', { name: planName('edit-name'), target_date: find('edit-target').value || null, target_sessions: goal('edit-goal'), expected_version: editing.version });
 			editDirty = false; find('edit').close();
 		}, '已保存。', 'edit-error');
 	});
 	function clearDraft() { createDirty = false; find('create-form').reset(); renderThemes(); }
+	function goal(id) {
+		if (!find(id).value.trim()) return null;
+		const value = Number(find(id).value);
+		if (!Number.isInteger(value) || value < 1 || value > 50) throw new Error('阶段目标请填写1至50场。');
+		return value;
+	}
 	find('clear').addEventListener('click', clearDraft);
 	find('create-form').addEventListener('input', () => { createDirty = true; lock(); });
 	find('position').addEventListener('change', () => { createDirty = true; renderThemes(); });
@@ -174,7 +195,7 @@ async function guardedFetch(url, options) {
 	find('create-form').addEventListener('submit', async (event) => {
 		event.preventDefault(); if (busy || created) return;
 		await mutate(async () => {
-			await request(endpoint, 'POST', { name: planName('name'), position: find('position').value, themes: selectedThemes(), difficulty: find('difficulty').value, target_date: find('target').value || null });
+			await request(endpoint, 'POST', { name: planName('name'), position: find('position').value, themes: selectedThemes(), difficulty: find('difficulty').value, target_date: find('target').value || null, target_sessions: goal('goal') });
 			clearDraft(); filters = { position: '', status: 'active', offset: 0 }; history.replaceState(null, '', '/plans');
 		}, '已保存计划，尚未创建练习。', 'create-error');
 	});

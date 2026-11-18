@@ -13,21 +13,21 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
-from build_ui import build, outputs
+from build_ui import build, load_manifest, outputs
 
 
 def secret_values():
     """Read only for leak detection. Never print configuration values."""
-    path = ROOT / 'backend/.env'
     values = []
-    if path.is_file():
-        for line in path.read_text(encoding='utf-8-sig').splitlines():
-            if line.lstrip().startswith('#') or '=' not in line:
-                continue
-            key, value = line.split('=', 1)
-            value = value.strip().strip('"').strip("'")
-            if re.search(r'KEY|TOKEN|SECRET|APP_ID|PASSWORD', key.upper()) and len(value) >= 8:
-                values.append(value.encode())
+    for path in (ROOT / 'backend/.env', ROOT / 'deploy/cloud/app.env'):
+        if path.is_file():
+            for line in path.read_text(encoding='utf-8-sig').splitlines():
+                if line.lstrip().startswith('#') or '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                value = value.strip().strip('"').strip("'")
+                if re.search(r'KEY|TOKEN|SECRET|APP_ID|PASSWORD', key.upper()) and len(value) >= 8:
+                    values.append(value.encode())
     return values
 
 
@@ -38,7 +38,9 @@ def validate_members(members, secrets=()):
         path = ROOT / relative
         if relative.is_absolute() or '..' in relative.parts or '\\' in name:
             raise ValueError('Unsafe package member')
-        if any(part.startswith('.') or part in ('backend', 'node_modules', '__pycache__') for part in relative.parts):
+        shared_policy = name in ('backend/app/__init__.py', 'backend/app/practice_policy.py')
+        if any(part.startswith('.') or part in ('node_modules', '__pycache__')
+               or part == 'backend' and not shared_policy for part in relative.parts):
             raise ValueError('Private or generated directory in package')
         if not path.resolve().is_relative_to(ROOT) or path.is_symlink() or not path.is_file():
             raise ValueError('Package source missing or outside workspace')
@@ -52,18 +54,26 @@ def validate_members(members, secrets=()):
 def package():
     build(check=True)
     generated = {p.relative_to(ROOT).as_posix() for p in outputs()}
+    images = {'assets/' + name for name in load_manifest().get('images', [])}
     source = {p.relative_to(ROOT).as_posix() for p in (ROOT / 'ui').rglob('*')
               if p.is_file() and p.suffix in ('.md', '.html', '.js', '.css', '.json')}
     source.update(p.relative_to(ROOT).as_posix() for p in (ROOT / 'tools').glob('*.py'))
+    source.update(p.relative_to(ROOT).as_posix() for p in (ROOT / 'tools').glob('*.cjs'))
+    source.update(p.relative_to(ROOT).as_posix() for p in (ROOT / 'tools').glob('*.mjs'))
+    source.update(p.relative_to(ROOT).as_posix() for directory in ('assistant', 'studio', 'shared', 'lib', 'widget', 'admin')
+                  for p in (ROOT / 'frontend' / directory).rglob('*') if p.suffix in ('.ts', '.tsx'))
+    source.update({'frontend/package.json', 'frontend/package-lock.json', 'frontend/tsconfig.json', 'frontend/tsconfig.web.json', 'frontend/tsconfig.assistant.json', 'frontend/vite.config.mjs', 'frontend/prettier.config.mjs', 'frontend/index.html', 'frontend/assistant.html', 'frontend/practice.html', 'frontend/admin.html'})
     source.update({'README.md', 'Makefile', 'tools/README.md', 'evals/README.md', 'assets/README.md'})
+    source.update({'backend/app/__init__.py', 'backend/app/practice_policy.py', 'data/roles.json'})
+    source.update(p.relative_to(ROOT).as_posix() for p in (ROOT / 'data/question_bank').glob('*.jsonl'))
     # Include every validation script used by verify_ui, plus its gateway checks.
     source.update(p.relative_to(ROOT).as_posix() for p in (ROOT / 'evals').glob('*_check.mjs'))
     source.update({'evals/native_home_check.py', 'evals/native_home_gateway.py',
-                   'evals/native_interview_test.cjs', 'evals/test_native_home_gateway.py'})
+                   'evals/test_native_home_gateway.py'})
     bundles = {
-        'qingzhan-native-home.zip': {'index.html', 'assets/home.css', 'assets/home.js', 'assets/account-menu.js', 'assets/README.md'},
-        'qingzhan-native-workspace.zip': generated | {'assets/README.md'},
-        'qingzhan-native-source.zip': source,
+        'qingzhan-native-home.zip': {'index.html', 'assets/home.css', 'assets/home.js', 'assets/account-menu.js', 'assets/qing-pet.js', 'assets/qing-widget.js', 'assets/onboarding.js', 'assets/README.md'},
+        'qingzhan-native-workspace.zip': generated | images | {'assets/README.md'},
+        'qingzhan-native-source.zip': source | images,
     }
     secrets = secret_values()
     # Validate all inputs before replacing any deliverable.
@@ -104,11 +114,13 @@ def status():
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == 'serve':
+        raise SystemExit(subprocess.call([sys.executable, str(ROOT / 'tools/run_server.py'), *sys.argv[2:]]))
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=('status', 'build', 'check', 'preview', 'package'))
+    parser.add_argument('command', choices=('status', 'build', 'check', 'preview', 'serve', 'package'))
     args, extra = parser.parse_known_args()
     if extra and args.command not in ('preview', 'check'):
-        parser.error('Extra arguments are only accepted for preview/check')
+        parser.error('Extra arguments are only accepted for preview/check/serve')
     if args.command in ('preview', 'check'):
         script = 'evals/native_home_preview.py' if args.command == 'preview' else 'tools/verify_ui.py'
         raise SystemExit(subprocess.call([sys.executable, str(ROOT / script), *extra], cwd=ROOT))

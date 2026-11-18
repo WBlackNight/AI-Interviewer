@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 from typing import Iterable
 
 from app.domain import Question
@@ -66,6 +67,7 @@ class QuestionBank:
         difficulty: str,
         exclude: set[str],
         is_coding: bool = False,
+        selection_seed: str = '',
     ) -> Question | None:
         """统一过滤后由配置的召回器排序，不重复已问题。
 
@@ -75,8 +77,13 @@ class QuestionBank:
         3. 未问候选耗尽则返回None，不放宽岗位、主题、题型或已问约束。
         """
         result = self.search(f"{theme} {difficulty}", QuestionFilter(position=position,
-            theme=theme, difficulty=difficulty, exclude=frozenset(exclude), is_coding=is_coding), top_k=1)
-        return self.get(result.hits[0].question_id) if result.hits else None
+            theme=theme, difficulty=difficulty, exclude=frozenset(exclude), is_coding=is_coding),
+            top_k=8 if selection_seed else 1)
+        if not result.hits:
+            return None
+        hit = min(result.hits, key=lambda hit: hashlib.sha256(
+            (selection_seed + ':' + hit.question_id).encode()).digest()) if selection_seed else result.hits[0]
+        return self.get(hit.question_id)
 
     def next_coding_question(self, *, position: str, exclude: set[str]) -> Question | None:
         result = self.search("编程 算法", QuestionFilter(position=position, is_coding=True,

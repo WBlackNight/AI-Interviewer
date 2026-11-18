@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Integer, String, Text, LargeBinary, func, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, LargeBinary, func, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -18,6 +18,20 @@ def _uuid() -> str:
 
 class Base(DeclarativeBase):
     pass
+
+
+class AssistantConversation(Base):
+    """Owner-scoped, bounded assistant history; unfinished streams never become turns."""
+    __tablename__ = "assistant_conversation"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    account_id: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    title: Mapped[str] = mapped_column(String(60), default="新的对话")
+    position: Mapped[str] = mapped_column(String(64))
+    messages: Mapped[list] = mapped_column(JSON, default=list)
+    version: Mapped[int] = mapped_column(Integer, default=0)
+    busy_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    busy_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
 
 
 class User(Base):
@@ -214,6 +228,15 @@ class AccountProfile(Base):
     avatar_version: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
 
+class AccountDetails(Base):
+    __tablename__ = "account_details"
+    account_id: Mapped[str] = mapped_column(ForeignKey("account.id"), primary_key=True)
+    gender: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    age: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    bio: Mapped[str] = mapped_column(String(160), default="")
+    version: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class AuthChallenge(Base):
     __tablename__ = 'auth_challenge'
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
@@ -312,3 +335,45 @@ class PreparationPractice(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     plan_id: Mapped[str] = mapped_column(ForeignKey("preparation_plan.id"), index=True)
     interview_id: Mapped[str] = mapped_column(ForeignKey("interview.id"), unique=True)
+
+
+class PreparationGoal(Base):
+    __tablename__ = "preparation_goal"
+    plan_id: Mapped[str] = mapped_column(ForeignKey("preparation_plan.id"), primary_key=True)
+    target_sessions: Mapped[int] = mapped_column(Integer)
+
+
+class ReportShare(Base):
+    __tablename__ = "report_share"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    account_id: Mapped[str] = mapped_column(ForeignKey("account.id"), index=True)
+    interview_id: Mapped[str] = mapped_column(ForeignKey("interview.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    scope: Mapped[str] = mapped_column(String(16))
+    snapshot: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, index=True)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class AdminAudit(Base):
+    __tablename__ = 'admin_audit'
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    actor_id: Mapped[str] = mapped_column(String(32), index=True)
+    action: Mapped[str] = mapped_column(String(32), index=True)
+    outcome: Mapped[str] = mapped_column(String(16))
+    resource: Mapped[str] = mapped_column(String(64), default='')
+    request_id: Mapped[str] = mapped_column(String(32), index=True)
+    details: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+class AdminQuestionReview(Base):
+    __tablename__ = 'admin_question_review'
+    question_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    content_hash: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(24))
+    note: Mapped[str] = mapped_column(String(500), default='')
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    reviewer_id: Mapped[str] = mapped_column(String(32))
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

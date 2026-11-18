@@ -19,6 +19,7 @@ class PlanFields(BaseModel):
     model_config = ConfigDict(extra='forbid')
     name: str | None = Field(default=None, strict=True, min_length=1, max_length=80)
     target_date: date | None = None
+    target_sessions: int | None = Field(default=None, strict=True, ge=1, le=50)
 
     @field_validator('name', mode='before')
     @classmethod
@@ -53,7 +54,7 @@ class PlanUpdate(PlanFields):
     @model_validator(mode='after')
     def valid_update(self):
         fields = self.model_fields_set - {'expected_version'}
-        if not fields or any(getattr(self, key) is None for key in fields - {'target_date'}): raise ValueError('空修改无效')
+        if not fields or any(getattr(self, key) is None for key in fields - {'target_date', 'target_sessions'}): raise ValueError('空修改无效')
         return self
 
 

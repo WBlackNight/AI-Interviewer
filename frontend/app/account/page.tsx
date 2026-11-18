@@ -14,6 +14,7 @@ export default function AccountPage() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const pending = useRef(false);
+  const logoutDialog = useRef<HTMLDialogElement>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     let active = true;
@@ -31,7 +32,11 @@ export default function AccountPage() {
     pending.current = true; setBusy(true); setError("");
     try {
       if (action === "authenticate") setAccount((await authenticate(mode, username, password)).account);
-      else if (action === "logout") { await logoutAccount(); setAccount(null); }
+      else if (action === "logout") {
+        await logoutAccount();
+        logoutDialog.current?.close();
+        setAccount(null);
+      }
       else { await deleteAccount(password); setAccount(null); setConfirmDelete(false); }
       setPassword("");
     } catch (error) { setError(error instanceof Error ? error.message : "请求失败，请重试"); }
@@ -45,20 +50,29 @@ export default function AccountPage() {
     {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     {account ? <>
       <Link href="/history" className="inline-block rounded-lg bg-brand-600 px-4 py-2 text-sm text-white">查看账户练习</Link>
-      <button type="button" disabled={busy} onClick={() => void act("logout")} className="ml-3 rounded-lg border px-4 py-2 text-sm disabled:opacity-50">退出当前会话</button>
+      <button type="button" disabled={busy} onClick={() => { setError(""); logoutDialog.current?.showModal(); }} className="ml-3 rounded-lg border px-4 py-2 text-sm disabled:opacity-50">退出当前会话</button>
+      <dialog ref={logoutDialog} aria-labelledby="logout-title" aria-describedby="logout-description" onCancel={event => { if (pending.current) event.preventDefault(); }} className="m-auto w-[calc(100%-2rem)] max-w-sm rounded-xl bg-white p-6 text-slate-900 shadow-lg backdrop:bg-black/30">
+        <h2 id="logout-title" className="text-lg font-semibold">确认退出登录？</h2>
+        <p id="logout-description" className="mt-2 text-sm text-slate-600">退出后，需要重新登录才能访问个人练习和收藏。</p>
+        {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
+          <button type="button" autoFocus disabled={busy} onClick={() => logoutDialog.current?.close()} className="rounded-lg border px-4 py-2 text-sm">取消</button>
+          <button type="button" disabled={busy} onClick={() => void act("logout")} className="rounded-lg bg-brand-600 px-4 py-2 text-sm text-white">确认退出</button>
+        </div>
+      </dialog>
       <p className="text-xs leading-5 text-slate-500">记录保留至主动删除。可在记录页删除已完成、已取消或尚未开始的面试；进行中需先完成或取消。目前不提供密码找回，请妥善保存密码。</p>
       <div className="border-t pt-4">
         {!confirmDelete ? <button type="button" disabled={busy} onClick={() => { setConfirmDelete(true); setPassword(""); }} className="text-sm text-red-700 underline">删除账户及所属内容</button> : <div className="space-y-3">
-          <p className="text-sm text-red-700">这将永久删除账户、所属面试及简历。请输入密码确认；已有备份和外部供应商副本不在此处清理。</p>
-          <input type="password" autoComplete="current-password" aria-label="确认删除的账户密码" value={password} disabled={busy} minLength={12} maxLength={128} onChange={event => setPassword(event.target.value)} className="w-full rounded-lg border px-3 py-2" />
-          <button type="button" disabled={busy || password.length < 12} onClick={() => void act("delete")} className="rounded-lg bg-red-700 px-4 py-2 text-sm text-white disabled:opacity-50">确认永久删除</button>
+          <p className="text-sm text-red-700">这将永久删除账户、所属面试及简历。请输入密码确认；已有备份和外部服务副本不在此处清理。</p>
+          <input type="password" autoComplete="current-password" aria-label="确认删除的账户密码" value={password} disabled={busy} minLength={8} maxLength={128} onChange={event => setPassword(event.target.value)} className="w-full rounded-lg border px-3 py-2" />
+          <button type="button" disabled={busy || Array.from(password).length < 8} onClick={() => void act("delete")} className="rounded-lg bg-red-700 px-4 py-2 text-sm text-white disabled:opacity-50">确认永久删除</button>
           <button type="button" disabled={busy} onClick={() => { setConfirmDelete(false); setPassword(""); }} className="ml-3 text-sm underline">取消</button>
         </div>}
       </div>
     </> : <form className="space-y-4" onSubmit={event => { event.preventDefault(); void act("authenticate"); }}>
       <div role="group" aria-label="账户操作" className="flex gap-3">{(["login", "register"] as const).map(value => <button type="button" key={value} aria-pressed={mode === value} disabled={busy} onClick={() => { setMode(value); setError(""); setPassword(""); }} className={`rounded-lg border px-4 py-2 text-sm ${mode === value ? "border-brand-600 text-brand-600" : "text-slate-600"}`}>{value === "login" ? "登录" : "注册"}</button>)}</div>
       <label className="block space-y-1 text-sm"><span>用户名（3–32位字母、数字或下划线）</span><input autoComplete="username" required minLength={3} maxLength={32} pattern="[A-Za-z0-9_]+" value={username} disabled={busy} onChange={event => setUsername(event.target.value)} className="w-full rounded-lg border px-3 py-2" /></label>
-      <label className="block space-y-1 text-sm"><span>密码（12–128字符）</span><input type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={12} maxLength={128} value={password} disabled={busy} onChange={event => setPassword(event.target.value)} className="w-full rounded-lg border px-3 py-2" /></label>
+      <label className="block space-y-1 text-sm"><span>密码（8–128字符）</span><input type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={8} maxLength={128} value={password} disabled={busy} onChange={event => setPassword(event.target.value)} className="w-full rounded-lg border px-3 py-2" /></label>
       <p className="text-xs text-slate-500">目前不提供密码找回。未登录也可从首页匿名练习。</p>
       <button disabled={busy} className="w-full rounded-lg bg-brand-600 px-4 py-3 text-sm text-white disabled:opacity-50">{busy ? "处理中…" : mode === "login" ? "登录" : "注册并登录"}</button>
     </form>}

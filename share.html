@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>分享报告 · 青栈 QINGZHAN</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+  <script src="/assets/share.js?v=7b13851d97dd" defer></script>
+<script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
+</head>
+<body class="notes-page">
+  <a class="skip" href="#share-main">跳到报告内容</a>
+  <header class="nav"><div class="container notes-nav"><a class="brand" href="/">青栈 <span class="brand-en">QINGZHAN</span></a><details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>此处展示分享时选定的报告范围。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
+  <main id="share-main" class="container notes-main shared-main">
+    <p class="eyebrow">SHARED REPORT</p><h1>面试练习报告</h1>
+    <p id="share-status" role="status">正在读取分享内容…</p>
+    <p id="share-error" class="notes-alert" role="alert"></p>
+    <button id="share-retry" class="notes-button" type="button">重新读取</button>
+    <section id="share-content" hidden aria-label="分享的报告"></section>
+  </main>
+  <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN</span><a href="/guide">了解如何练习</a></div></footer>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="share" data-tour-steps="[[&quot;查看分享内容&quot;, &quot;先读报告摘要。只有分享者授权展示的部分会出现在当前页面。&quot;], [&quot;回到自己的练习&quot;, &quot;想体验相同题型时，可以从首页选择对应岗位与练习方向。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">分享报告指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
+</body>
+</html>

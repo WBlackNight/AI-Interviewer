@@ -1,0 +1,97 @@
+.guide-hero {
+  padding: clamp(28px, 6vw, 68px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: linear-gradient(125deg, var(--mint), var(--card));
+}
+.guide-hero h1 { margin-block: 12px; font: 500 clamp(36px, 6vw, 64px)/1.2 var(--serif); }
+.guide-hero > p:not(.eyebrow) { max-width: 42em; color: var(--ink-2); font-size: 17px; line-height: 1.8; }
+.guide-hero .note-actions { margin-top: 24px; flex-wrap: wrap; }
+.guide-layout { display: grid; grid-template-columns: 212px minmax(0, 1fr); gap: clamp(24px, 4vw, 52px); margin-top: 40px; }
+.guide-toc { position: sticky; top: calc(var(--nav-h) + 32px); align-self: start; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--card); }
+.guide-toc p { margin: 6px 10px; font-weight: 600; }
+.guide-toc a { display: flex; align-items: center; min-height: 44px; padding: 6px 10px; border-radius: 8px; color: var(--sage-deep); font-size: 14px; text-decoration: none; }
+.guide-toc a:is(:hover, [aria-current]) { background: var(--mint); }
+.guide-content { display: grid; gap: 36px; min-width: 0; }
+.guide-content section { scroll-margin-top: calc(var(--nav-h) + 34px); }
+.guide-content h2 { margin-block: 7px 12px; font: 500 clamp(23px, 4vw, 32px)/1.4 var(--serif); }
+.guide-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+.guide-cards article { padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); overflow-wrap: anywhere; }
+.guide-cards h3 { font-size: 17px; }
+.guide-cards p { margin-block: 8px; color: var(--ink-2); line-height: 1.75; }
+.guide-cards a { display: inline-flex; align-items: center; min-height: 44px; color: var(--sage-deep); text-underline-offset: 4px; }
+@media (max-width: 800px) {
+  .guide-layout { grid-template-columns: minmax(0, 1fr); margin-top: 24px; }
+  .guide-toc { position: static; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .guide-toc p { grid-column: 1 / -1; }
+}
+@media (max-width: 560px) {
+  .guide-cards { grid-template-columns: minmax(0, 1fr); }
+  .guide-toc a { padding-inline: 6px; }
+}
+.practice-preview-summary { padding: 14px 18px; margin-block: 16px; border-radius: 12px; background: var(--mint); overflow-wrap: anywhere; }
+.practice-preview-summary p + p { margin-top: 6px; }
+.practice-preview-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.practice-preview-actions .notes-button,
+.guide-hero .note-actions .notes-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin: 0;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+}
+.practice-preview-actions [hidden] { display: none; }
+@media (max-width: 420px) {
+  .practice-preview-actions .notes-button,
+  .guide-hero .note-actions .notes-button { flex: 1 1 100%; }
+}
+#form-error:empty { display: none; }
+.dashboard-next-step {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 28px;
+  padding: clamp(22px, 4vw, 36px);
+  margin-bottom: 24px;
+  border: 1px solid #b8ccbe;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #edf5ef, var(--card));
+}
+.dashboard-next-step h2 { margin-top: 10px; font: 500 clamp(23px, 3vw, 30px)/1.5 var(--serif); }
+.dashboard-next-step h3 { font-size: 17px; }
+.dashboard-next-step p:not(.eyebrow) { margin-block: 12px 18px; color: var(--ink-2); line-height: 1.8; overflow-wrap: anywhere; }
+.dashboard-next-step a.notes-button { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; min-height: 44px; text-align: center; }
+.dashboard-quick-start { padding-left: 28px; border-left: 1px solid var(--line); }
+.dashboard-quick-start .note-actions { margin-top: 0; }
+.dashboard-quick-start .notes-button { flex: 1 1 auto; }
+@media (max-width: 760px) {
+  .dashboard-next-step { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .dashboard-quick-start { padding: 20px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+}
+.retry-comparison { margin-bottom: 24px; }
+.retry-comparison-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-block: 20px; }
+.retry-answer { min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); overflow-wrap: anywhere; }
+.retry-answer h3 { font-size: 18px; }
+.retry-answer p { margin-top: 12px; line-height: 1.8; white-space: pre-wrap; }
+.retry-score { display: block; margin-top: 12px; color: var(--sage-deep); font-size: 24px; }
+@media(max-width:600px) { .retry-comparison-grid { grid-template-columns: minmax(0,1fr); } }
+.plan-goal-label { margin-top: 16px; color: var(--sage-deep); font-weight: 600; }
+.plan-goal-progress { width: 100%; height: 12px; accent-color: var(--sage-deep); }
+.report-sharing { margin-bottom: 24px; }
+.report-sharing > summary { color: var(--sage-deep); font-size: 19px; font-weight: 600; cursor: pointer; min-height: 44px; line-height: 44px; }
+.report-sharing > summary:focus-visible { outline: 2px solid var(--sage-deep); outline-offset: 4px; border-radius: 8px; }
+.share-form { display: grid; gap: 14px; margin-top: 18px; }
+.share-form label:not(.share-answer-choice), #report-share-created { display: grid; gap: 10px; }
+.share-form select, #report-share-url { width: 100%; min-height: 44px; border: 1px solid var(--line-strong); border-radius: 10px; padding: 10px 12px; background: var(--card); color: var(--ink); font: inherit; }
+.share-answer-choice { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+#report-share-created { margin-top: 18px; }
+#report-share-created[hidden] { display: none; }
+.share-list-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; }
+.share-list-row p { overflow-wrap: anywhere; }
+.shared-main { max-width: 880px; }
+.shared-main h1 { font: 500 36px/1.5 var(--serif); }
+.shared-main #share-content { display: grid; gap: 20px; margin-top: 24px; }
+.shared-main #share-content[hidden] { display: none; }
+.shared-main .report-panel > :is(p,h3,ul) { margin-top: 14px; line-height: 1.8; }

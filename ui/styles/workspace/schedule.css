@@ -1,0 +1,31 @@
+/* 任务安排：筛选字段按网格对齐，快捷日期和保存操作各占一行。 */
+
+.notes-toolbar #board-filters { display: grid; grid-template-columns: minmax(200px, 1.5fr) repeat(3, minmax(130px, 1fr)); gap: 16px; }
+
+#board-filters > label { min-width: 0; }
+
+#board-filters input, #board-filters select { min-height: 50px; }
+
+.board-filter-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.board-quick-dates { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; margin-top: 4px; }
+
+.board-quick-dates .notes-button { padding-inline: 15px; border-color: transparent; background: var(--paper-2); }
+
+.board-quick-dates .notes-button:hover { border-color: var(--control-border); background: var(--mint); }
+
+.board-schedule input { flex: 1 1 150px; }
+
+@media (max-width: 900px) {
+  .notes-toolbar #board-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 600px) {
+  #board-filters > .board-search, #board-filters > label[for="board-position"] { grid-column: 1 / -1; }
+  .board-filter-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .board-filter-actions .notes-primary { grid-column: 1 / -1; }
+  .board-schedule input { width: 100%; flex-basis: 100%; font-size: 16px; }
+  .board-schedule > button { flex: 1; }
+  .board-quick-dates .notes-button { flex: 1; }
+}
+

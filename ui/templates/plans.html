@@ -36,7 +36,7 @@
           <label for="plans-position">目标岗位<select id="plans-position"><option value="">正在读取岗位…</option></select></label>
           <fieldset><legend>知识主题</legend><div id="plans-themes"></div></fieldset><p id="plans-selected" class="plans-selection" role="status"></p>
           <label for="plans-difficulty">练习强度<select id="plans-difficulty"><option value="easy">轻松</option><option value="mid" selected>标准</option><option value="hard">挑战</option></select></label>
-          <label for="plans-target">目标日期（可不填）<input id="plans-target" type="date" min="2000-01-01" max="2100-12-31"></label>
+          <label for="plans-goal">阶段目标（完成场数，可不填）<input id="plans-goal" type="number" min="1" max="50" step="1" placeholder="例如：5"></label><label for="plans-target">目标日期（可不填）<input id="plans-target" type="date" min="2000-01-01" max="2100-12-31"></label>
           <p class="notes-boundary">保存后练习范围固定，每个主题最多两道主问题，包含追问。</p><button id="plans-create" class="notes-button notes-primary" type="submit" disabled>保存准备计划</button><button id="plans-clear" class="notes-button" type="button">清空草稿</button><p id="plans-create-error" class="notes-alert" role="alert"></p>
         </form></aside>
       </div>
@@ -44,7 +44,7 @@
     </div>
   </main>
   <!-- 编辑计划：只改名称和目标日，冲突保留输入，不覆盖其他页面。 -->
-  <dialog id="plans-edit" class="notes-discard plans-edit" aria-labelledby="plans-edit-title"><form id="plans-edit-form"><h2 id="plans-edit-title">调整名称与目标日期</h2><label for="plans-edit-name">计划名称<input id="plans-edit-name" required maxlength="160" autocomplete="off"></label><label for="plans-edit-target">目标日期（留空可清除）<input id="plans-edit-target" type="date" min="2000-01-01" max="2100-12-31"></label><p class="notes-boundary">练习范围保持原设置，已有练习不会改变。</p><p id="plans-edit-error" class="notes-alert" role="alert"></p><div class="note-actions"><button id="plans-edit-close" class="notes-button" type="button">返回列表</button><button class="notes-button notes-primary" type="submit">保存修改</button></div></form></dialog>
+  <dialog id="plans-edit" class="notes-discard plans-edit" aria-labelledby="plans-edit-title"><form id="plans-edit-form"><h2 id="plans-edit-title">调整名称与目标日期</h2><label for="plans-edit-name">计划名称<input id="plans-edit-name" required maxlength="160" autocomplete="off"></label><label for="plans-edit-goal">阶段目标（完成场数，留空可清除）<input id="plans-edit-goal" type="number" min="1" max="50" step="1"></label><label for="plans-edit-target">目标日期（留空可清除）<input id="plans-edit-target" type="date" min="2000-01-01" max="2100-12-31"></label><p class="notes-boundary">练习范围保持原设置，已有练习不会改变。</p><p id="plans-edit-error" class="notes-alert" role="alert"></p><div class="note-actions"><button id="plans-edit-close" class="notes-button" type="button">返回列表</button><button class="notes-button notes-primary" type="submit">保存修改</button></div></form></dialog>
   <!-- 草稿保护：关闭编辑前显式选择保留或放弃尚未保存的输入。 -->
   <dialog id="plans-discard" class="notes-discard" aria-labelledby="plans-discard-title"><h2 id="plans-discard-title">放弃尚未保存的修改？</h2><p>服务器里的计划保持原样。</p><div class="note-actions"><button id="plans-keep-edit" class="notes-button" type="button" autofocus>继续编辑</button><button id="plans-discard-edit" class="notes-button" type="button">放弃修改</button></div></dialog>
   <!-- 移除计划：仅归档计划可移除，明确保留关联练习与报告。 -->

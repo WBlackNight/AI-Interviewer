@@ -3,7 +3,7 @@
   'use strict';
 /* @include session */
 /* @include element */
-/* @include fetch */
+/* @include http */
   const find = (id) => document.querySelector('#dashboard-' + id);
   let loading = false;
   let version = 0;
@@ -14,8 +14,35 @@
     return /^[a-f0-9]{32}$/.test(item.interview_id) ? '/' + prefix + '/' + item.interview_id : '/history';
   }
 
+  function nextStep(data) {
+    const active = data.active.find(item => /^[a-f0-9]{32}$/.test(item.interview_id));
+    if (active) {
+      return { title: '接着上一次，继续练习', description: (active.position_display_name || '这场练习') + '已保存 ' + active.answer_count + ' 轮回答，可从当前题继续。',
+        label: '继续练习', path: reportPath(active, 'interview') };
+    }
+    if (data.tasks.overdue || data.tasks.today) {
+      return { title: '先回看一个到期的知识点', description: '你有 ' + data.tasks.today + ' 项今日复习和 ' + data.tasks.overdue + ' 项此前待完成的复习。可以先挑一项回看。',
+        label: '查看到期任务', path: '/revision?status=todo&due=' + (data.tasks.overdue ? 'overdue' : 'today') };
+    }
+    if (data.preparation.items.length) {
+      return { title: '从准备计划，开始今天的练习', description: data.preparation.items[0].name,
+        label: '查看准备计划', path: '/plans' };
+    }
+    if (data.recent.length) {
+      return { title: '回看一次回答，再练一个弱项', description: '从最近一份报告中找出待补强要点，安排一次主题练习。',
+        label: '查看最近报告', path: reportPath(data.recent[0], 'report') };
+    }
+    return { title: '用五分钟，完成第一次练习', description: '先选择熟悉的岗位，回答两道主问题，看看自己的思路是否讲清楚。',
+      label: '配置短练习', path: '/?duration=5#start' };
+  }
+
   // 数字与日历：零值来自服务端，七日场数按北京时间完成日期统计。
   function render(data) {
+    const action = nextStep(data);
+    find('next-title').textContent = action.title;
+    find('next-description').textContent = action.description;
+    find('next-link').textContent = action.label;
+    find('next-link').href = action.path;
     find('today').textContent = data.today + ' · 北京时间 · 只展示本账户已保存记录。';
     find('finished').textContent = data.interviews.finished;
     find('due').textContent = data.tasks.today;
@@ -44,7 +71,8 @@
     data.priority_tasks.forEach((task) => {
       const card = element('article', undefined, 'note-card');
       const due = task.due_date < data.today ? 'overdue' : 'today';
-      const names = { java_backend: 'Java 后端', python_backend: 'Python 后端' };
+      const names = { java_backend: 'Java 后端', python_backend: 'Python 后端', marketing: '市场营销',
+        operations: '运营管理', education: '教育教学', english_interview: '英语面试' };
       card.append(element('p', due === 'today' ? '今日复习' : '此前安排，尚未完成', 'eyebrow'), element('h3', task.theme),
         element('p', (names[task.position] || task.position) + ' · ' + task.due_date, 'note-context'),
         link('打开' + (due === 'today' ? '今日' : '逾期') + '任务 ↗', '/revision?status=todo&due=' + due), link('回看来源报告 ↗', reportPath(task, 'report')));
@@ -61,6 +89,29 @@
     });
     find('recent-empty').hidden = data.recent.length > 0;
     renderPreparation(data.preparation, data.today);
+    renderFocus(data.practice_focus);
+  }
+
+  function renderFocus(focus) {
+    find('focus-list').replaceChildren();
+    find('focus-empty').hidden = !!focus;
+    find('focus-note').textContent = focus ? focus.position_display_name + ' · ' + focus.sample_count +
+      ' 道主问题。' + (focus.local_feedback ? '含本地规则或旧版反馈，仅作练习参考。' : '评分仅供练习参考。') + focus.note : '';
+    if (!focus) return;
+    focus.themes.forEach(theme => {
+      const card = element('article', undefined, 'focus-card');
+      card.append(element('p', theme.priority ? '优先补强' : '继续巩固', 'eyebrow'),
+        element('h3', theme.name), element('strong', theme.score.toFixed(1) + ' / 10', 'focus-score'),
+        element('p', '来自本场 ' + theme.question_count + ' 道主问题', 'notes-boundary'));
+      const actions = element('div', undefined, 'note-actions');
+      actions.append(link('查看评分依据', '/report/' + focus.interview_id));
+      if (theme.can_practice) {
+        const start = element('a', '按主题再练', 'notes-button notes-primary');
+        start.href = '/?' + new URLSearchParams({ position: focus.position, mode: 'topic', theme: theme.name, duration: '5' }) + '#start';
+        actions.append(start);
+      }
+      card.append(actions); find('focus-list').append(card);
+    });
   }
 
   // 主动准备：只显示三个最近目标，数量和目标日期不推断能力。
@@ -74,6 +125,9 @@
       card.append(element('p', date ? date < today ? '已过目标日期' : date === today ? '今天的目标' : '接下来的目标' : '按自己的节奏', 'eyebrow'), element('h3', plan.name),
         element('p', date ? '目标日期：' + date : '尚未设置目标日期', 'note-context'),
         link('打开这份计划 ↗', '/plans?plan_id=' + encodeURIComponent(plan.id)));
+      if (plan.target_sessions) {
+        card.append(element('p', '阶段进度 ' + plan.finished_count + ' / ' + plan.target_sessions + ' 场' + (plan.finished_count >= plan.target_sessions ? ' · 已达成' : ''), 'plan-goal-label'));
+      }
       find('plans').append(card);
     });
     find('plans-empty').hidden = plans.items.length > 0;
@@ -91,18 +145,14 @@
     loading = true; find('refresh').disabled = find('retry').disabled = true;
     const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), 15000);
     try {
-      const response = await guardedFetch('/api/account/dashboard', { cache: 'no-store', signal: controller.signal, headers: { Authorization: 'Bearer ' + account.access_token } });
-      const result = await response.json();
+      const result = await requestJSON('/api/account/dashboard', { auth: true, signal: controller.signal });
       if (version !== requestVersion) return;
       if (session()?.access_token !== account.access_token) throw new Error('账户已变化，请刷新概览。');
-      if (!response.ok) {
-        if (response.status === 401) find('login').hidden = false;
-        throw new Error(result.detail || '读取失败，请重试。');
-      }
       render(result); find('content').hidden = false;
     } catch (error) {
       if (version !== requestVersion) return;
-      find('error').textContent = error.name === 'AbortError' ? '读取超时，可重试。' : error instanceof TypeError ? '连接失败，请检查本机服务。' : error.message;
+      if (error.status === 401) find('login').hidden = false;
+      find('error').textContent = error.name === 'AbortError' ? '读取超时，可重试。' : error instanceof TypeError ? '连接失败，请检查网络后重试。' : error.message;
       find('error-panel').hidden = false;
     } finally {
       clearTimeout(timer);
@@ -112,5 +162,6 @@
   find('refresh').addEventListener('click', load);
   find('retry').addEventListener('click', load);
   addEventListener('pageshow', (event) => { if (event.persisted) { version++; loading = false; load(); } });
+  addEventListener('account:changed', () => { version++; loading = false; load(); });
   load();
 }());

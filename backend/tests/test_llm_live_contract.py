@@ -174,7 +174,8 @@ def probe(monkeypatch):
         else:
             component = "prober"
             target = json.loads(body["messages"][1]["content"])
-            data = {"content": "请说明" + "、".join(target["points"]), "node_id": target["node_id"]}
+            data = target["output_template"]
+            assert data["content"] == target["suggestion"] and data["content"].endswith(("?", "？"))
         count[component] += 1
         fault = faults.get((component, count[component]))
         return response("bad-json" if fault == "invalid" else json.dumps(data, ensure_ascii=False),

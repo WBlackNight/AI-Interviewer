@@ -177,7 +177,7 @@ class TestProbing:
         assert total_probes == 3
         assert session.finished  # 无编码题，弱回答耗尽后直接收尾
 
-    def test_probe_text_keeps_original_missed_anchor_when_tree_names_do_not_match(self):
+    def test_probe_keeps_missed_anchor_private_when_tree_names_do_not_match(self):
         bank = _bank()
         session = _session(bank, plan=[
             PlanItem(theme="MySQL", weight=1.0, difficulty="mid", question_count=1),
@@ -185,7 +185,9 @@ class TestProbing:
         session.start()
         events = session.handle_answer(WEAK_ANSWER)
         probe = [q for q in _events_of(events, EventType.QUESTION)][0]
-        assert "要点1" in probe["content"] and "索引结构" not in probe["content"]
+        assert probe["content"].endswith("？")
+        assert "要点1" not in probe["content"] and "索引结构" not in probe["content"]
+        assert session.snapshot()["scoring_target"]["answer_points"][0]["point"] == "要点1"
 
     def test_recovery_from_probe_returns_to_questioning(self):
         """追问答得好 → 通过追问 → 回到主流程推下一主题。

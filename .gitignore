@@ -27,7 +27,13 @@ out/
 
 # 环境与编辑器
 .env
-.env.local
+.env.*
+!.env.example
+*.env
+!*.env.example
+*.pem
+*.pfx
+*.key
 .idea/
 .vscode/
 .DS_Store

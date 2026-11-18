@@ -14,6 +14,7 @@ from app.models.entities import InterviewRuntime
 from app.security import has_access
 from app.voice.doubao import DoubaoVoiceError, DoubaoVoiceOptions
 from app.voice.realtime import RealtimeDialogue
+from app.services.web_origin import allowed_origin
 
 router = APIRouter()
 
@@ -67,7 +68,7 @@ async def realtime_ws(websocket: WebSocket, interview_id: str):
             return bool(interview and interview.status not in ('finished', 'cancelled'))
 
     if (not re.fullmatch('[a-f0-9]{32}', interview_id) or not authorized()
-            or websocket.headers.get('origin') not in settings.cors_origins):
+            or not allowed_origin(websocket, settings.cors_origins)):
         await websocket.close(code=4403)
         return
     await websocket.accept(subprotocol='interview')

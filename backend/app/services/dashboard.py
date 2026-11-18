@@ -7,6 +7,9 @@ from app.models.entities import Interview, ResourceOwner, RevisionTask, Revision
 from app.services.history import summaries
 from app.services.revision import revision_today
 from app.services.preparation import plan_dashboard
+from app.agent.skill_tree import load_skill_tree
+from app.config import get_settings
+from app.services.practice_focus import latest_practice_focus
 
 
 def account_dashboard(db, account_id, skill_tree_dir):
@@ -46,6 +49,7 @@ def account_dashboard(db, account_id, skill_tree_dir):
         'tasks': {'todo': task_counts.get('todo', 0), 'done': task_counts.get('done', 0), **due},
         'notes_with_content': note_count,
         'preparation': plan_dashboard(db, account_id, today),
+        'practice_focus': latest_practice_focus(db, account_id, load_skill_tree(skill_tree_dir), get_settings().weak_score),
         'week': [{'date': day.isoformat(), 'finished': count} for day, count in zip(days, week)],
         'active': summaries(db, active, skill_tree_dir), 'recent': summaries(db, recent, skill_tree_dir),
         'priority_tasks': [{'id': task.id, 'interview_id': task.interview_id, 'position': task.position,

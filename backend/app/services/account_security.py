@@ -42,8 +42,11 @@ def consume(db,identifier,code,purpose,account_id=None,context=None):
         AuthChallenge.account_id==account_id,AuthChallenge.consumed==0,
         AuthChallenge.expires_at>now_utc(),AuthChallenge.attempts<5]
     if context is not None:filters.append(AuthChallenge.context==context)
-    row=db.execute(update(AuthChallenge).where(*filters).values(attempts=AuthChallenge.attempts+1)
-        .returning(AuthChallenge.secret_hash,AuthChallenge.context)).first()
+    # 本机 SQLite 3.26 不支持 UPDATE ... RETURNING：先原子自增，再按 id 取回挑战内容
+    updated=db.execute(update(AuthChallenge).where(*filters)
+        .values(attempts=AuthChallenge.attempts+1)).rowcount
+    row=db.execute(select(AuthChallenge.secret_hash,AuthChallenge.context)
+        .where(AuthChallenge.id==identifier)).first() if updated else None
     # Failed attempts persist independently of later form errors.
     db.commit()
     if not row or not hmac.compare_digest(row[0],digest(identifier,code)):
@@ -65,10 +68,14 @@ def captcha(db):
     return {'captcha_id':row.id,'image':'data:image/png;base64,'+base64.b64encode(output.getvalue()).decode(),'expires_in':120}
 
 def profile_data(db,account):
+    from app.models.entities import AccountDetails
+    details = db.get(AccountDetails, account.id)
     row=db.get(AccountProfile,account.id)
     return {'id':account.id,'username':account.username,'nickname':row.nickname if row else '',
         'email':row.email if row else None,'email_verified':bool(row and row.email),
-        'avatar_version':row.avatar_version if row else None}
+        'avatar_version':row.avatar_version if row else None,
+        'gender': details.gender if details else None, 'age': details.age if details else None,
+        'bio': details.bio if details else '', 'profile_version': details.version if details else 0}
 
 def profile_row(db,account):
     row=db.get(AccountProfile,account.id)
@@ -81,9 +88,10 @@ def nickname(value):
         raise ValueError('昵称应为1–32个可见字符')
     return value
 
-def normalize_avatar(raw,media):
+def normalize_avatar(raw,media,size=256):
     allowed={'image/png':'PNG','image/jpeg':'JPEG','image/webp':'WEBP'}
     if media not in allowed:raise HTTPException(415,'头像仅支持 JPG、PNG、WebP 静态图片')
+    if type(size) is not int or size not in (128,256,512):raise HTTPException(422,'头像尺寸可选128、256或512像素')
     if not raw or len(raw)>AVATAR_LIMIT:raise HTTPException(413,'头像不能为空且不能超过2MB')
     if not _AVATAR_WORK.acquire(blocking=False):raise HTTPException(429,'图片处理繁忙，请稍后重试')
     try:
@@ -92,7 +100,7 @@ def normalize_avatar(raw,media):
                 raise ValueError('format')
             if not (32<=source.width<=4096 and 32<=source.height<=4096):raise ValueError('dimensions')
             source.load()
-            image=ImageOps.fit(ImageOps.exif_transpose(source).convert('RGB'),(256,256))
+            image=ImageOps.fit(ImageOps.exif_transpose(source).convert('RGB'),(size,size))
             image.info.clear()
             out=io.BytesIO();image.save(out,format='PNG');return out.getvalue()
     except (ValueError,OSError,UnidentifiedImageError,Image.DecompressionBombError):
@@ -108,7 +116,7 @@ def send_code(settings,address,code,purpose):
     if local and settings.smtp_host not in ('127.0.0.1','localhost','::1'):
         raise HTTPException(503,'本机测试邮件配置无效')
     if not local and settings.smtp_security=='none':raise HTTPException(503,'SMTP需要启用TLS')
-    message=EmailMessage();message['Subject']='青栈 · '+('绑定邮箱' if purpose=='email_bind' else '修改密码')+'验证码'
+    message=EmailMessage();message['Subject']='青栈 · '+({'email_bind':'绑定邮箱','email_change':'更换邮箱','password_recovery':'找回密码'}.get(purpose,'修改密码'))+'验证码'
     message['From']=settings.mail_from;message['To']=address
     message.set_content(('本机测试邮件，不发送至外部。\n' if local else '')+f'你的验证码是：{code}\n10分钟内有效，仅限本次操作。请勿向他人透露。')
     try:

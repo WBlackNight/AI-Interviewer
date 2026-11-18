@@ -1,0 +1,146 @@
+.tour-open,
+.tour-quiet {
+  min-height: 44px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--pine);
+  font: 600 14px/1.4 var(--sans);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.tour-open:hover,
+.tour-quiet:hover {
+  background: #e7f0e7;
+}
+
+.tour-entry {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 16px;
+  padding-block: 8px;
+}
+
+.tour-entry:has(.tour-open[hidden]),
+.realtime-page[data-immersive="true"] .tour-entry {
+  display: none;
+}
+
+.tour-entry p {
+  margin: 0 auto 0 0;
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tour-entry .tour-open {
+  flex: 0 0 auto;
+  padding-inline: 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  text-decoration: none;
+}
+
+.tour-entry .tour-open:hover {
+  border-color: var(--line-strong);
+  background: var(--paper-2);
+}
+
+.tour-entry + .notes-main {
+  padding-block-start: clamp(12px, 2vw, 30px);
+}
+
+.onboarding {
+  inset: auto 24px 24px auto;
+  margin: 0;
+  max-width: min(430px, calc(100% - 32px));
+  max-height: calc(100dvh - 40px);
+  padding: clamp(16px, 3vw, 24px);
+  border: 1px solid var(--control-border);
+  border-radius: 22px;
+  background: #fcfdf9;
+  color: var(--ink);
+  box-shadow: var(--surface-shadow), 0 20px 65px rgb(19 48 34 / 25%);
+  overflow: auto;
+}
+
+.onboarding::backdrop {
+  background: rgb(18 42 29 / 36%);
+}
+
+.tour-header,
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.onboarding .tour-header h2 {
+  font: 650 17px/1.4 var(--sans);
+}
+
+.tour-meter {
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin-block: 10px 0;
+  accent-color: var(--sage-deep);
+}
+
+.tour-content {
+  margin-block: 12px 18px;
+  padding: clamp(12px, 3vw, 18px);
+  border-radius: 14px;
+  background: var(--paper-2);
+}
+
+.tour-content .tour-progress {
+  margin: 0 0 8px;
+  color: #355647;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tour-content h3 {
+  margin: 0 0 6px;
+  font: 650 clamp(20px, 5vw, 24px)/1.3 var(--sans);
+}
+
+.tour-content p:last-child {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.tour-actions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .tour-entry {
+    align-items: center;
+    gap: 8px;
+    padding-block: 4px;
+  }
+
+  .onboarding {
+    inset: auto 12px max(12px, env(safe-area-inset-bottom)) 12px;
+    max-width: none;
+    width: auto;
+  }
+}
+
+.guide-tour-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-start: 12px;
+}

@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, ConfigDict, field_validator, TypeAdapter
 from typing import Literal, Annotated
 
 from app.voice.audio import MAX_FRAME_BASE64_CHARS
+from app.practice_policy import DURATION_QUESTIONS
 
 
 class ResumeCreateRequest(BaseModel):
@@ -24,12 +25,20 @@ class ResumeResponse(BaseModel):
 
 
 class InterviewCreateRequest(BaseModel):
+    duration_minutes: int | None = Field(default=None, strict=True)
     resume_id: str | None = None
     position: str = Field(default="java_backend")
     difficulty: str = Field(default="mid", pattern="^(easy|mid|hard)$")
     # 省略为常规面试；显式空列表无效，避免误建为全岗位面试。
     themes: list[Annotated[str, Field(min_length=1, max_length=64)]] | None = Field(
         default=None, min_length=1, max_length=12)
+
+    @field_validator('duration_minutes')
+    @classmethod
+    def supported_duration(cls, value):
+        if value is not None and value not in DURATION_QUESTIONS:
+            raise ValueError('请选择5、10或15分钟的练习')
+        return value
 
 
 class PlanItemOut(BaseModel):
@@ -38,6 +47,13 @@ class PlanItemOut(BaseModel):
     difficulty: str
     question_count: int
     include_coding: bool
+    question_id: str | None = None
+    source_interview_id: str | None = None
+
+
+class QuestionRetryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    question_id: str = Field(strict=True, min_length=1, max_length=64)
 
 
 class InterviewCreateResponse(BaseModel):

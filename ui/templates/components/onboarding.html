@@ -1,0 +1,17 @@
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="{{page}}" data-tour-steps="{{steps}}">
+    <div class="tour-header">
+      <h2 id="tour-title">{{title}}</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="{{total}}" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      {{finish}}
+    </div>
+  </dialog>

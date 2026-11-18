@@ -3,6 +3,7 @@
 /* @include session */
 /* @include token */
 /* @include microphone */
+/* @include questionmotion */
 	const find = (id) => document.querySelector('#voice-' + id);
 	const copy = find('copy').dataset;
 	const interviewId = location.pathname.match(/^\/interview\/([a-f0-9]{32})$/)?.[1];
@@ -47,7 +48,6 @@
 		if (capture) { capture.port.onmessage = null; capture.disconnect(); capture = null; }
 		source?.disconnect(); source = null;
 		mute?.disconnect(); mute = null;
-		find('level').value = 0;
 		find('file').value = '';
 		say('capture', copy.idleCapture); render();
 	}
@@ -88,9 +88,7 @@
 			const merged = new Float32Array(samples.length + block.length);
 			merged.set(samples); merged.set(block, samples.length);
 			const size = Math.round(context.sampleRate / 10);
-			let offset = 0, energy = 0;
-			for (const value of block) energy += value * value;
-			find('level').value = Math.min(1, Math.sqrt(energy / block.length) * 4);
+			let offset = 0;
 			while (merged.length - offset >= size) {
 				const bytes = new Uint8Array(3200), view = new DataView(bytes.buffer);
 				for (let index = 0; index < 1600; index++) {
@@ -197,6 +195,7 @@
 			connecting = false; clearTimeout(connectionTimer);
 			question = event.current_question; version = event.version;
 			active = !event.finished && !event.cancelled;
+			find('complete').hidden = !event.finished || !!event.cancelled;
 			pending = false; say('status', active ? copy.ready : copy.ended);
 		} else if (event.type === 'question') {
 			stopCapture(); question = event; version = event.version; active = true; pending = false; blocked = false;
@@ -209,6 +208,7 @@
 		} else if (event.type === 'answer_ack') {
 			say('saved', copy.saved);
 		} else if (event.type === 'report_ready' || event.type === 'interview_cancelled') {
+			find('complete').hidden = event.type !== 'report_ready';
 			active = false; pending = false; stopCapture(); say('status', copy.finished);
 		} else if (event.type === 'tts_chunk') play(event);
 		else if (event.type === 'tts_end') { generating = false; if (!playing.size) { speech = ''; say('playing', ''); } }
@@ -217,7 +217,7 @@
 			fail(new Error(event.detail || copy.failed), event.type === 'voice_gap');
 		}
 		if (event.version !== undefined) version = event.version;
-		say('question', question?.content || copy.emptyQuestion);
+		renderQuestionTitle(find('question'), question?.content || copy.emptyQuestion, question?.turn_id);
 		say('meta', question ? question.theme + (question.is_probe ? ' · 追问' : copy.mainQuestion) : 'PRACTICE SAVED'); render();
 	}
 	async function connect() {
@@ -261,6 +261,7 @@
 	addEventListener('pageshow', (event) => { if (event.persisted) { disposed = false; void connect(); } });
 	find('text-link').href = '/interview/' + interviewId;
 	find('report').href = '/report/' + interviewId;
+	find('complete-report').href = find('report').href;
 	void microphone.refresh(); connect();
   document.querySelectorAll('a[href*="mode="], #voice-text-link').forEach(link => link.addEventListener('click', event => {
     if (recording || acquiring || pending) { event.preventDefault(); say('error', '请先停止录音并等待本轮保存，再切换对话模式。'); }

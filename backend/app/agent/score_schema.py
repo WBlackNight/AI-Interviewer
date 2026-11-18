@@ -27,9 +27,13 @@ from app.domain import EvidenceRef, Question, ScoreResult
 
 #: 提示词版本：进入缓存键。修改 SYSTEM_PROMPT 时必须同步递增，
 #: 否则旧缓存会被错误复用。
-PROMPT_VERSION = "score-prompt-v7"
+PROMPT_VERSION = "score-prompt-v8"
 
 DIMENSION_KEYS = ("技术深度", "表达逻辑", "岗位匹配")
+DIMENSION_WEIGHTS = dict(zip(
+    (*DIMENSION_KEYS, "证据支撑", "应用与取舍"),
+    (0.35, 0.20, 0.15, 0.15, 0.15),
+))
 
 MAX_QUOTES = 5
 MAX_QUOTE_CHARS = 300
@@ -70,8 +74,8 @@ class ScorePayload(BaseModel):
     @classmethod
     def _dimensions_exact_keys(cls, value: dict[str, float]) -> dict[str, float]:
         keys = set(value)
-        if keys != set(DIMENSION_KEYS):
-            raise ValueError(f"维度必须是 {list(DIMENSION_KEYS)}，实际为 {sorted(keys)}")
+        if keys not in (set(DIMENSION_KEYS), set(DIMENSION_WEIGHTS)):
+            raise ValueError("评分维度组合不完整")
         for key, item in value.items():
             if isinstance(item, bool) or not isinstance(item, (int, float)):
                 raise ValueError(f"维度 {key} 不是数值")
@@ -152,8 +156,11 @@ def build_score_result(payload: ScorePayload, question: Question, answer: str) -
     if hit and not refs:
         raise ValueError("命中了要点但没有任何引用支撑")
 
+    weighted_score = payload.score
+    if payload.dimensions.keys() == DIMENSION_WEIGHTS.keys():
+        weighted_score = sum(payload.dimensions[key] * weight for key, weight in DIMENSION_WEIGHTS.items())
     score, dimensions, note = apply_injection_policy(
-        score=payload.score, dimensions=payload.dimensions,
+        score=weighted_score, dimensions=payload.dimensions,
         hits=tuple(payload.key_points_hit), answer=answer,
     )
     if not hit:

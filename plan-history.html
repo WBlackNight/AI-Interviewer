@@ -6,16 +6,19 @@
   <meta name="color-scheme" content="light">
   <title>计划练习记录 · 青栈 QINGZHAN</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="/assets/home.css">
-  <script src="/assets/plan-history.js" defer></script>
-<script src="/assets/account-menu.js" defer></script>
+  <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+  <script src="/assets/plan-history.js?v=3aa64897e89f" defer></script>
+<script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
 </head>
 <body class="notes-page">
   <a class="skip" href="#plan-history-main">跳到主要内容</a>
   <header class="nav"><div class="container notes-nav">
     <a class="brand" href="/" aria-label="青栈首页"><svg width="25" height="25" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 5h20v14H13l-6 5v-5H4zM9 10h10M9 14h6"/></svg><span class="brand-mark">青栈</span><span class="brand-en">QINGZHAN</span></a>
-    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard">概览</a><a href="/catalog">题库</a><a href="/plans">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
-  <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div></header>
+    <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a><details class="workspace-nav-more" data-navigation-menu><summary data-current-section><span class="desktop-nav-label">更多功能</span><span class="mobile-nav-label">菜单</span></summary><div class="workspace-nav-panel"><div class="workspace-nav-section mobile-nav-primary"><p>开始练习</p><a href="/#start">开始练习</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a></div><div class="workspace-nav-section"><p>记录与复盘</p><a href="/dashboard">练习概览</a><a href="/history">练习记录</a><a href="/review">跨场复盘</a></div><div class="workspace-nav-section"><p>我的准备</p><a href="/plans" aria-current="location">准备计划</a><a href="/revision">复习任务</a><a href="/notes">复习笔记</a><a href="/library">我的题单</a></div><div class="workspace-nav-section"><p>账户与帮助</p><a href="/account">账户中心</a><a href="/guide">使用指南</a></div></div></details></nav>
+  <details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div></header>
+  <div class="container tour-entry"><p id="tour-hint" hidden>从计划记录回看已经完成的练习。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
   <main id="plan-history-main" class="container notes-main board-main">
     <section class="notes-intro board-intro" aria-labelledby="plan-history-title"><div><p class="eyebrow">ONE PLAN, EVERY ATTEMPT</p><h1 id="plan-history-title">同一个方向，<br>每一次都有记录。</h1></div><div><p class="sec-lead">把一份计划里的练习放在一起。接着未讲完的思路，也回看已经留下的回答。</p><p class="notes-boundary">这里只整理仍保留的关联场次；记录数量不表示能力，完成练习不改变计划目标。</p><a href="/dashboard" class="link-arrow">返回练习概览 ↗</a></div></section>
     <!-- 身份与地址：先检查会话及计划编号，不枚举他人的记录。 -->
@@ -50,5 +53,22 @@
   </main>
   <footer class="site-foot"><div class="container foot-row"><span>青栈 QINGZHAN · 同一个方向，每次再往前一点。</span><a href="/plans">准备计划 ↗</a></div></footer>
   <noscript><p class="no-script">开启JavaScript并登录所属账户后，可读取计划练习记录。</p></noscript>
+  <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="plan-history" data-tour-steps="[[&quot;查看计划对应的练习&quot;, &quot;先确认当前计划，再按页面提供的筛选查看相关练习。&quot;], [&quot;结合报告复盘&quot;, &quot;打开有报告的场次，核对已完成内容和下一步要继续的主题。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">计划记录指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
 </body>
 </html>

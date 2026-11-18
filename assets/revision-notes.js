@@ -2,6 +2,13 @@
 /* 复习笔记：原生DOM、账户授权、显式保存与版本冲突处理。 */
 (function () {
 	'use strict';
+function notify(message, type = 'success', nextPage = false) {
+	const detail = { message: String(message || '').slice(0, 240), type };
+	if (!detail.message) return;
+	if (nextPage) {
+		try { sessionStorage.setItem('ui:notice', JSON.stringify({ ...detail, expires: Date.now() + 10000 })); } catch {}
+	} else if (typeof CustomEvent === 'function') dispatchEvent(new CustomEvent('app:notice', { detail }));
+}
 function readSession() {
 	try {
 		const value = JSON.parse(sessionStorage.getItem('account:session'));
@@ -112,9 +119,11 @@ async function guardedFetch(url, options) {
 			state.input.value = state.note.content;
 			state.conflict.hidden = true;
 			state.message.textContent = state.note.content ? '笔记已保存。' : '笔记已清空。';
+			notify(state.message.textContent);
 			showSaved(state);
 		} catch (error) {
 			state.message.textContent = error.message || '保存失败，草稿保留，请重试。';
+			notify(state.message.textContent, 'error');
 			if (error.status === 409) state.conflict.hidden = false;
 			if (error.status === 401) showError(error);
 		} finally {

@@ -11,11 +11,14 @@ function microphoneError(error) {
   return new Error(messages[error.name] || error.message || '麦克风暂不可用，请重试或上传录音。');
 }
 function microphonePicker(select, status) {
-  const supported = () => typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined';
+  const supported = () => globalThis.isSecureContext !== false && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia && typeof AudioContext !== 'undefined';
+  const unavailable = () => globalThis.isSecureContext === false
+    ? '当前连接未加密，浏览器无法使用麦克风。请通过本站 HTTPS 地址打开后重试。'
+    : '当前浏览器未开放录音，请使用 Edge 或 Chrome 打开本页，或上传录音。';
   let generation = 0;
   async function refresh() {
     const attempt = ++generation;
-    if (!supported()) { status.textContent = '当前浏览器未开放录音，请在 Edge 或 Chrome 中打开 localhost 页面。仍可上传录音。'; return; }
+    if (!supported()) { status.textContent = unavailable(); return; }
     status.textContent = '使用系统默认麦克风；点击开始时才会请求录音授权。';
     if (!navigator.mediaDevices.enumerateDevices) return;
     try {
@@ -31,7 +34,7 @@ function microphonePicker(select, status) {
     } catch { status.textContent = '暂时无法读取设备列表，可使用系统默认麦克风。'; }
   }
   async function acquire() {
-    if (!supported()) throw new Error('当前浏览器不支持录音，请用 Edge 或 Chrome 打开本页，或上传录音。');
+    if (!supported()) throw new Error(unavailable());
     let expired = false, timer;
     const pending = navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, ...(select.value ? { deviceId: { exact: select.value } } : {}) } });
     pending.then(media => { if (expired) media.getTracks().forEach(track => track.stop()); }, () => {});

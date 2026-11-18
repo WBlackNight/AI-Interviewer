@@ -1,0 +1,361 @@
+/* White, focused avatar picker with local crop and a separate save action. */
+button.profile-avatar {
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  border: 1px solid #c8ddcd;
+  color: #416c4c;
+  font: inherit;
+  overflow: visible;
+}
+button.profile-avatar::after {
+  content: "编辑";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 1px solid #c8ddcd;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+button.profile-avatar img {
+  border-radius: inherit;
+}
+button.profile-avatar:focus-visible {
+  outline: 3px solid #739a7c;
+  outline-offset: 5px;
+}
+.avatar-settings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+  gap: 14px;
+}
+.avatar-settings-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 19px;
+  background: #eaf3e9;
+  color: #73927a;
+  font-size: 28px;
+}
+.avatar-settings-card h3 {
+  font-size: 18px;
+  font-weight: 550;
+}
+.avatar-settings-card p {
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.9;
+}
+.avatar-settings-card button {
+  margin-top: 8px;
+}
+.avatar-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(760px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  border: 1px solid #d5e3d8;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow:
+    0 32px 96px -20px #173c2947,
+    0 4px 16px #173c2910;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.avatar-dialog::backdrop {
+  background: #19372b70;
+  backdrop-filter: blur(5px);
+  animation: motion-fade var(--t-base) var(--ease-state);
+}
+.avatar-dialog[open] {
+  animation: motion-enter var(--t-base) var(--ease);
+}
+.avatar-dialog-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid #e5ede6;
+  background: #fcfdfb;
+}
+.avatar-dialog-header h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 550;
+  line-height: 1.5;
+}
+.avatar-dialog-header p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #60766a;
+  margin: 8px 0 0;
+}
+.avatar-dialog-header > button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 11px;
+  background: #eef4ed;
+  color: #718775;
+  font-size: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.avatar-dialog-header > button:focus-visible {
+  outline: 3px solid #719a7d;
+  outline-offset: 3px;
+}
+.avatar-dialog #avatar-form {
+  margin: 0;
+  padding: 22px 28px 24px;
+  gap: 14px;
+}
+.avatar-dialog .avatar-drop {
+  border: 1px dashed #bdd3c1;
+  border-radius: 15px;
+  background: #f8fbf6;
+  padding: 22px;
+  text-align: center;
+  transition:
+    border-color var(--t-fast),
+    background var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.avatar-drop.is-drag-over {
+  background: #e7f3e8;
+  border-color: #5e8f6c;
+}
+.avatar-drop p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #6c8373;
+  margin: 0 0 12px;
+}
+.avatar-drop .account-help {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: #657b6b;
+}
+.avatar-dialog:has(#avatar-crop:not([hidden])) .avatar-drop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  padding: 12px;
+}
+.avatar-dialog:has(#avatar-crop:not([hidden])) .avatar-drop > p:first-child {
+  display: none;
+}
+.avatar-dialog:has(#avatar-crop:not([hidden])) .avatar-drop .account-help {
+  margin: 0;
+}
+.avatar-file-name {
+  margin: 12px 0;
+  font-size: 12px;
+  color: #657b6b;
+  overflow-wrap: anywhere;
+}
+.avatar-file-name:empty {
+  display: none;
+}
+.avatar-dialog .avatar-crop {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 16px 0 0;
+}
+.avatar-dialog .crop-workspace > div:first-child > .account-help {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+.avatar-dialog #avatar-form label {
+  margin: 12px 0 8px;
+  line-height: 1.6;
+}
+.avatar-dialog .crop-workspace {
+  grid-template-columns: minmax(0, 1fr) 148px;
+  gap: 24px;
+  padding-top: 4px;
+}
+.avatar-dialog .crop-stage {
+  max-width: 320px;
+  margin-inline: auto;
+  border: 1px solid #d3e2d6;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.avatar-dialog .crop-result {
+  align-content: start;
+  gap: 12px;
+  padding-top: 10px;
+}
+.avatar-dialog #avatar-preview {
+  box-shadow: 0 0 0 4px #f0f5ed;
+  border: 1px solid #d6e3d6;
+}
+.avatar-dialog .crop-result > p {
+  margin: 0;
+  font-size: 12px;
+  color: #60766a;
+}
+.avatar-dialog #avatar-form .crop-result label {
+  margin: 0;
+  font-size: 13px;
+}
+.avatar-dialog .crop-result select {
+  font-size: 14px;
+  min-height: 40px;
+}
+.avatar-dialog .crop-position {
+  margin-top: 8px;
+}
+.avatar-dialog .crop-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+}
+.avatar-dialog input[type="range"] {
+  accent-color: #598568;
+}
+.avatar-dialog #avatar-message {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0;
+}
+.avatar-dialog #avatar-message:empty {
+  display: none;
+}
+.avatar-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid #e3ebe3;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.avatar-dialog-actions > div {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+.avatar-dialog .avatar-reset-row {
+  display: flex;
+  justify-content: end;
+  margin-top: 12px;
+}
+.avatar-dialog .avatar-reset-row button {
+  font-size: 12px;
+  min-height: 34px;
+  padding: 6px 11px;
+}
+.avatar-dialog :is(button, input, select):focus-visible {
+  outline: 3px solid #70977c;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .avatar-dialog {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 24px);
+    border-radius: 18px;
+  }
+  .avatar-dialog-header {
+    padding: 20px;
+  }
+  .avatar-dialog #avatar-form {
+    padding: 18px 20px 22px;
+  }
+  .avatar-dialog .crop-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .avatar-dialog .crop-result {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 6px 18px;
+    align-items: center;
+    text-align: left;
+    padding: 6px 4px;
+  }
+  .avatar-dialog #avatar-preview {
+    grid-row: span 3;
+    width: 68px;
+    height: 68px;
+  }
+  .avatar-dialog .crop-result > p {
+    margin: 0;
+  }
+  .avatar-dialog .crop-result select {
+    width: 100%;
+  }
+  .avatar-dialog .crop-stage {
+    max-width: 280px;
+  }
+  .avatar-dialog .crop-position {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .avatar-dialog-header h2 {
+    font-size: 21px;
+  }
+  .avatar-dialog-actions > div {
+    gap: 8px;
+  }
+}
+.avatar-drop:focus-within {
+  border-color: #5e8f6c;
+  box-shadow: 0 0 0 3px #719d7c18;
+}
+@media (hover: hover) and (pointer: fine) {
+  .avatar-dialog-header > button:hover {
+    background: #dcece0;
+  }
+  .avatar-dialog .avatar-drop:hover {
+    border-color: #8db69a;
+    background: #f2f8f1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .avatar-dialog[open] {
+    animation: none;
+  }
+  .avatar-drop {
+    transition: none;
+  }
+}
+.avatar-dialog-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: linear-gradient(120deg, #f2f8f2, #fff);
+}
+.avatar-dialog .crop-stage {
+  max-width: 280px;
+}
+.avatar-dialog-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: #fff;
+  padding-bottom: 12px;
+  box-shadow: 0 -10px 16px #ffffffd9;
+}

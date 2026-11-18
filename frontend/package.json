@@ -3,23 +3,40 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "test": "tsc -p tsconfig.tests.json && node --test .test-build/tests/*.test.js"
+    "dev": "vite",
+    "build": "npm run typecheck && node ../tools/build_frontend.mjs",
+    "start": "node ../tools/start_web.mjs",
+    "typecheck": "tsc -p tsconfig.web.json",
+    "build:assistant": "node ../tools/build_frontend.mjs",
+    "check:assistant": "npm run typecheck",
+    "dev:legacy": "next dev --port 3001",
+    "build:legacy": "next build",
+    "test": "tsc -p tsconfig.tests.json && node --test .test-build/tests/*.test.js",
+    "format": "prettier --write \"{assistant,studio,shared,widget,admin}/**/*.{ts,tsx}\" vite.config.mjs tsconfig.web.json prettier.config.mjs ../tools/build_frontend.mjs ../tools/start_web.mjs ../ui/styles/97-assistant.css ../ui/styles/98-react-practice.css ../ui/styles/99-qing-pet.css ../ui/styles/91-avatar-dialog.css ../ui/styles/100-admin.css",
+    "format:check": "prettier --check \"{assistant,studio,shared,widget,admin}/**/*.{ts,tsx}\" vite.config.mjs tsconfig.web.json prettier.config.mjs ../tools/build_frontend.mjs ../tools/start_web.mjs ../ui/styles/97-assistant.css ../ui/styles/98-react-practice.css ../ui/styles/99-qing-pet.css ../ui/styles/91-avatar-dialog.css ../ui/styles/100-admin.css"
   },
   "dependencies": {
-    "next": "14.2.13",
+    "next": "15.5.29",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@types/node": "20.14.15",
+    "@types/node": "24.19.2",
     "@types/react": "18.3.4",
     "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "6.3.0",
     "autoprefixer": "10.4.20",
-    "postcss": "8.4.41",
+    "postcss": "8.5.33",
+    "prettier": "3.10.1",
     "tailwindcss": "3.4.10",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "vite": "8.3.8"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "overrides": {
+    "postcss": "$postcss",
+    "postcss-selector-parser": "6.1.5"
   }
 }

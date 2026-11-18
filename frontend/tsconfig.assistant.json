@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "incremental": false, "jsx": "react-jsx", "plugins": [] },
+  "include": ["assistant/**/*.ts", "assistant/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

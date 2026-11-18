@@ -4,11 +4,13 @@ from collections import Counter
 from fastapi import HTTPException
 
 from app.services.practice import available_themes
+from app.practice_policy import role_metadata
 
 
 def question_catalog(trees, bank, *, position=None, theme=None, difficulty=None,
                      kind='all', query=None, offset=0, limit=6, theme_limit=3):
     questions = bank.questions
+    metadata = role_metadata()
     positions = []
     for key, tree in trees.items():
         rows = [question for question in questions if question.position == key]
@@ -17,6 +19,9 @@ def question_catalog(trees, bank, *, position=None, theme=None, difficulty=None,
         allowed = available_themes(tree, bank, key)
         topics = list(dict.fromkeys(tree.root_names() + sorted({question.theme for question in rows})))
         positions.append({'id': key, 'display_name': tree.display_name, 'total': len(rows),
+            'group': metadata.get(key, {}).get('group', '其他方向'),
+            'summary': metadata.get(key, {}).get('summary', ''),
+            'focus': metadata.get(key, {}).get('focus', ''),
             'knowledge': sum(not row.is_coding for row in rows), 'coding': sum(row.is_coding for row in rows),
             'practice_theme_limit': min(12, theme_limit),
             'themes': [{'name': topic, 'question_count': sum(row.theme == topic for row in rows),

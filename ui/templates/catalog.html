@@ -17,16 +17,17 @@
   </div></header>
   <main id="catalog-main" class="container notes-main board-main">
     <section class="notes-intro board-intro" aria-labelledby="catalog-title">
-      <div><p class="eyebrow">FIND YOUR NEXT QUESTION</p><h1 id="catalog-title">先找到方向，<br>再把这一题讲清楚。</h1></div>
-      <div><p class="sec-lead">找到想练的方向，选一个主题，把思路讲清楚。</p><p class="notes-boundary">预览题目与参考来源，再开始练习。</p><a href="#catalog-build" class="link-arrow">选择主题，准备一场练习 ↗</a></div>
+      <div><p class="eyebrow">FIND YOUR NEXT QUESTION</p><h1 id="catalog-title">题库探索</h1></div>
+      <div><p class="sec-lead">搜题，或按方向和主题筛选。</p><a href="#catalog-build" class="link-arrow">选择主题，准备一场练习 ↗</a></div>
     </section>
     <!-- 题库筛选：由服务端做字面匹配和严格难度筛选，失败保留已应用范围。 -->
     <section class="notes-toolbar" aria-label="题库筛选">
       <form id="catalog-filters">
-        <label for="catalog-position">目标岗位<select id="catalog-position"><option value="">正在读取岗位…</option></select></label>
+        <label for="catalog-query" class="board-search">关键词<input id="catalog-query" type="search" maxlength="200" placeholder="题干、主题、编号或来源" autocomplete="off"></label>
+        <details class="filter-disclosure catalog-advanced"><summary>按方向、主题和难度筛选</summary><div class="catalog-filter-fields"><label for="catalog-position">目标岗位<select id="catalog-position"><option value="">正在读取岗位…</option></select></label>
         <label for="catalog-theme">题目主题<select id="catalog-theme"><option value="">全部主题</option></select></label>
         <label for="catalog-level">题目难度<select id="catalog-level"><option value="">全部难度</option><option value="easy">基础</option><option value="mid">进阶</option><option value="hard">挑战</option></select></label>
-        <label for="catalog-query" class="board-search">关键词<input id="catalog-query" type="search" maxlength="200" placeholder="题干、主题、编号或来源" autocomplete="off"></label>
+        </div></details>
         <button class="notes-button notes-primary" type="submit">查找题目</button><button id="catalog-reset" type="button" class="notes-button">清除筛选</button><button id="catalog-refresh" type="button" class="notes-button">刷新题库</button>
       </form>
       <div class="board-date-tabs" role="group" aria-label="题型"><button class="notes-button" type="button" data-kind="all" aria-pressed="true">全部题目</button><button class="notes-button" type="button" data-kind="knowledge" aria-pressed="false">知识题</button><button class="notes-button" type="button" data-kind="coding" aria-pressed="false">编程题</button></div>

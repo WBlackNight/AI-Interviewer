@@ -1,80 +1,79 @@
 """Authenticated profile and reauthenticated account security operations."""
 import asyncio
-import re
 import secrets
 from datetime import timedelta
-from fastapi import APIRouter,Depends,HTTPException,Request,Header
+from fastapi import APIRouter,Depends,HTTPException,Request,Header,Query
 from fastapi.responses import Response
-from pydantic import BaseModel,ConfigDict,Field,SecretStr,field_validator,model_validator
-from sqlalchemy import select,delete,update
+from sqlalchemy import select,delete,update,func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 from app.config import get_settings
 from app.db import get_db
 from app.models.entities import Account,AccountProfile,AccountSession,AuthChallenge
-from app.services.accounts import require_account,verify_password,hash_password,lock_account,now_utc,issue_session
-from app.services import account_security as security
-from app.api.accounts import auth_work
+from app.services.accounts import require_account,verify_password,hash_password,lock_account,now_utc,issue_session,bearer_token,token_hash
+from app.services import account_security as security, revision_export
+from app.api.dependencies import auth_work
 
 router=APIRouter(prefix='/api',tags=['profile'])
 
-class ProfileInput(BaseModel):
-    model_config=ConfigDict(extra='forbid')
-    nickname:str=Field(min_length=1,max_length=32)
-    @field_validator('nickname')
-    @classmethod
-    def clean_name(cls,value):return security.nickname(value)
+@router.get('/account/revision-export')
+def export_revision_data(db:Session=Depends(get_db),account:Account=Depends(require_account)):
+    return revision_export.export_revision_data(db, account.id)
 
-class EmailCodeInput(BaseModel):
-    model_config=ConfigDict(extra='forbid')
-    current_password:SecretStr=Field(min_length=12,max_length=128)
-    purpose:str=Field(pattern=r'^(email_bind|password_change)$')
-    email:str|None=Field(default=None,max_length=254)
-    @field_validator('email')
-    @classmethod
-    def email_format(cls,value):
-        if value is None:return value
-        value=value.strip().lower()
-        if not re.fullmatch(r"[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+",value) or '..' in value or len(value.split('@')[0])>64 or value.startswith('.') or '.@' in value or any(len(label)>63 for label in value.rsplit('@',1)[-1].split('.')):
-            raise ValueError('邮箱格式不正确')
-        return value
-
-class EmailConfirm(EmailCodeInput):
-    challenge_id:str=Field(pattern=r'^[a-f0-9]{32}$')
-    code:str=Field(pattern=r'^\d{6}$')
-
-class PasswordInput(BaseModel):
-    model_config=ConfigDict(extra='forbid')
-    current_password:SecretStr=Field(min_length=12,max_length=128)
-    new_password:SecretStr=Field(min_length=12,max_length=128)
-    password_confirm:SecretStr=Field(min_length=12,max_length=128)
-    challenge_id:str|None=Field(default=None,pattern=r'^[a-f0-9]{32}$')
-    code:str|None=Field(default=None,pattern=r'^\d{6}$')
-    @model_validator(mode='after')
-    def matching(self):
-        if self.new_password.get_secret_value()!=self.password_confirm.get_secret_value():raise HTTPException(422,'两次新密码不一致')
-        if self.new_password.get_secret_value()==self.current_password.get_secret_value():raise HTTPException(422,'新密码不能与当前密码相同')
-        return self
+from app.api.account_inputs import ProfileInput, EmailCodeInput, EmailConfirm, PasswordInput, ReauthenticateInput
 
 def reauthenticate(db,account,password):
     lock_account(db,account.id);db.refresh(account)
     if not verify_password(password.get_secret_value(),account.password_hash):raise HTTPException(403,'当前密码不正确，请重新输入')
 
 @router.get('/account/security')
-def capabilities(account:Account=Depends(require_account)):
+def capabilities(db:Session=Depends(get_db),account:Account=Depends(require_account)):
     settings=get_settings()
     return {'email_available':security.mail_available(settings),'email_mode':settings.mail_mode,
         'test_mail_url':'http://localhost:8025/' if settings.mail_mode=='local_test' else None,
-        'avatar_max_bytes':security.AVATAR_LIMIT}
+        'avatar_max_bytes':security.AVATAR_LIMIT,
+        'active_sessions':db.scalar(select(func.count()).select_from(AccountSession).where(
+            AccountSession.account_id==account.id,AccountSession.expires_at>now_utc()))}
+
+@router.post('/account/sessions/revoke-others',dependencies=[Depends(auth_work)])
+def revoke_other_sessions(payload:ReauthenticateInput,db:Session=Depends(get_db),
+        account:Account=Depends(require_account),authorization:str|None=Header(default=None)):
+    reauthenticate(db,account,payload.current_password)
+    current=token_hash(bearer_token(authorization))
+    count=db.execute(delete(AccountSession).where(AccountSession.account_id==account.id,
+        AccountSession.token_hash!=current)).rowcount
+    db.commit()
+    return {'revoked':count}
 
 @router.patch('/account/profile')
 def update_profile(payload:ProfileInput,db:Session=Depends(get_db),account:Account=Depends(require_account)):
-    lock_account(db,account.id);security.profile_row(db,account).nickname=payload.nickname;db.commit()
+    from app.models.entities import AccountDetails
+    lock_account(db, account.id)
+    details = db.get(AccountDetails, account.id)
+    version = details.version if details else 0
+    if payload.expected_version is not None and payload.expected_version != version:
+        raise HTTPException(409, '资料已在其他页面修改，请重新读取后再保存')
+    if details is None:
+        details = AccountDetails(account_id=account.id, gender=None, age=None, bio='', version=0)
+        db.add(details)
+    changes = payload.model_dump(exclude_unset=True, exclude={'expected_version'})
+    changed = False
+    if 'nickname' in changes:
+        profile = security.profile_row(db, account)
+        changed = profile.nickname != changes.pop('nickname')
+        profile.nickname = payload.nickname
+    for field, value in changes.items():
+        if getattr(details, field) != value:
+            setattr(details, field, value)
+            changed = True
+    if changed:
+        details.version += 1
+    db.commit()
     return security.profile_data(db,account)
 
 @router.post('/account/avatar')
-async def upload_avatar(request:Request,db:Session=Depends(get_db),account:Account=Depends(require_account)):
+async def upload_avatar(request:Request,db:Session=Depends(get_db),account:Account=Depends(require_account),size:int=Query(256,ge=128,le=512)):
     raw=bytearray()
     try:
         async with asyncio.timeout(10):
@@ -83,7 +82,7 @@ async def upload_avatar(request:Request,db:Session=Depends(get_db),account:Accou
                 raw.extend(chunk)
     except TimeoutError:raise HTTPException(408,'头像上传超时，请重试') from None
     media=request.headers.get('content-type','').split(';')[0].lower()
-    avatar=await run_in_threadpool(security.normalize_avatar,bytes(raw),media)
+    avatar=await run_in_threadpool(security.normalize_avatar,bytes(raw),media,size)
     lock_account(db,account.id);row=security.profile_row(db,account)
     row.avatar=avatar;row.avatar_version=secrets.token_hex(16);db.commit()
     return security.profile_data(db,account)
@@ -103,9 +102,11 @@ def remove_avatar(db:Session=Depends(get_db),account:Account=Depends(require_acc
 def email_code(payload:EmailCodeInput,db:Session=Depends(get_db),account:Account=Depends(require_account)):
     reauthenticate(db,account,payload.current_password)
     row=security.profile_row(db,account)
-    if payload.purpose=='email_bind':
-        if row.email:raise HTTPException(409,'账户已绑定邮箱，无需重复绑定')
+    if payload.purpose in ('email_bind','email_change'):
+        if row.email and payload.purpose=='email_bind':raise HTTPException(409,'账户已绑定邮箱，无需重复绑定')
+        if not row.email and payload.purpose=='email_change':raise HTTPException(409,'请先绑定邮箱')
         if not payload.email:raise HTTPException(422,'请输入要绑定的邮箱')
+        if payload.email==row.email:raise HTTPException(422,'新邮箱不能与当前邮箱相同')
         address=payload.email
         if db.scalar(select(AccountProfile.account_id).where(AccountProfile.email==address)):raise HTTPException(409,'该邮箱不可用于绑定')
     else:
@@ -126,11 +127,14 @@ def email_code(payload:EmailCodeInput,db:Session=Depends(get_db),account:Account
 
 @router.post('/account/email/confirm',dependencies=[Depends(auth_work)])
 def confirm_email(payload:EmailConfirm,db:Session=Depends(get_db),account:Account=Depends(require_account)):
-    if payload.purpose!='email_bind' or not payload.email:raise HTTPException(422,'邮箱验证请求不完整')
+    if payload.purpose not in ('email_bind','email_change') or not payload.email:raise HTTPException(422,'邮箱验证请求不完整')
     reauthenticate(db,account,payload.current_password);db.commit()
-    security.consume(db,payload.challenge_id,payload.code,'email_bind',account.id,payload.email)
+    security.consume(db,payload.challenge_id,payload.code,payload.purpose,account.id,payload.email)
     reauthenticate(db,account,payload.current_password);row=security.profile_row(db,account)
-    if row.email:raise HTTPException(409,'账户已绑定邮箱')
+    if row.email and payload.purpose=='email_bind':raise HTTPException(409,'账户已绑定邮箱')
+    if not row.email and payload.purpose=='email_change':raise HTTPException(409,'请先绑定邮箱')
+    db.execute(delete(AuthChallenge).where(AuthChallenge.account_id==account.id,
+        AuthChallenge.purpose.in_(('password_recovery','password_change'))))
     row.email=payload.email
     try:db.commit()
     except IntegrityError:db.rollback();raise HTTPException(409,'该邮箱不可用于绑定') from None

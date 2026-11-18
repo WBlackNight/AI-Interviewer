@@ -1,0 +1,40 @@
+/* 原生任务板：搜索、日期与卡片沿用笔记页视觉，操作在正常文档流内。 */
+
+.board-main { padding-top: 48px; }
+
+.board-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; }
+
+.board-intro h1 { margin-top: 16px; font-size: clamp(30px, 3.2vw, 40px); }
+
+.board-intro .sec-lead { margin-top: 0; font-size: 14px; }
+
+.board-intro .notes-boundary { margin-top: 16px; }
+
+.notes-toolbar input { display: block; width: 100%; min-height: 44px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 10px; color: var(--ink); background: var(--card); font: 14px var(--sans); }
+
+.notes-toolbar .board-search { flex: 1 1 260px; min-width: 200px; }
+
+.board-counts { margin-top: 24px; font-size: 14px; color: var(--ink-2); line-height: 1.8; }
+
+.board-date-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+.board-date-tabs [aria-pressed="true"] { background: var(--sage-deep); color: var(--paper); border-color: var(--sage-deep); }
+
+.board-notice { min-height: 24px; margin-top: 12px; color: var(--sage-deep); font-size: 14px; line-height: 1.8; }
+
+.board-date-caption { margin-top: 16px; color: var(--sage-deep); font-size: 14px; line-height: 1.8; }
+
+.board-label { margin-top: 24px; font-size: 14px; color: var(--ink-2); line-height: 1.8; }
+
+.board-focus { padding-left: 18px; margin-block: 8px 24px; font-size: 14px; line-height: 1.9; overflow-wrap: anywhere; }
+
+.board-schedule { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 20px; border-top: 1px solid var(--line); }
+
+.board-schedule label { width: 100%; color: var(--ink-2); font-size: 14px; }
+
+.board-schedule input { width: 160px; min-width: 0; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 10px; background: var(--paper); color: var(--ink); font: 14px var(--sans); }
+
+.board-date-draft { min-height: 22px; margin-top: 8px; color: var(--clay); font-size: 14px; line-height: 1.8; }
+
+.board-note-preview { margin-block: 16px 24px; padding: 16px; border-radius: 10px; background: var(--paper); color: var(--ink-2); font-size: 14px; line-height: 1.9; white-space: pre-wrap; overflow-wrap: anywhere; }
+

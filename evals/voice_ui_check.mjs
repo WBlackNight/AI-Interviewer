@@ -7,7 +7,8 @@ const html = readFileSync(new URL('../voice.html', import.meta.url), 'utf8');
 const elements = new Map();
 for (const id of html.matchAll(/id="voice-([^"]+)"/g)) {
   elements.set(id[1], { textContent: '', disabled: true, dataset: {},
-    addEventListener(name, action) { this[name] = action; }, setAttribute() {} });
+    addEventListener(name, action) { this[name] = action; }, setAttribute() {},
+    replaceChildren(node) { this.child = node; this.textContent = node.textContent; } });
 }
 for (const entry of html.matchAll(/data-([a-z0-9-]+)="([^"]*)"/g)) {
   elements.get('copy').dataset[entry[1].replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = entry[2];
@@ -35,7 +36,7 @@ class Audio {
   }
 }
 const modeLink = { addEventListener(name, action) { this[name] = action; } };
-const sandbox = vm.createContext({ document: { querySelectorAll: () => [modeLink], querySelector: selector => elements.get(selector.slice(7)), body: { dataset: {} } },
+const sandbox = vm.createContext({ document: { querySelectorAll: () => [modeLink], querySelector: selector => elements.get(selector.slice(7)), createElement: () => ({}), body: { dataset: {} } },
   location: { pathname: '/interview/' + 'a'.repeat(32), origin: 'http://localhost' },
   sessionStorage: { getItem: key => key === 'account:session' ? null : currentToken },
   fetch: async () => ({ ok: true, json: async () => ({ enabled: true }) }),
@@ -44,11 +45,14 @@ const sandbox = vm.createContext({ document: { querySelectorAll: () => [modeLink
 vm.runInContext(readFileSync(new URL('../assets/voice.js', import.meta.url), 'utf8'), sandbox);
 await new Promise(setImmediate);
 socket.emit({ type: 'snapshot', current_question: { turn_id: 'c'.repeat(32), content: '测试题', theme: 'MySQL' }, version: 1 });
+const animatedQuestion = elements.get('question').child;
+assert.equal(animatedQuestion.className, 'motion-question');
 assert.equal(elements.get('read').disabled, false);
 await elements.get('read').click();
 assert.equal(elements.get('read').disabled, true, '合成中禁止重复朗读');
 const chunk = seq => ({ type: 'tts_chunk', utterance_id: 'u1', seq, format: 'pcm_s16le', sample_rate: 24000, channels: 1, data: 'ABAQEA==' });
 socket.emit(chunk(0));
+assert.equal(elements.get('question').child, animatedQuestion, '音频分片不应重播题目动画');
 nodes[0].onended();
 assert.equal(elements.get('read').disabled, true, '分片间隙仍等待本次播报');
 socket.emit(chunk(1));
@@ -71,6 +75,7 @@ assert.equal(elements.get('start').disabled, true);
 assert.equal(sent.filter(event => event.type === 'read_question').length, 1);
 await elements.get('sync').click();await new Promise(setImmediate);
 socket.emit({ type: 'snapshot', current_question: { turn_id: 'd'.repeat(32), content: '下一题', theme: 'MySQL' }, version: 1 });
+assert.notEqual(elements.get('question').child, animatedQuestion, '换题应触发新的入场动画');
 let resolveFile;
 const reading=new Promise(resolve=>resolveFile=resolve);
 elements.get('file').files=[{size:44,arrayBuffer:()=>reading}];

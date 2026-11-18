@@ -17,6 +17,9 @@ def native_files():
     """Use the same explicit page/asset registry as the native builder."""
     manifest = json.loads((ROOT / 'ui/manifest.json').read_text(encoding='utf-8'))
     files = {'/assets/home.css': ('assets/home.css', 'text/css; charset=utf-8')}
+    for name in manifest.get('images', []):
+        assert re.fullmatch(r'[a-z0-9-]+\.webp', name)
+        files['/assets/' + name] = ('assets/' + name, 'image/webp')
     for name in manifest.get('shared_scripts',[]):
         assert re.fullmatch(r'[a-z-]+\.js',name)
         files['/assets/'+name]=('assets/'+name,'text/javascript; charset=utf-8')
@@ -28,6 +31,10 @@ def native_files():
             files[page['route']] = (page['template'], 'text/html; charset=utf-8')
         asset = 'assets/' + page['script']
         files['/' + asset] = (asset, 'text/javascript; charset=utf-8')
+        style = page.get('stylesheet')
+        if style:
+            assert re.fullmatch(r'[a-z-]+\.css', style)
+            files['/assets/' + style] = ('assets/' + style, 'text/css; charset=utf-8')
     files['/index.html'] = files['/']
     return files
 
@@ -41,12 +48,14 @@ def create_gateway(port, frontend_port=3100, backend_port=8000):
         def send_bytes(self, status, body, content_type, headers=()):
             self.send_response(status)
             for key, value in headers:
-                if key.lower() not in HOP_HEADERS | {"content-type", "cache-control"}:
+                if key.lower() not in HOP_HEADERS | {"content-type", "cache-control", "x-content-type-options", "referrer-policy", "x-frame-options"}:
                     self.send_header(key, value)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(body)))
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("X-Frame-Options", "DENY")
             self.end_headers()
             if self.command != "HEAD":
                 self.wfile.write(body)

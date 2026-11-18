@@ -92,6 +92,68 @@ class OpenAICompatibleLLM:
     def close(self) -> None:
         self._client.close()
 
+    def tool_call(self, messages: list[dict], tools: list[dict]) -> dict:
+        """One bounded, read-only planning call. No retry or arbitrary execution."""
+        budget = current_budget()
+        if budget:
+            budget.check()
+        with slot(self._queue_timeout):
+            call_id = budget.begin_call() if budget and hasattr(budget, 'begin_call') else None
+            with self._usage_lock:
+                self._network_calls += 1
+            try:
+                response = self._client.chat.completions.create(
+                    model=self._model, messages=messages, tools=tools, tool_choice='auto',
+                    temperature=0.2, max_tokens=min(self._max_output_tokens, 400),
+                    **({'extra_body': {'thinking': {'type': self._thinking_mode}}} if self._thinking_mode else {}))
+            except Exception:
+                self._settle(budget, call_id, None)
+                raise
+        usage = _extract_usage(response)
+        self._settle(budget, call_id, usage)
+        if response.choices[0].finish_reason not in ('stop', 'tool_calls'):
+            raise LLMError(LLMErrorKind.BAD_PAYLOAD, '工具规划未正常完成')
+        message = response.choices[0].message
+        return {'role': 'assistant', 'content': message.content or '',
+                **({'tool_calls': [{'id': call.id, 'type': 'function', 'function':
+                    {'name': call.function.name, 'arguments': call.function.arguments}}
+                    for call in message.tool_calls]} if message.tool_calls else {})}
+
+    def stream_chat(self, messages: list[dict]):
+        """Provider deltas, not a typewriter replay. Partial output is never retried."""
+        usage = None
+        budget = current_budget()
+        if budget:
+            budget.check()
+        with slot(self._queue_timeout):
+            stream, finish = None, None
+            call_id = budget.begin_call() if budget and hasattr(budget, 'begin_call') else None
+            with self._usage_lock:
+                self._network_calls += 1
+            try:
+                stream = self._client.chat.completions.create(
+                    model=self._model, messages=messages, stream=True,
+                    stream_options={'include_usage': True}, temperature=0.2,
+                    max_tokens=self._max_output_tokens,
+                    **({'extra_body': {'thinking': {'type': self._thinking_mode}}} if self._thinking_mode else {}))
+                for chunk in stream:
+                    current = _extract_usage(chunk)
+                    if current is not None:
+                        usage = current
+                    if chunk.choices:
+                        finish = chunk.choices[0].finish_reason or finish
+                        text = chunk.choices[0].delta.content
+                        if isinstance(text, str) and text:
+                            yield text
+                if finish != 'stop':
+                    raise LLMError(LLMErrorKind.BAD_PAYLOAD, '回答未正常完成')
+            finally:
+                try:
+                    if stream is not None:
+                        stream.close()
+                finally:
+                    self._settle(budget, call_id, usage)
+
     @property
     def model(self) -> str:
         return self._model

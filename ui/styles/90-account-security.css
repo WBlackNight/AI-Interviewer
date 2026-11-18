@@ -65,11 +65,35 @@
 .account-page .account-form :is(input,select):focus-visible { outline: 2px solid #397353; outline-offset: 3px; border-color: #397353; }
 .account-page .account-form input[aria-invalid="true"] { border-color: #a04a32; background: #fff9f6; }
 .account-help:empty { display: none; }
-@media(max-width:1100px) {
-  .notes-page .notes-nav { flex-wrap: wrap; }
-  .notes-page .workspace-navigation { order: 3; }
-  .notes-page .user-menu { margin-left: auto; }
-}
+.account-danger { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: #f8fbf9; }
+.account-danger summary { font-size: 16px; font-weight: 600; color: var(--ink); }
+.account-danger .notes-button { min-height: 44px; }
+.session-management { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 24px; padding: 24px; margin-top: 20px; border: 1px solid var(--line); border-radius: 18px; background: #f8fbf9; }
+.session-management h3 { margin-bottom: 10px; font-size: 18px; }
+.session-management .notes-button { margin-top: 16px; }
+@media(max-width:760px) { .session-management { grid-template-columns: minmax(0,1fr); padding: 18px; gap: 16px; } }
+.avatar-crop { margin-top: 18px; padding: 16px; border: 1px solid #c9ded0; border-radius: 16px; background: #edf5ef; animation: motion-enter var(--t-base) var(--ease); }
+.crop-workspace { display: grid; grid-template-columns: minmax(0,1fr) 144px; gap: 16px; align-items: start; }
+.crop-stage { position: relative; overflow: hidden; aspect-ratio: 1; border: 1px solid #95b9a2; border-radius: 12px; background: #d4e4da; }
+.crop-stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to right,transparent 33%,#ffffff70 33%,#ffffff70 33.5%,transparent 33.5%,transparent 66%,#ffffff70 66%,#ffffff70 66.5%,transparent 66.5%),linear-gradient(to bottom,transparent 33%,#ffffff70 33%,#ffffff70 33.5%,transparent 33.5%,transparent 66%,#ffffff70 66%,#ffffff70 66.5%,transparent 66.5%); }
+#avatar-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#avatar-canvas:active { cursor: grabbing; }
+.avatar-crop[aria-busy="true"] .crop-stage { opacity: .65; }
+.crop-result { display: grid; gap: 12px; min-width: 0; text-align: center; }
+#avatar-preview { display: block; width: 96px; max-width: 100%; height: auto; border-radius: 50%; margin-inline: auto; box-shadow: 0 3px 12px #28584120; }
+.account-page .crop-result label { font-size: 14px; }
+.crop-result select { width: 100%; padding-inline: 8px 25px; font-size: 14px; }
+.crop-position { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.account-page .avatar-crop input[type="range"] { width: 100%; min-height: 32px; padding: 0; border: 0; accent-color: #285841; background: transparent; }
+.avatar-crop output { margin-left: 8px; color: var(--sage-deep); font-variant-numeric: tabular-nums; }
+.account-page .profile-settings:has(#avatar-crop:not([hidden])) .profile-settings-grid { grid-template-columns: minmax(0,1fr); }
+.account-page .profile-settings:has(#avatar-crop:not([hidden])) #avatar-form { max-width: 660px; width: 100%; margin-inline: auto; }
+.profile-settings[open] > .profile-settings-grid, .profile-editor:not([hidden]), .personal-record { animation: motion-enter var(--t-base) var(--ease); }
+@media(max-width:560px) { .crop-workspace { grid-template-columns: minmax(0,1fr); } .crop-result { grid-template-columns: 76px minmax(0,1fr); align-items: center; text-align: left; } #avatar-preview { grid-row: span 2; width: 64px; } }
+.account-recovery { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 16px; }
+.account-recovery summary { cursor: pointer; min-height: 44px; color: var(--sage-deep); font-size: 14px; }
+.account-recovery[open] .account-form { animation: motion-enter var(--t-base) var(--ease); margin-top: 18px; }
+#recovery-captcha-image { width: 190px; height: 64px; max-width: 100%; border-radius: 12px; background: #edf5ef; }
 @media(max-width:760px) {
   .account-page:has(#account-profile:not([hidden])) .account-panel { padding: 22px; }
   .personal-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -93,3 +117,29 @@
   .profile-sections { gap: 6px; }
   .profile-sections a { padding-inline: 10px; }
 }
+.password-strength { display: grid; gap: 5px; color: var(--ink-2); font-size: 14px; }
+.password-strength[hidden] { display: none; }
+.password-strength meter { width: 100%; height: 10px; accent-color: var(--sage-deep); }
+.password-strength meter::-webkit-meter-bar { background: var(--paper-2); border: 0; border-radius: 8px; }
+.password-strength meter::-webkit-meter-optimum-value { background: var(--sage-deep); border-radius: 8px; }
+.password-strength[data-level="1"] meter::-webkit-meter-optimum-value { background: var(--clay); }
+.password-strength[data-level="2"] meter::-webkit-meter-optimum-value { background: var(--sage); }
+.realtime-review { margin-top: 20px; }
+.realtime-review li { margin: 8px 0; overflow-wrap: anywhere; }
+#account-logout-dialog { background: #fff; }
+#account-logout-error:empty { display: none; }
+.profile-summary { margin-block: 24px; padding: 22px 24px; border: 1px solid var(--line); border-radius: 18px; background: #f8fbf9; }
+.profile-summary-heading, .profile-editor-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.profile-summary-heading h2 { font-size: 20px; }
+.profile-facts { display: flex; flex-wrap: wrap; gap: 24px 48px; margin-block: 18px; }
+.profile-facts > div { display: grid; gap: 6px; min-width: 90px; }
+.profile-facts dt { font-size: 14px; color: var(--ink-2); }
+.profile-facts dd { margin: 0; font-size: 16px; }
+#profile-bio-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.profile-editor-heading h2 { font: 600 28px/1.5 var(--sans); }
+.profile-fields-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.profile-fields-row label { min-width: 0; }
+#profile-form textarea { width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--line-strong); border-radius: 10px; padding: 12px; background: var(--card); color: var(--ink); font: 16px/1.7 var(--sans); }
+#profile-settings[hidden] { display: none; }
+.account-page[data-profile-editing="true"] :is(.personal-overview,.profile-summary,.profile-welcome,.profile-sections,.account-shortcuts,#security-settings,.account-danger,#account-logout,.profile-heading > .notes-button) { display: none; }
+@media(max-width:560px) { .profile-fields-row { grid-template-columns: minmax(0,1fr); } .profile-summary { padding: 20px; } }

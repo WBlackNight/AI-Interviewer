@@ -1,0 +1,194 @@
+.landing .home-device {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 4px 10px;
+  border: 1px solid #b8d0bf;
+  border-radius: 999px;
+  background: #eff6f0;
+  color: #315941;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.landing .home-device::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.landing .practice-form .practice-choice {
+  display: block;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.landing .practice-form .practice-choice select:not([multiple]) {
+  width: 100%;
+  min-height: 48px;
+  border-color: #a9c2b1;
+  border-radius: 12px;
+  background-color: #f3f8f4;
+  color: #214332;
+  font-weight: 500;
+}
+
+.landing .practice-form .practice-choice select:focus-visible,
+.landing #resume-text:focus-visible {
+  outline: 2px solid #32734e;
+  outline-offset: 2px;
+}
+
+.landing .practice-form .practice-choice select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.landing .resume-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.landing #resume-done {
+  padding: 6px 14px;
+  border: 1px solid #a9c2b1;
+  border-radius: 10px;
+  background: #e6f1e9;
+  color: #234c35;
+  font-weight: 600;
+}
+
+.landing #resume-done:disabled {
+  opacity: 0.55;
+}
+
+.landing .resume-completion {
+  color: #315941;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.landing .resume-completion:empty {
+  display: none;
+}
+
+@media (min-width: 1120px) {
+  .landing .hero {
+    padding-block-start: 56px;
+  }
+
+  .landing .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 0.78fr) minmax(0, 1.22fr);
+    gap: clamp(24px, 4vw, 64px);
+  }
+
+  .landing .hero-copy {
+    text-align: left;
+  }
+
+  .landing .hero-h1 {
+    font-size: clamp(42px, 4.2vw, 62px);
+  }
+
+  .landing .hero-sub {
+    max-width: 32ch;
+  }
+
+  .landing :is(.hero-actions, .hero-meta) {
+    justify-content: start;
+  }
+
+  .landing .hero-meta {
+    flex-wrap: wrap;
+  }
+
+  .landing .product-grid {
+    grid-template-columns: minmax(120px, 0.32fr) minmax(0, 1fr);
+  }
+
+  .landing .product-rail {
+    padding: 16px 12px;
+  }
+
+  .landing .product-insight {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 10px 16px;
+    border-block-start: 1px solid var(--line);
+    border-inline-start: 0;
+    gap: 8px 14px;
+  }
+
+  .landing .product-insight > :is(svg, .mini-label, p) {
+    display: none;
+  }
+
+  .landing .product-insight > h2 {
+    grid-column: 1 / -1;
+    min-block-size: 0;
+    font-size: 15px;
+  }
+
+  .landing .hero-visual {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px), (pointer: coarse) {
+  .landing .practice-form .practice-choice select:not([multiple]),
+  .landing .practice-form .practice-choice select:not([multiple])::picker(select) {
+    appearance: auto;
+  }
+
+  .landing .practice-form .practice-choice select:not([multiple]) {
+    display: block;
+    min-height: 52px;
+    padding-inline: 12px;
+    background-image: none;
+    font-size: 16px;
+  }
+
+  .landing #resume-text {
+    min-height: 104px;
+    font-size: 16px;
+  }
+
+  .landing .resume-actions button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 700px), (max-width: 950px) and (pointer: coarse) {
+  .landing .hero {
+    padding-block-start: 18px;
+  }
+
+  .landing .home-device {
+    margin-block-end: 8px;
+  }
+
+  .landing .hero-sub {
+    max-width: 31ch;
+  }
+
+  .landing .resume-fields label,
+  .landing .resume-actions {
+    min-width: 0;
+  }
+
+  .landing :is(#resume-pdf-status, #resume-completion) {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (forced-colors: active) {
+  .landing .practice-form .practice-choice select:not([multiple]),
+  .landing .practice-form .practice-choice select:not([multiple])::picker(select) {
+    appearance: auto;
+  }
+}

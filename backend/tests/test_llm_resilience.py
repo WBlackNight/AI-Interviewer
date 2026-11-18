@@ -290,7 +290,7 @@ def _failure_response(mode: str, good_json: str) -> FakeLLM:
 def _prober_response(assets, question: Question, result) -> str:
     tree, _bank = assets
     target = SkillTreeProber(tree).propose(question, result, 1, answer=ANSWER)
-    content = "请进一步说明" + "、".join(p.point for p in target.points)
+    content = "你会如何验证刚才的判断？"
     return json.dumps({"content": content, "node_id": target.node_id}, ensure_ascii=False)
 
 
@@ -341,6 +341,13 @@ class TestFourComponentsUnderFailureModes:
         assert got.node_id == baseline.node_id, "目标节点不可被模型改变"
         assert got.content != baseline.content, "成功时应使用模型措辞"
         assert telemetry.snapshot()["prober"]["llm_success"] == 1
+
+    def test_prober_rejects_answer_disguised_as_question(self, assets, question):
+        tree, _ = assets
+        result = HeuristicScorer().score(question, ANSWER)
+        baseline = SkillTreeProber(tree).propose(question, result, 1, answer=ANSWER)
+        raw = json.dumps({"content": ANSWER.rstrip("。") + "？", "node_id": baseline.node_id})
+        assert LLMProber(FakeLLM(response=raw), tree).propose(question, result, 1, answer=ANSWER) == baseline
 
     @pytest.mark.parametrize("mode", FAILURE_MODES)
     def test_prober_failure_falls_back(self, mode, assets, question, telemetry):

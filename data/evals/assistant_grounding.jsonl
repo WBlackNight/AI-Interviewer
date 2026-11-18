@@ -1,0 +1,12 @@
+{"case_id":"cost-forward","answer":"维护一个联合索引的成本相当于维护多个单列索引。","reject":true}
+{"case_id":"cost-reverse","answer":"维护一个联合索引的成本与维护多个单独索引的总成本相当。","reject":true}
+{"case_id":"where-order","answer":"WHERE条件必须按照索引列的顺序书写。","reject":true}
+{"case_id":"where-order-2","answer":"查询条件需要遵循联合索引列顺序。","reject":true}
+{"case_id":"optimizer-always","answer":"优化器一定会选择联合索引。","reject":true}
+{"case_id":"optimizer-database","answer":"数据库总是使用联合索引。","reject":true}
+{"case_id":"cost-negation","answer":"不能认为一个联合索引的成本等同于多个单列索引。","reject":false}
+{"case_id":"where-independent","answer":"WHERE中等价AND条件的书写顺序不影响索引定义。","reject":false}
+{"case_id":"optimizer-caveat","answer":"不保证优化器一定会选择联合索引，应核对执行计划。","reject":false}
+{"case_id":"measurement","answer":"维护成本受键宽度、更新列和工作负载影响，需要实际测量。","reject":false}
+{"case_id":"left-prefix","answer":"联合索引(a,b,c)可使用(a)、(a,b)、(a,b,c)最左前缀。","reject":false}
+{"case_id":"range-boundary","answer":"范围条件限制查找区间，后续列仍可能用于过滤或覆盖。","reject":false}

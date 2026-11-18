@@ -100,6 +100,8 @@ def create_interview(
                 "difficulty": p.difficulty,
                 "question_count": p.question_count,
                 "include_coding": p.include_coding,
+                **({"question_id": p.question_id, "source_interview_id": p.source_interview_id}
+                   if p.question_id else {}),
             }
             for p in plan
         ],

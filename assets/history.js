@@ -2,6 +2,13 @@
 /* 原生练习记录与账户筛选。 */
 (function () {
 	'use strict';
+function notify(message, type = 'success', nextPage = false) {
+	const detail = { message: String(message || '').slice(0, 240), type };
+	if (!detail.message) return;
+	if (nextPage) {
+		try { sessionStorage.setItem('ui:notice', JSON.stringify({ ...detail, expires: Date.now() + 10000 })); } catch {}
+	} else if (typeof CustomEvent === 'function') dispatchEvent(new CustomEvent('app:notice', { detail }));
+}
 function readSession() {
 	try {
 		const value = JSON.parse(sessionStorage.getItem('account:session'));
@@ -208,7 +215,7 @@ async function guardedFetch(url, options) {
 			await request('/account/interviews/' + id + '/claim', { method: 'POST', body: JSON.stringify({ access_token: anonymousToken(id) }) });
 			claimed.add(id);
 			try { sessionStorage.removeItem('interview:' + id + ':token'); } catch { /* 服务端认领已经生效。 */ }
-			anonymousCache = null; find('#history-notice').textContent = '认领成功，原匿名凭据失效。';
+			anonymousCache = null; find('#history-notice').textContent = '认领成功，原匿名凭据失效。'; notify('练习记录已保存到账户');
 			await renderPage(selection(), 0);
 		} catch (error) { showError(error); }
 		finally { setBusy(false); }

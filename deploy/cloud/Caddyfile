@@ -1,0 +1,31 @@
+{
+	admin off
+}
+
+{$SITE_HOST} {
+	@assets path /assets/*
+	encode @assets zstd gzip
+
+	request_body {
+		max_size 8MB
+	}
+
+	header {
+		Permissions-Policy "microphone=(self), camera=(), geolocation=()"
+		Strict-Transport-Security "max-age=15552000"
+		-Server
+	}
+
+	# Operational diagnostics remain accessible inside the app container.
+	@internal path /api/diagnostics/* /docs /redoc /openapi.json
+	respond @internal "Not Found" 404
+
+	# WebSocket upgrades and text/event-stream flushing are supported natively.
+	# Keep client disconnect cancellation; do not force flush_interval -1.
+	reverse_proxy app:8000 {
+		transport http {
+			dial_timeout 10s
+			response_header_timeout 180s
+		}
+	}
+}

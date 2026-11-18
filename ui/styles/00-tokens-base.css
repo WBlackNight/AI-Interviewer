@@ -8,15 +8,15 @@
      ============================================================ */
 
 :root {
-    --paper: #F5F5F7;
-    --paper-2: #ECEEF0;
-    --ink: #1D2522;
-    --ink-2: #606965;
+    --paper: #f5f8f6;
+    --paper-2: #edf3ef;
+    --ink: #20332d;
+    --ink-2: #53655c;
     --line: #14211B1F;
     --line-2: #14211B1A;
     --sage: #83A183;
-    --sage-deep: #2C4A3B;
-    --mint: #E3EDE3;
+    --sage-deep: #285841;
+    --mint: #dfeee5;
     --pine: #102821;
     --clay: #B06A45;
 
@@ -26,8 +26,11 @@
 
     --ease: cubic-bezier(.22, 1, .36, 1);
     --ease-state: cubic-bezier(.4, 0, .2, 1);
-    --t-fast: 200ms;
-    --t-base: 520ms;
+    --t-press: 100ms;
+    --t-fast: 160ms;
+    --t-base: 240ms;
+    --t-scene: 360ms;
+    --t-exit: 140ms;
     --nav-h: 56px;
     --card: #ffffff;
     --line-strong: #14211b33;
@@ -36,9 +39,25 @@
     --field-dark: #1b352b;
     --overlay: #10282188;
     --container: 1160px;
+    --control-border: #c2d1c8;
+    --control-focus: #2c6b51;
+    --focus-ring: #2c6b5126;
+    --surface-shadow: 0 12px 32px -18px #23463530, 0 2px 6px #23463506;
+    --surface-rest: 0 4px 18px -8px #23463512;
+    --field-gap: 8px;
+    --hint-gap: 8px;
+    --form-item-gap: 16px;
+    --copy-leading: 1.8;
   }
 
 *, *::before, *::after { box-sizing: border-box; }
+
+/* Quiet scrollbars keep compact panels readable without changing native scroll. */
+* { scrollbar-width: thin; scrollbar-color: #b4c8b9 transparent; }
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-thumb { background: #b4c8b9; border: 2px solid transparent; background-clip: padding-box; border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+@media (forced-colors: active) { * { scrollbar-color: auto; } }
 
 html { scroll-padding-top: 72px; }
 
@@ -95,13 +114,36 @@ svg { display: block; }
 
 .skip:focus { top: 12px; }
 
-/* ---------- 入场：只播一次，opacity + translateY(14px) ---------- */
+/* 内容换入只改变透明度和位置，保留文档布局。 */
+@keyframes motion-enter {
+    from { opacity: var(--motion-opacity, .55); transform: translate(var(--motion-x, 0px), var(--motion-y, 6px)); }
+    to { opacity: 1; transform: translate(0, 0); }
+}
+
+@keyframes motion-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+[data-direction="next"] { --motion-x: 10px; --motion-y: 0px; }
+[data-direction="previous"] { --motion-x: -10px; --motion-y: 0px; }
+
+.motion-question { display: block; animation: motion-enter var(--t-fast) var(--ease); }
 
 .motion-ready [data-reveal] {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
     transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
-    transition-delay: var(--d, 0ms);
   }
 
 .motion-ready [data-reveal].is-in { opacity: 1; transform: none; }
+.motion-ready [data-reveal]:focus-within { opacity: 1; transform: none; transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after, dialog::backdrop {
+      animation: none !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+    .motion-ready [data-reveal] { opacity: 1; transform: none; }
+}

@@ -8,9 +8,6 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError
-from fastapi.exception_handlers import request_validation_exception_handler
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router as api_router
@@ -23,7 +20,6 @@ from app.api.account_profile import router as profile_router
 from app.config import get_settings
 from app.db import SessionLocal, engine
 from app.factories import load_assets
-from app.models.entities import Base
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 settings = get_settings()
@@ -57,29 +53,29 @@ def create_app() -> FastAPI:
     app.include_router(question_marks_router)
     app.include_router(preparation_router)
     app.include_router(profile_router)
+    from app.api.practice_config import router as practice_config_router
+    app.include_router(practice_config_router)
+    from app.api.account_recovery import router as recovery_router
+    app.include_router(recovery_router)
+    from app.api.report_shares import router as shares_router
+    app.include_router(shares_router)
+    from app.api.assistant import router as assistant_router
+    app.include_router(assistant_router)
+    from app.api.admin import router as admin_router
+    app.include_router(admin_router)
+    from app.api.forum import router as forum_router
+    app.include_router(forum_router)
 
-    @app.middleware("http")
-    async def private_responses(request, call_next):
-        response = await call_next(request)
-        if request.url.path.startswith(("/api/auth/", "/api/account", "/api/interview", "/api/resume")):
-            response.headers["Cache-Control"] = "no-store"
-        return response
+    from app.api.frontend import attach_frontend
+    attach_frontend(app)
 
-    @app.exception_handler(RequestValidationError)
-    async def validation_error(request, exc):
-        if request.url.path.startswith(("/api/auth/", "/api/account")):
-            fields={str(error['loc'][-1]) for error in exc.errors()}
-            detail=('请输入有效的邮箱地址' if 'email' in fields else '昵称应为1–32个可见字符' if 'nickname' in fields else '请填写有效的验证码' if fields & {'captcha_id','captcha_code','code','challenge_id'} else '账户输入格式不正确，请检查用户名及密码长度（12–128字符）')
-            return JSONResponse({'detail':detail},status_code=422)
-        return await request_validation_exception_handler(request, exc)
+    from app.api.http_policy import register_http_policy
+    register_http_policy(app)
 
     def on_startup() -> None:
-        # 开发期自动建表；生产用 alembic 迁移（见 README 路线图）
-        Base.metadata.create_all(bind=engine)
-        from app.migrations import upgrade_event_sequences, upgrade_interview_user_nullable
-        # 顺序：先补 schema（列可空性），再修历史数据（事件序号）。
-        upgrade_interview_user_nullable(engine)
-        upgrade_event_sequences(engine)
+        # 建表、旧库升级与版本登记共享数据库锁和事务。
+        from app.schema_versions import upgrade_schema
+        upgrade_schema(engine)
         # P2 步骤 2.1：严格模式（模型失败即抛错而非回退）只应在开发期开启。
         from app.llm.resilience import configure_strict
 

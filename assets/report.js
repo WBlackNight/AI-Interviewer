@@ -2,6 +2,13 @@
 /* 原生报告：逐轮分页不改变评分。 */
 (function () {
 	'use strict';
+function notify(message, type = 'success', nextPage = false) {
+	const detail = { message: String(message || '').slice(0, 240), type };
+	if (!detail.message) return;
+	if (nextPage) {
+		try { sessionStorage.setItem('ui:notice', JSON.stringify({ ...detail, expires: Date.now() + 10000 })); } catch {}
+	} else if (typeof CustomEvent === 'function') dispatchEvent(new CustomEvent('app:notice', { detail }));
+}
 function readSession() {
 	try {
 		const value = JSON.parse(sessionStorage.getItem('account:session'));
@@ -17,6 +24,95 @@ function createNode(tag, text, className) {
 	if (className) node.className = className;
 	return node;
 }
+function reportSharing(find, request, reportId) {
+	let writing = false, generation = 0;
+	const names = { summary: '评分摘要', answers: '含题目与回答' };
+	function clear() {
+		generation++;
+		find('share-url').value = '';
+		find('share-created').hidden = true;
+		find('share-list').replaceChildren();
+		find('share-message').textContent = '';
+		find('share-error').textContent = '';
+		find('sharing').hidden = true;
+		find('sharing').open = false;
+	}
+	function lock(value) {
+		writing = value;
+		find('sharing').querySelectorAll('button, select, input').forEach(control => { control.disabled = value; });
+	}
+	async function refresh() {
+		const version = ++generation;
+		try {
+			const data = await request('/account/interviews/' + reportId + '/shares', {}, true);
+			if (version !== generation) return;
+			find('share-list').replaceChildren();
+			data.items.forEach(item => {
+				const row = createNode('div', undefined, 'share-list-row');
+				row.append(createNode('p', names[item.scope] + ' · ' + (item.active ? '有效至 ' + new Date(item.expires_at).toLocaleString('zh-CN') : item.revoked ? '已撤销' : '已到期')));
+				if (item.active) {
+					const revoke = createNode('button', '撤销链接', 'notes-button');
+					revoke.type = 'button';
+					revoke.addEventListener('click', async () => {
+						if (writing) return;
+						lock(true);
+						try {
+							await request('/account/report-shares/' + item.id + '/revoke', { method: 'POST' }, true);
+							find('share-url').value = '';
+							find('share-created').hidden = true;
+							find('share-message').textContent = '链接已撤销。';
+							await refresh();
+						} catch (error) { find('share-error').textContent = error.message; }
+						finally { lock(false); }
+					});
+					row.append(revoke);
+				}
+				find('share-list').append(row);
+			});
+		} catch (error) { if (version === generation) find('share-error').textContent = error.message; }
+	}
+	find('share-form').addEventListener('submit', async event => {
+		event.preventDefault();
+		if (writing) return;
+		lock(true);
+		find('share-error').textContent = '';
+		find('share-created').hidden = true;
+		find('share-url').value = '';
+		try {
+			const data = await request('/account/interviews/' + reportId + '/shares', {
+				method: 'POST', body: JSON.stringify({ hours: Number(find('share-hours').value),
+					scope: find('share-answers').checked ? 'answers' : 'summary' })
+			}, true);
+			if (!/^\/share#[a-f0-9]{64}$/.test(data.share_path)) throw new Error('链接生成结果无法读取，请刷新管理列表。');
+			find('share-url').value = location.origin + data.share_path;
+			find('share-created').hidden = false;
+			find('share-message').textContent = '链接已生成，有效至 ' + new Date(data.expires_at).toLocaleString('zh-CN') + '。';
+			await refresh();
+		} catch (error) { find('share-error').textContent = error.message; }
+		finally { lock(false); }
+	});
+	find('share-copy').addEventListener('click', async () => {
+		const value = find('share-url').value;
+		if (!value) return;
+		try { await navigator.clipboard.writeText(value); find('share-message').textContent = '链接已复制。'; }
+		catch { find('share-url').focus(); find('share-url').select(); find('share-message').textContent = '请手动复制选中的链接。'; }
+	});
+	addEventListener('pagehide', clear);
+	addEventListener('account:changed', clear);
+	return { refresh };
+}
+	function renderAssessment(report, find) {
+		const assessment = report.assessment;
+		find('assessment').hidden = !assessment;
+		if (!assessment) return;
+		find('assessment-summary').textContent = assessment.summary + (report.is_complete ? '' : ' 当前为已提交回答的阶段反馈。');
+		const strengths = find('strengths'), priorities = find('priorities');
+		strengths.replaceChildren(); priorities.replaceChildren();
+		for (const item of assessment.strengths) strengths.append(createNode('li', item.theme + ' · ' + item.point));
+		if (!assessment.strengths.length) strengths.append(createNode('li', report.answer_count ? '继续补充完整回答，积累可复盘的表现。' : '完成一轮回答后，在这里回看已覆盖的要点。'));
+		for (const item of assessment.priorities) priorities.append(createNode('li', item.theme + ' · ' + item.action));
+		if (!assessment.priorities.length) priorities.append(createNode('li', report.answer_count ? '尝试变化场景，检查自己能否解释边界和取舍。' : '开始回答后生成具体建议。'));
+	}
 	const find = (id) => document.querySelector('#report-' + id);
 	const reportId = location.pathname.match(/^\/report\/([a-f0-9]{32})$/)?.[1];
 	function setText(id, value) { find(id).textContent = value; }
@@ -28,6 +124,7 @@ function createNode(tag, text, className) {
 	let busy = false;
 	let loading = false;
 	let loadVersion = 0;
+	const sharing = reportSharing(find, request, reportId);
 	const session = readSession;
 	function credential(accountOnly = false) {
 		const account = session();
@@ -44,7 +141,8 @@ function createNode(tag, text, className) {
 		const timer = setTimeout(() => controller.abort(), 20000);
 		try {
 			const response = await fetch('/api' + path, { ...options, cache: 'no-store', signal: controller.signal,
-				headers: { 'X-Interview-Token': access.token, ...(access.account ? { Authorization: 'Bearer ' + access.token } : {}) } });
+				headers: { 'X-Interview-Token': access.token, ...(access.account ? { Authorization: 'Bearer ' + access.token } : {}),
+					...(options.body ? { 'Content-Type': 'application/json' } : {}) } });
 			const data = blob && response.ok ? await response.blob() : await response.json().catch(() => null);
 			if (!response.ok) throw new Error(typeof data?.detail === 'string' ? data.detail : '读取失败，请检查账户。');
 			if (credential(accountOnly).token !== access.token) throw new Error('会话已变化，请刷新。');
@@ -56,20 +154,16 @@ function createNode(tag, text, className) {
 		} finally { clearTimeout(timer); }
 	}
 	const node = createNode;
-	function originText(origin = {}) {
-		const names = { heuristic: '规则评分', llm: '模型评分', heuristic_fallback: '模型失败后规则回退' };
-		return (names[origin.source] || '来源未记录') + (origin.cached ? ' · 缓存命中，本轮未调用评分模型' : '') + (origin.sandbox_applied ? ' · 含客观判题合分' : '');
-	}
-	function versions(origin = {}) {
-		return [origin.scorer_version, origin.model, origin.prompt_version, origin.config_version && '配置 ' + origin.config_version,
-			origin.prompt_digest && '提示词摘要 ' + origin.prompt_digest.slice(0, 12), origin.fallback_reason && '回退类别 ' + origin.fallback_reason].filter(Boolean).join(' · ') || '历史来源与版本未记录';
-	}
 	function setBusy(value) {
 		busy = value;
 		document.querySelectorAll('#report-content button, #report-confirm button').forEach((button) => { button.disabled = value; });
 		if (!value && report) renderTurns();
 	}
 	function render() {
+		setHidden('sharing', !session() || !report.is_complete);
+		if (!find('sharing').hidden) void sharing.refresh();
+		renderComparison();
+		renderAssessment(report, find);
 		const complete = report.is_complete;
 		const active = !['finished', 'cancelled'].includes(report.status);
 		const states = { created: '尚未开始', finished: '已完成', cancelled: '已取消' };
@@ -86,7 +180,10 @@ function createNode(tag, text, className) {
 			if (report.overall != null) row.append(meter);
 			find('dimensions').append(row);
 		});
-		setText('aggregation', report.aggregation || '');
+		const rubric = report.dimensions?.['证据支撑'] != null
+			? '五维评分按内容 35%、表达 20%、岗位 15%、证据 15%、应用 15% 加权。新增维度只汇总实际有分数的回答。'
+			: '当前记录展示三项评分，逐题详情包含得分依据。';
+		setText('aggregation', [report.aggregation, report.answer_count ? rubric : ''].filter(Boolean).join(' '));
 		setHidden('source', !report.revision_source);
 		if (report.revision_source) {
 			setText('source-theme', report.revision_source.theme);
@@ -113,6 +210,27 @@ function createNode(tag, text, className) {
 		find('theme').value = selected;
 		if (find('theme').selectedIndex < 0) find('theme').value = '';
 		updateReviewLink(); renderTurns();
+	}
+	function renderComparison() {
+		const comparison = report.retry_comparison;
+		setHidden('comparison', !comparison);
+		find('comparison-cards').replaceChildren();
+		if (!comparison) return;
+		for (const [label, result] of [['上次回答', comparison.original], ['本次回答', comparison.current]]) {
+			const card = node('article', undefined, 'retry-answer');
+			card.append(node('h3', label));
+			if (result) {
+				card.append(node('strong', Number(result.score).toFixed(1) + ' / 10', 'retry-score'));
+				card.append(node('p', result.content));
+				card.append(node('p', result.answer_text || '本轮未记录回答文本。', 'report-answer-text'));
+				card.append(node('p', '已覆盖：' + (result.key_points_hit?.join('、') || '暂无'), 'report-evidence'));
+				card.append(node('p', '待补强：' + (result.key_points_missed?.join('、') || '本轮未记录待补强要点'), 'report-missed'));
+			} else {
+				card.append(node('p', '完成本次主问题作答后，在这里对照两次表现。'));
+			}
+			find('comparison-cards').append(card);
+		}
+		if (/^[a-f0-9]{32}$/.test(comparison.source_interview_id)) find('comparison-source').href = '/report/' + comparison.source_interview_id;
 	}
 	function updateReviewLink() {
 		const query = new URLSearchParams({ position: report.position });
@@ -151,13 +269,22 @@ function createNode(tag, text, className) {
 			const answer = node('details', undefined, 'report-answer');
 			answer.append(node('summary', '查看你的回答'), node('p', turn.answer_text || '本轮未记录回答文本。', 'report-answer-text'));
 			card.append(answer, node('p', '评分依据：' + (turn.evidence || '未记录'), 'report-evidence'));
+			if (turn.dimensions) {
+				const scores = Object.entries(turn.dimensions).map(([label, value]) => label + ' ' + Number(value).toFixed(1));
+				if (scores.length) card.append(node('p', scores.join(' · '), 'report-evidence'));
+			}
 			if (turn.key_points_hit?.length) card.append(node('p', '已覆盖：' + turn.key_points_hit.join('、'), 'report-evidence'));
 			if (turn.key_points_missed?.length) card.append(node('p', '待补强：' + turn.key_points_missed.join('、'), 'report-missed'));
 			if (turn.sandbox) card.append(node('p', '客观判题：' + turn.sandbox.passed + ' / ' + turn.sandbox.total + ' 通过', 'note-context'));
-			card.append(node('p', originText(turn.scoring_origin), 'note-context'));
-			const source = node('details', undefined, 'report-answer');
-			source.append(node('summary', '评分来源与版本'), node('p', versions(turn.scoring_origin), 'report-version'));
-			card.append(source);
+			if (turn.can_retry && session()) {
+				const retry = node('button', '重新回答这道题', 'notes-button');
+				retry.type = 'button'; retry.disabled = busy;
+				retry.addEventListener('click', () => action('/interview/' + reportId + '/question-practice', true, (data) => {
+					if (!data.account_owned || !/^[a-f0-9]{32}$/.test(data.interview_id)) throw new Error('创建结果不完整，请先查看练习记录。');
+					location.assign('/interview/' + data.interview_id);
+				}, { question_id: turn.question_id }));
+				card.append(retry, node('p', '从原题重新作答。已有未完成的同题复练时，将继续该场练习。', 'notes-boundary'));
+			}
 			find('turns').append(card);
 		});
 		setHidden('empty', visible.length > 0);
@@ -189,15 +316,16 @@ function createNode(tag, text, className) {
 	find('next').addEventListener('click', () => { page++; renderTurns(); find('turns-title').scrollIntoView({ block: 'start' }); });
 	find('refresh').addEventListener('click', load);
 	find('retry').addEventListener('click', load);
-	async function action(path, accountOnly, done) {
+	async function action(path, accountOnly, done, body) {
 		if (busy || loading) return;
 		setBusy(true); setText('action-error', ''); setText('action-message', '');
-		try { await done(await request(path, { method: 'POST' }, accountOnly)); }
-		catch (error) { setText('action-error', error.message); }
+		try { await done(await request(path, { method: 'POST', ...(body ? { body: JSON.stringify(body) } : {}) }, accountOnly)); }
+		catch (error) { setText('action-error', error.message); notify(error.message, 'error'); }
 		finally { setBusy(false); }
 	}
 	find('add-tasks').addEventListener('click', () => action('/account/interviews/' + reportId + '/revision-tasks', true, (data) => {
 		setText('action-message', '新增 ' + data.added + ' 项，已有 ' + data.existing + ' 项。已有完成状态保持。');
+		notify('复习任务已更新');
 	}));
 	find('practice').addEventListener('click', () => action('/interview/' + reportId + '/practice', false, (data) => {
 		if (!/^[a-f0-9]{32}$/.test(data.interview_id)) throw new Error('请查记录核对结果。');
@@ -216,7 +344,8 @@ function createNode(tag, text, className) {
 			const link = node('a'); link.href = url; link.download = 'interview-' + reportId + (format === 'json' ? '.json' : '.md');
 			document.body.append(link);
 			try { link.click(); } finally { link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); }
-		} catch (error) { setText('export-error', error.message); }
+			notify('报告下载已开始');
+		} catch (error) { setText('export-error', error.message); notify(error.message, 'error'); }
 		finally { setBusy(false); }
 	}));
 	const dialog = find('confirm');

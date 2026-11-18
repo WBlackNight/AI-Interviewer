@@ -6,9 +6,11 @@
     <meta name="color-scheme" content="light">
     <title>练习概览 · 青栈 QINGZHAN</title>
     <link rel="icon" href="data:,">
-    <link rel="stylesheet" href="/assets/home.css">
-    <script src="/assets/dashboard.js" defer></script>
-  <script src="/assets/account-menu.js" defer></script>
+    <link rel="stylesheet" href="/assets/home.css?v=d9509825f80d">
+    <script src="/assets/dashboard.js?v=0113b5b0dbf5" defer></script>
+  <script src="/assets/account-menu.js?v=4bbed3ab08f3" defer></script>
+<script src="/assets/qing-pet.js?v=9e57bff8a51c" defer></script>
+<script src="/assets/onboarding.js?v=d5466a75c389" defer></script>
 </head>
   <body class="notes-page">
     <a class="skip" href="#dashboard-main">跳到主要内容</a>
@@ -19,10 +21,11 @@
           <span class="brand-mark">青栈</span>
           <span class="brand-en">QINGZHAN</span>
         </a>
-        <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/dashboard" aria-current="page">概览</a><a href="/catalog">题库</a><a href="/plans">计划</a><a href="/history">记录</a><a href="/revision">复习</a><a href="/notes">笔记</a><a href="/library">题单</a><a href="/account">账户</a></nav>
-      <a class="user-menu" href="/account" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span></a></div>
+        <nav class="notes-nav-links workspace-navigation" aria-label="工作区导航"><a href="/">首页</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a><details class="workspace-nav-more" data-navigation-menu><summary data-current-section><span class="desktop-nav-label">更多功能</span><span class="mobile-nav-label">菜单</span></summary><div class="workspace-nav-panel"><div class="workspace-nav-section mobile-nav-primary"><p>开始练习</p><a href="/#start">开始练习</a><a href="/assistant">小青助手</a><a href="/roles">练习方向</a><a href="/catalog">题库探索</a><a href="/forum">面试社区</a></div><div class="workspace-nav-section"><p>记录与复盘</p><a href="/dashboard" aria-current="page">练习概览</a><a href="/history">练习记录</a><a href="/review">跨场复盘</a></div><div class="workspace-nav-section"><p>我的准备</p><a href="/plans">准备计划</a><a href="/revision">复习任务</a><a href="/notes">复习笔记</a><a href="/library">我的题单</a></div><div class="workspace-nav-section"><p>账户与帮助</p><a href="/account">账户中心</a><a href="/guide">使用指南</a></div></div></details></nav>
+      <details class="user-menu-group"><summary class="user-menu" aria-label="账户与登录"><span class="user-avatar" aria-hidden="true"><img data-account-image hidden alt=""><span data-user-initial>青</span></span><span data-user-name>登录 / 注册</span><span class="mobile-account-label">账户</span></summary><nav class="user-menu-links" aria-label="个人空间"><a href="/account" data-account-entry>登录 / 注册</a><a href="/dashboard" data-account-only hidden>练习概览</a><a href="/account?view=profile" data-account-only hidden>编辑资料</a><a href="/account#security-settings" data-account-only hidden>账户与安全</a><a href="/admin" data-admin-only hidden>管理工作台</a><a href="/guide">使用指南</a></nav></details></div>
     </header>
-    <main id="dashboard-main" class="container notes-main board-main">
+    <div class="container tour-entry"><p id="tour-hint" hidden>从最近报告和待继续的练习开始安排下一步。</p><button id="tour-open" class="tour-open" type="button" aria-haspopup="dialog" aria-controls="onboarding" hidden>本页指引</button></div>
+  <main id="dashboard-main" class="container notes-main board-main">
       <section class="notes-intro board-intro">
         <div>
           <p class="eyebrow">A LITTLE PRACTICE, EVERY TIME</p>
@@ -51,6 +54,23 @@
         <button id="dashboard-retry" type="button" class="notes-button">重试读取</button>
       </section>
       <div id="dashboard-content" hidden>
+        <section class="dashboard-next-step" aria-labelledby="dashboard-next-title">
+          <div>
+            <p class="eyebrow">YOUR NEXT STEP</p>
+            <h2 id="dashboard-next-title">今天，从这里继续</h2>
+            <p id="dashboard-next-description"></p>
+            <a id="dashboard-next-link" class="notes-button notes-primary" href="/#start">开始练习</a>
+          </div>
+          <div class="dashboard-quick-start">
+            <h3>按今天的空闲时间练一场</h3>
+            <p>选择后核对岗位和配置，再开始。</p>
+            <div class="note-actions">
+              <a href="/?duration=5#start" class="notes-button">约 5 分钟</a>
+              <a href="/?duration=10#start" class="notes-button">约 10 分钟</a>
+              <a href="/?duration=15#start" class="notes-button">约 15 分钟</a>
+            </div>
+          </div>
+        </section>
         <section class="dashboard-metrics" aria-label="账户练习与复习统计">
           <a href="/history">
             <span>已经完成的练习</span>
@@ -72,6 +92,12 @@
             <strong id="dashboard-notes">—</strong>
             <small>项 · 含已保存内容</small>
           </a>
+        </section>
+        <section class="dashboard-section" aria-labelledby="dashboard-focus-title">
+          <div class="dashboard-section-heading"><div><p class="eyebrow">FROM FEEDBACK TO PRACTICE</p><h2 id="dashboard-focus-title">下一场，练得更有方向</h2></div><a href="/review" class="link-arrow">对照更多报告</a></div>
+          <p id="dashboard-focus-note" class="notes-boundary"></p>
+          <div id="dashboard-focus-list" class="focus-grid"></div>
+          <p id="dashboard-focus-empty" class="notes-message">完成第一场练习后，这里会依据已保存的评分推荐复习主题。</p>
         </section>
         <div class="dashboard-layout">
           <section class="report-panel dashboard-week" aria-labelledby="dashboard-week-title">
@@ -136,5 +162,22 @@
     <noscript>
       <p class="no-script">开启JavaScript并登录账户后可读取练习概览。</p>
     </noscript>
-  </body>
+    <dialog class="onboarding" id="onboarding" aria-labelledby="tour-title" data-tour-page="dashboard" data-tour-steps="[[&quot;查看近期练习&quot;, &quot;用概览了解已完成和仍在进行的练习，从待继续的记录回到原场次。&quot;], [&quot;安排下一次复练&quot;, &quot;参考最近报告里的待补强方向，再选择相关主题练习。&quot;]]">
+    <div class="tour-header">
+      <h2 id="tour-title">练习概览指引</h2>
+      <button id="tour-skip" class="tour-quiet" type="button">跳过指引</button>
+    </div>
+    <progress class="tour-meter" id="tour-meter" value="1" max="2" aria-hidden="true"></progress>
+    <div class="tour-content" aria-live="polite" aria-atomic="true">
+      <p id="tour-progress" class="tour-progress"></p>
+      <h3 id="tour-step"></h3>
+      <p id="tour-copy"></p>
+    </div>
+    <div class="tour-actions">
+      <button id="tour-back" class="notes-button" type="button" hidden>上一步</button>
+      <button id="tour-next" class="notes-button notes-primary" type="button" autofocus>下一步</button>
+      <button id="tour-finish" class="notes-button notes-primary" type="button" hidden>完成指引</button>
+    </div>
+  </dialog>
+</body>
 </html>

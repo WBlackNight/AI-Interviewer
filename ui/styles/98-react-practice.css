@@ -1,0 +1,560 @@
+/* React practice room: shared theme, fluid cards and calm feedback. */
+.react-practice-root {
+  padding-block: 32px 64px;
+}
+.practice-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+.practice-intro h1 {
+  font-size: clamp(27px, 3vw, 38px);
+  line-height: 1.5;
+  font-weight: 550;
+  letter-spacing: -0.035em;
+}
+.practice-intro h1 span {
+  color: #648471;
+}
+.practice-intro > p {
+  color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.9;
+}
+.practice-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border: 1px solid #dce6df;
+  border-radius: 14px;
+  background: #f9fcf9;
+  margin-bottom: 16px;
+}
+.practice-status p {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+}
+.practice-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #93ab9a;
+  flex-shrink: 0;
+}
+.practice-status-dot[data-phase="active"],
+.practice-status-dot[data-phase="finished"] {
+  background: #36734f;
+  box-shadow: 0 0 0 4px #36734f12;
+}
+.practice-status-dot[data-phase="connecting"],
+.practice-status-dot[data-phase="waiting"] {
+  animation: practice-pulse 1.6s ease-in-out infinite;
+}
+.practice-status-dot[data-phase="error"] {
+  background: var(--clay);
+}
+.react-practice-root button,
+.practice-actions a {
+  border: 1px solid #cddbd0;
+  border-radius: 10px;
+  background: white;
+  color: #355c43;
+  padding: 10px 15px;
+  min-height: 42px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background var(--t-fast),
+    border-color var(--t-fast),
+    transform var(--t-press);
+}
+.react-practice-root button:hover,
+.practice-actions a:hover {
+  background: #eef5ef;
+  border-color: #9bb7a2;
+}
+.react-practice-root button:active {
+  transform: translateY(1px);
+}
+.react-practice-root button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+.react-practice-root button:focus-visible,
+.react-practice-root a:focus-visible,
+.react-practice-root summary:focus-visible {
+  outline: 3px solid #629574;
+  outline-offset: 4px;
+}
+.react-practice-root .practice-primary-action {
+  background: #306345;
+  color: white;
+  border-color: #306345;
+}
+.react-practice-root .practice-primary-action:hover {
+  background: #244d35;
+}
+.practice-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 295px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 22px;
+}
+.practice-primary,
+.practice-sidebar {
+  min-width: 0;
+  display: grid;
+  gap: 22px;
+}
+.practice-card {
+  padding: 28px;
+  background: #fff;
+  border: 1px solid #e0e8e2;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px #1f403206;
+}
+.practice-card h2 {
+  font-size: 20px;
+  font-weight: 550;
+  line-height: 1.8;
+}
+.practice-question h2 {
+  font-size: 22px;
+  margin: 12px 0 24px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  animation: practice-enter var(--t-scene) var(--ease);
+}
+.practice-question label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: baseline;
+  margin: var(--form-item-gap) 0 var(--field-gap);
+  font-size: 15px;
+  font-weight: 550;
+}
+.practice-question label span {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.practice-question textarea {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  min-height: 165px;
+  max-height: 65svh;
+  padding: 16px;
+  background: #fbfdfb;
+  border: 1px solid #cbdacf;
+  border-radius: 12px;
+  color: var(--ink);
+  font: 15px/1.85 var(--sans);
+  transition:
+    border-color var(--t-fast),
+    box-shadow var(--t-fast);
+}
+.practice-question textarea:focus {
+  outline: none;
+  border-color: #588465;
+  box-shadow: 0 0 0 3px #58846514;
+}
+.practice-question textarea:disabled {
+  background: #f3f6f3;
+  color: #738578;
+}
+.practice-question .practice-code {
+  font: 14px/1.8 var(--mono);
+  white-space: pre;
+}
+.practice-muted {
+  color: #6d8075;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.practice-submit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+.practice-submit-row > div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.practice-privacy {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.75;
+}
+.practice-error {
+  color: #925137;
+  background: #f9eee7;
+  border: 1px solid #eed5c8;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.8;
+  margin-block: 16px;
+  overflow-wrap: anywhere;
+}
+.practice-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.practice-card-heading > span {
+  color: #788c7d;
+  font-size: 13px;
+}
+.practice-history-item {
+  border-top: 1px solid #e4ece5;
+  padding-block: 16px;
+}
+.practice-history-item summary {
+  color: #45644f;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1.8;
+}
+.practice-history-item summary > span {
+  float: right;
+  color: #6e8776;
+}
+.practice-history-item h3 {
+  font-size: 15px;
+  margin-block: 18px 10px;
+  font-weight: 550;
+  line-height: 1.8;
+}
+.practice-answer-copy {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.practice-evidence {
+  font-size: 14px;
+  line-height: 1.9;
+  color: #61746a;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+.practice-missed {
+  color: #9b694e;
+  background: #faf2ec;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+.practice-last-score {
+  font: 500 48px/1.5 var(--serif);
+  color: #3d6e4f;
+  margin-top: 12px;
+}
+.practice-last-score > span {
+  color: #8e9f92;
+  font: 13px var(--sans);
+  margin-left: 10px;
+}
+.practice-dimensions {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+}
+.practice-dimensions > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px;
+  font-size: 13px;
+  color: #607768;
+}
+.practice-dimensions strong {
+  font-weight: 500;
+}
+.practice-dimensions meter {
+  grid-column: 1/-1;
+  width: 100%;
+  height: 8px;
+  accent-color: #689675;
+}
+.practice-dimensions meter::-webkit-meter-bar {
+  background: #edf2ec;
+  border: 0;
+}
+.practice-dimensions meter::-webkit-meter-optimum-value {
+  background: #79a383;
+  border-radius: 8px;
+}
+.practice-sidebar a {
+  display: inline-block;
+  font-size: 13px;
+  margin-top: 18px;
+  color: #3d7250;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.practice-guide {
+  padding: 8px 18px;
+}
+.practice-guide h2 {
+  font-size: 16px;
+  font-weight: 550;
+}
+.practice-guide ol {
+  padding-left: 20px;
+  margin-block: 14px;
+  font-size: 14px;
+  color: #69816f;
+  line-height: 2;
+}
+.practice-guide .practice-cancel {
+  display: block;
+  margin-top: 28px;
+  font-size: 13px;
+  color: #92715d;
+  border-color: #dfd5cb;
+  background: transparent;
+}
+.practice-tests {
+  font-size: 13px;
+  color: #647c6c;
+  margin-bottom: 20px;
+}
+.practice-tests summary {
+  cursor: pointer;
+}
+.practice-tests pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  background: #f4f8f3;
+  border-radius: 8px;
+  margin-top: 10px;
+  font: 13px/1.8 var(--mono);
+}
+.practice-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6d8075;
+}
+.practice-recovery summary {
+  font-size: 14px;
+  color: #7b6f50;
+  cursor: pointer;
+}
+.practice-recovery .practice-answer-copy {
+  margin: 16px 0;
+  max-height: 220px;
+  overflow: auto;
+}
+.practice-complete {
+  text-align: center;
+  padding: 42px 28px;
+  animation: practice-enter 0.45s var(--ease);
+}
+.practice-complete-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 22px;
+  border-radius: 20px;
+  font-size: 28px;
+  color: #42774f;
+  background: #eaf4e9;
+}
+.practice-complete h2 {
+  font-size: 27px;
+  margin: 12px 0;
+}
+.practice-complete > p:not(.eyebrow) {
+  color: #718478;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.practice-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.practice-access {
+  margin-block: 24px;
+  text-align: center;
+}
+.practice-access p {
+  line-height: 1.9;
+  color: #6d8075;
+}
+.practice-dialog {
+  border: 1px solid #dce7df;
+  border-radius: 20px;
+  background: #fff;
+  padding: 28px;
+  max-width: 420px;
+  width: calc(100% - 32px);
+  color: var(--ink);
+  box-shadow: 0 24px 80px #17382622;
+}
+.practice-dialog::backdrop {
+  background: #1c352b55;
+  backdrop-filter: blur(3px);
+}
+.practice-dialog h2 {
+  font-size: 21px;
+  margin-bottom: 12px;
+}
+.practice-dialog p {
+  font-size: 14px;
+  color: #6e7d73;
+  line-height: 1.9;
+}
+.practice-dialog > div {
+  display: flex;
+  justify-content: end;
+  gap: 12px;
+  margin-top: 24px;
+}
+@keyframes practice-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes practice-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 900px) {
+  .practice-grid {
+    grid-template-columns: minmax(0, 1fr) 255px;
+    gap: 18px;
+  }
+  .practice-card {
+    padding: 22px;
+  }
+  .practice-intro {
+    align-items: start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .react-practice-root {
+    padding-block: 24px 40px;
+  }
+  .practice-grid {
+    grid-template-columns: 1fr;
+  }
+  .practice-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .practice-intro h1 {
+    font-size: 27px;
+  }
+  .practice-intro h1 span {
+    display: block;
+  }
+  .practice-intro > p {
+    font-size: 13px;
+  }
+  .practice-status {
+    padding: 12px;
+    gap: 10px;
+  }
+  .practice-status p {
+    font-size: 13px;
+  }
+  .practice-status button {
+    padding: 9px 12px;
+    white-space: nowrap;
+  }
+  .practice-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  .practice-question h2 {
+    font-size: 20px;
+  }
+  .practice-key-hint {
+    display: none;
+  }
+  .practice-submit-row > div {
+    width: 100%;
+    justify-content: end;
+  }
+  .practice-question textarea {
+    font-size: 16px;
+  }
+  .practice-complete h2 {
+    font-size: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .practice-question h2,
+  .practice-complete,
+  .practice-status-dot {
+    animation: none !important;
+  }
+  .react-practice-root button {
+    transition: none;
+  }
+}
+@media (max-width: 700px) {
+  .react-practice-root .practice-modes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 5px;
+  }
+  .react-practice-root .practice-modes a {
+    min-height: 66px;
+    padding: 10px 4px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .react-practice-root .practice-modes a span {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .practice-intro {
+    margin-bottom: 20px;
+  }
+  .practice-intro > p {
+    line-height: 1.8;
+  }
+}

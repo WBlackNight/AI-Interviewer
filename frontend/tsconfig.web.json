@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "jsx": "react-jsx",
+    "plugins": []
+  },
+  "include": [
+    "widget/**/*.ts",
+    "widget/**/*.tsx",
+    "assistant/**/*.ts",
+    "assistant/**/*.tsx",
+    "studio/**/*.ts",
+    "studio/**/*.tsx",
+    "shared/**/*.ts",
+    "shared/**/*.tsx",
+    "admin/**/*.ts",
+    "admin/**/*.tsx"
+  ],
+  "exclude": ["node_modules"]
+}

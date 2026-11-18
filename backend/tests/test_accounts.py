@@ -16,8 +16,8 @@ PASSWORD = "synthetic-passphrase-123"
 
 @pytest.fixture
 def users(api, monkeypatch):
-    from app.api import accounts
-    monkeypatch.setattr(accounts, "throttle", AuthThrottle())
+    from app.api import accounts, dependencies
+    monkeypatch.setattr(dependencies, "throttle", AuthThrottle())
     client, factory = api
     def register(username):
         result = register_account(client, json={"username": username, "password": PASSWORD})
@@ -49,7 +49,7 @@ def test_registration_hashes_password_and_session_and_normalizes_login(users):
     login = client.post("/api/auth/login", json={"username": " USER_A ", "password": PASSWORD})
     assert login.status_code == 200
     assert login.json()["access_token"] != a["access_token"]
-    assert client.get("/api/auth/me", headers=auth(a)).json() == a["account"]
+    assert client.get("/api/auth/me", headers=auth(a)).json() == {**a["account"], "is_admin": False}
     with factory() as db:
         account = db.get(Account, a["account"]["id"])
         assert PASSWORD not in account.password_hash and account.password_hash.startswith("pbkdf2_sha256$600000$")
@@ -205,17 +205,17 @@ def test_account_delete_requires_password_and_preserves_unrelated_resources(user
 
 
 def test_auth_admission_rejects_flood_and_busy_hash_workers(api, monkeypatch):
-    from app.api import accounts
+    from app.api import accounts, dependencies
     client, _ = api
     limiter = AuthThrottle()
-    monkeypatch.setattr(accounts, "throttle", limiter)
+    monkeypatch.setattr(dependencies, "throttle", limiter)
     monkeypatch.setattr(accounts, "verify_password", lambda *a: False)
     payload = {"username": "missing_user", "password": PASSWORD}
     for _ in range(20):
         assert client.post("/api/auth/login", json=payload).status_code == 401
     assert client.post("/api/auth/login", json=payload).status_code == 429
     limiter = AuthThrottle()
-    monkeypatch.setattr(accounts, "throttle", limiter)
+    monkeypatch.setattr(dependencies, "throttle", limiter)
     limiter.work.acquire(); limiter.work.acquire()
     try:
         assert client.post("/api/auth/login", json=payload).status_code == 429

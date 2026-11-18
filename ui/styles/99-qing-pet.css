@@ -1,0 +1,702 @@
+/* Cross-page Qing companion. The launcher stays small; chat is loaded on demand. */
+.qing-pet[data-side="left"] .qing-pet-hint {
+  left: 0;
+  right: auto;
+}
+.qing-pet {
+  position: fixed;
+  z-index: 900;
+  width: 76px;
+  height: 92px;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 5px 9px #31553b12);
+}
+.qing-pet-button {
+  display: grid;
+  justify-items: center;
+  width: 76px;
+  height: 92px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #3b6d4b;
+  cursor: grab;
+  touch-action: none;
+  border-radius: 24px;
+  font: inherit;
+  transition: filter var(--t-fast) var(--ease-state);
+}
+.qing-pet-button:hover {
+  filter: drop-shadow(0 3px 6px #376c4a20);
+}
+.qing-pet-button:focus-visible {
+  outline: 3px solid #437657;
+  outline-offset: 4px;
+  background: #e4f1e7;
+}
+.qing-pet-button:active,
+.qing-pet.is-dragging .qing-pet-button {
+  cursor: grabbing;
+}
+.qing-pet-button > svg {
+  display: block;
+  width: 76px;
+  height: 76px;
+}
+.qing-pet-name {
+  margin-top: -6px;
+  padding: 1px 12px;
+  border: 1px solid #d3e5d6;
+  border-radius: 20px;
+  background: #f7fff9e8;
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: 0.1em;
+  box-shadow: 0 2px 8px #24482e0a;
+}
+.qing-pet-hint {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  width: max-content;
+  max-width: 190px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.16s,
+    transform 0.16s;
+  background: #fff;
+  border: 1px solid #dbe9dd;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #5c7764;
+  box-shadow: 0 4px 20px #2748350b;
+}
+.qing-pet:hover .qing-pet-hint,
+.qing-pet:focus-within .qing-pet-hint {
+  opacity: 1;
+  transform: none;
+}
+.qing-pet.is-dragging .qing-pet-hint {
+  opacity: 0;
+}
+.qing-pet:has([aria-expanded="true"]) .qing-pet-hint {
+  opacity: 0;
+}
+.qing-pet.is-idle :is(.qing-pet-character, .qing-pet-eyes),
+.qing-pet.is-idle .qing-pet-name::after {
+  animation-play-state: paused;
+}
+.qing-pet-character {
+  animation: qing-pet-float 4.6s ease-in-out infinite;
+}
+.qing-pet-eyes {
+  transform-origin: 48px 51px;
+  animation: qing-pet-blink 6s infinite;
+}
+.qing-pet.is-thinking .qing-pet-name::after {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: #568b60;
+  animation: qing-pet-float 1.1s infinite;
+}
+.qing-pet.is-dragging .qing-pet-character {
+  animation: none;
+  transform: rotate(-6deg);
+}
+.qing-widget-panel {
+  position: fixed;
+  z-index: 910;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  border: 1px solid #d0e2d5;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow:
+    0 24px 64px -16px #183b2938,
+    0 4px 14px #183b290d;
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: qing-window-in var(--t-base) var(--ease);
+}
+.qing-widget-panel[hidden] {
+  display: none;
+}
+.qing-widget-panel > div {
+  height: 100%;
+  min-height: 0;
+}
+.qing-widget-loading {
+  padding: 28px;
+  font: 14px/1.9 var(--sans);
+  color: #63786b;
+}
+.qing-widget-loading a,
+.qing-widget-loading button {
+  display: inline-block;
+  margin: 14px 12px 0 0;
+  color: #356c49;
+}
+.qing-widget {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  color: #294534;
+  font: 14px/1.7 var(--sans);
+}
+.qing-widget button,
+.qing-widget select,
+.qing-widget textarea {
+  font: inherit;
+}
+.qing-widget button {
+  cursor: pointer;
+  transition:
+    background-color var(--t-fast) var(--ease-state),
+    border-color var(--t-fast) var(--ease-state),
+    box-shadow var(--t-fast) var(--ease-state);
+}
+.qing-widget button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.qing-widget :is(button, a, summary, select):focus-visible {
+  outline: 3px solid #619a73;
+  outline-offset: 3px;
+}
+.qing-widget .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.qing-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px 12px;
+  background: linear-gradient(120deg, #edf6ef, #fcfdfb);
+  border-bottom: 1px solid #e6eee6;
+}
+.qing-widget-header > div,
+.qing-widget-header nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qing-widget-header strong,
+.qing-widget-header small {
+  display: block;
+}
+.qing-widget-header strong {
+  font-size: 16px;
+  font-weight: 550;
+}
+.qing-widget-header small {
+  font-size: 12px;
+  color: #60776a;
+}
+.qing-widget-header nav > a {
+  font-size: 12px;
+  color: #4f705b;
+  white-space: nowrap;
+}
+.qing-widget-header nav > button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  color: #5a7763;
+  background: #edf4ed;
+  font-size: 24px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .qing-widget-header nav > button:hover,
+  .qing-widget-tools > button:hover {
+    background: #dcece0;
+  }
+  .qing-widget-welcome > button:hover {
+    background: #eaf4ed;
+    border-color: #9fc6ab;
+    box-shadow: 0 3px 8px #254d3210;
+  }
+  .qing-widget-composer button:not(:disabled):hover {
+    background: #285841;
+    box-shadow: 0 3px 8px #28584126;
+  }
+}
+.qing-widget .qing-mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 17px;
+  background: #edf5eb;
+  color: #7da283;
+}
+.qing-widget .qing-mark svg {
+  width: 36px;
+  height: 36px;
+}
+.qing-widget .qing-mark-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+}
+.qing-widget .qing-mark-small svg {
+  width: 29px;
+  height: 29px;
+}
+.qing-widget-tools {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 18px;
+}
+.qing-widget-tools label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: #5d7565;
+}
+.qing-widget select {
+  min-width: 0;
+  max-width: 180px;
+  min-height: 32px;
+  padding: 5px 22px 5px 9px;
+  border: 1px solid #d8e5db;
+  border-radius: 9px;
+  background-color: #f7faf5;
+  color: #496b53;
+  font-size: 12px;
+}
+.qing-widget-tools > button {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 8px;
+  min-height: 36px;
+  padding: 7px 11px;
+  background: #f0f6ef;
+  color: #52715a;
+  font-size: 12px;
+}
+.qing-widget-history {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px 8px;
+  font-size: 12px;
+  color: #60776a;
+}
+.qing-widget-history select {
+  max-width: none;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.qing-widget-welcome {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px 24px;
+  background: radial-gradient(ellipse at 50% 0, #eef6ee99, transparent 72%);
+  text-align: center;
+}
+.qing-widget-welcome > .qing-mark {
+  margin: 0 auto 14px;
+}
+.qing-widget-welcome h2 {
+  font-size: 20px;
+  font-weight: 550;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+.qing-widget-welcome > p {
+  margin: 12px 0 16px;
+  color: #60766a;
+  font-size: 13px;
+}
+.qing-widget-welcome > button {
+  display: block;
+  width: 100%;
+  border: 1px solid #dce9df;
+  background: #fbfdf9;
+  text-align: left;
+  border-radius: 11px;
+  min-height: 46px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  color: #42664e;
+  font-size: 13px;
+}
+.qing-widget-welcome .qing-widget-guest {
+  font-size: 12px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  margin: 12px 0 0;
+}
+.qing-widget-guest a {
+  display: block;
+  color: #3f7550;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.qing-widget .qing-chat-log {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 16px 18px;
+  scroll-padding-bottom: 24px;
+}
+.qing-widget .qing-message {
+  margin-bottom: 20px;
+  overflow-wrap: anywhere;
+  animation: motion-fade var(--t-fast) var(--ease-state);
+}
+.qing-widget .qing-message-label {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  color: #6f8976;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+.qing-widget .qing-message-label .qing-mark {
+  width: 25px;
+  height: 25px;
+  border-radius: 8px;
+}
+.qing-widget .qing-message-label svg {
+  width: 22px;
+  height: 22px;
+}
+.qing-widget .qing-message-user {
+  margin-left: 10%;
+}
+.qing-widget .qing-message-user .qing-message-label {
+  justify-content: end;
+}
+.qing-widget .qing-message-user .qing-message-body {
+  padding: 10px 12px;
+  background: #eef6ed;
+  border-radius: 12px 3px 12px 12px;
+}
+.qing-widget .qing-message-body {
+  font-size: 14px;
+  line-height: 1.9;
+}
+.qing-widget .qing-message-body > p,
+.qing-widget .qing-answer-text {
+  white-space: pre-wrap;
+}
+.qing-widget .qing-answer-text h3 {
+  font-size: 14px;
+  margin: 12px 0 6px;
+}
+.qing-widget .qing-answer-text p + p {
+  margin-top: 8px;
+}
+.qing-widget .qing-answer-text ul {
+  list-style: disc;
+  padding-left: 18px;
+}
+.qing-widget .qing-answer-text code {
+  font: 12px var(--mono);
+  background: #eff4ed;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+.qing-widget .qing-answer-text pre {
+  overflow: auto;
+  white-space: pre;
+  padding: 10px;
+  background: #eff4ed;
+  border-radius: 9px;
+}
+.qing-widget .qing-answer-note {
+  color: #8a978d;
+  font-size: 11px;
+  margin-top: 10px;
+}
+.qing-widget .qing-evidence {
+  margin-top: 12px;
+  border-top: 1px solid #e4ece3;
+  padding-top: 8px;
+  font-size: 12px;
+  color: #617e68;
+}
+.qing-widget .qing-evidence summary {
+  cursor: pointer;
+}
+.qing-widget .qing-evidence a,
+.qing-widget .qing-guide-source {
+  display: block;
+  padding: 10px;
+  background: #f7faf5;
+  margin-top: 8px;
+  border-radius: 9px;
+}
+.qing-widget .qing-evidence a > span,
+.qing-widget .qing-guide-source > span {
+  font-size: 10px;
+  color: #8c9b8d;
+}
+.qing-widget .qing-evidence small {
+  display: block;
+  color: #8c9b8d;
+}
+.qing-widget .qing-guide-source h4 {
+  font-size: 12px;
+  font-weight: 550;
+}
+.qing-widget .qing-guide-source p {
+  font-size: 12px;
+}
+.qing-widget .qing-answer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+.qing-widget .qing-answer-actions a {
+  display: flex;
+  gap: 8px;
+  padding: 6px 9px;
+  border: 1px solid #dce7d9;
+  border-radius: 8px;
+  font-size: 11px;
+  color: #567b5d;
+}
+.qing-widget .qing-copy {
+  border: 0;
+  background: none;
+  color: #7b9182;
+  padding: 5px 0;
+  font-size: 11px;
+  margin-top: 5px;
+}
+.qing-widget-stage {
+  padding: 8px 18px;
+  margin: 0;
+  line-height: 1.7;
+  font-size: 12px;
+  color: #709079;
+}
+.qing-widget-error {
+  margin: 8px 12px 12px;
+  padding: 12px 14px;
+  background: #fcf2ec;
+  border: 1px solid #efddd1;
+  border-radius: 9px;
+  color: #97694e;
+  font-size: 12px;
+  line-height: 1.75;
+  max-height: 112px;
+  overflow: auto;
+}
+.qing-widget-error button {
+  border: 0;
+  background: none;
+  text-decoration: underline;
+  font-size: 12px;
+  color: #835c47;
+  margin-top: 8px;
+}
+.qing-widget-composer {
+  margin: 0 12px;
+  padding: 11px 12px 9px;
+  border: 1px solid #cddfcf;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 3px 12px #28584108;
+  transition:
+    border-color var(--t-fast) var(--ease-state),
+    box-shadow var(--t-fast) var(--ease-state);
+}
+.qing-widget-composer:focus-within {
+  border-color: #5c9470;
+  box-shadow: 0 0 0 3px #719d7c1a;
+}
+.qing-widget-composer textarea {
+  display: block;
+  resize: none;
+  width: 100%;
+  height: 46px;
+  min-height: 46px;
+  max-height: 100px;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  color: #34513e;
+  background: transparent;
+  font-size: 13px;
+  line-height: 1.8;
+  box-shadow: none;
+}
+.qing-widget-composer > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+}
+.qing-widget-composer small {
+  font-size: 12px;
+  color: #657b6b;
+}
+.qing-widget-composer button {
+  min-height: 36px;
+  padding: 6px 15px;
+  border: 0;
+  border-radius: 9px;
+  background: #376c4a;
+  color: #fff;
+  font-size: 13px;
+}
+.qing-widget-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px 14px;
+  font-size: 12px;
+  color: #657b6b;
+  line-height: 1.65;
+}
+.qing-widget-footer label {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  cursor: pointer;
+}
+.qing-widget-footer input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: #497a56;
+}
+@keyframes qing-pet-float {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes qing-pet-blink {
+  0%,
+  88%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  91% {
+    transform: scaleY(0.12);
+  }
+}
+@keyframes qing-window-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-height: 800px) {
+  .qing-widget-welcome > .qing-mark {
+    display: none;
+  }
+  .qing-widget-welcome {
+    padding-block: 18px;
+  }
+}
+@media (max-width: 480px) {
+  .qing-widget-header {
+    padding: 12px 14px;
+  }
+  .qing-widget-header small {
+    display: none;
+  }
+  .qing-widget-tools {
+    padding: 8px 14px;
+    gap: 6px;
+  }
+  .qing-widget-tools label {
+    gap: 6px;
+  }
+  .qing-widget-tools select {
+    max-width: 152px;
+  }
+  .qing-widget-welcome {
+    padding: 16px 20px;
+  }
+  .qing-pet-hint {
+    display: none;
+  }
+  .qing-widget-composer textarea {
+    font-size: 16px;
+  }
+  .qing-widget-panel {
+    border-radius: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qing-pet-character,
+  .qing-pet-eyes,
+  .qing-pet.is-thinking .qing-pet-name::after,
+  .qing-widget-panel {
+    animation: none !important;
+  }
+  .qing-pet-hint {
+    transition: none;
+  }
+}
+@media print {
+  .qing-pet,
+  .qing-widget-panel {
+    display: none !important;
+  }
+}
+.qing-auth-prompt {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  max-width: 560px;
+  margin: 24px auto;
+  padding: clamp(18px, 5vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--card);
+}
+.qing-auth-prompt h1,
+.qing-auth-prompt h2 {
+  margin: 0;
+}
+.qing-auth-prompt h2 {
+  font: 600 20px/1.5 var(--sans);
+}
+.qing-auth-prompt p {
+  color: var(--ink-2);
+}
+.qing-widget .qing-auth-prompt {
+  margin: 12px;
+}

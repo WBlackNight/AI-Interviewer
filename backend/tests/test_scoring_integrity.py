@@ -101,6 +101,17 @@ def as_json(data: dict) -> str:
     return json.dumps(data, ensure_ascii=False)
 
 
+def test_five_dimension_score_uses_rubric_weights(question):
+    data = payload(score=10.0, dimensions={
+        "技术深度": 8.0, "表达逻辑": 7.0, "岗位匹配": 8.0,
+        "证据支撑": 4.0, "应用与取舍": 2.0,
+    })
+    result = LLMScorer(FakeLLM(response=as_json(data))).score(question, ANSWER)
+    assert result.origin.source == "llm"
+    assert result.score == 6.3
+    assert result.dimensions == data["dimensions"]
+
+
 @pytest.mark.parametrize("response,reason", [
     ("private-answer", "score_json_invalid"),
     ('{"score":', "score_json_invalid"),

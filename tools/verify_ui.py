@@ -20,8 +20,8 @@ def verify():
         raise RuntimeError('Node.js is required for frontend verification')
     commands = [[node, '--check', str(p)] for p in sorted((ROOT / 'assets').glob('*.js'))]
     commands += [[node, 'evals/' + name] for name in
-                 ('ui_core_check.mjs', 'account_ui_check.mjs', 'account_menu_check.mjs', 'home_interaction_check.mjs', 'carousel_check.mjs', 'microphone_check.mjs', 'voice_ui_check.mjs', 'realtime_ui_check.mjs')]
-    commands.append([node, '--test', 'evals/native_interview_test.cjs'])
+                 ('ui_core_check.mjs', 'account_ui_check.mjs', 'account_menu_check.mjs', 'avatar_crop_check.mjs', 'qing_pet_check.mjs', 'batch_selection_check.mjs', 'home_interaction_check.mjs', 'feedback_demo_check.mjs', 'practice_transport_check.mjs', 'carousel_check.mjs', 'microphone_check.mjs', 'voice_ui_check.mjs', 'realtime_ui_check.mjs')]
+    # Practice state and recovery now live in frontend/tests/studio-state.test.ts.
     results = []
     for command in commands:
         run = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, encoding='utf-8', timeout=60)

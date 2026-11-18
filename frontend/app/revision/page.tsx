@@ -91,7 +91,7 @@ export default function RevisionPage() {
         </div>
       </>}
     </section>
-    <p className="rounded-xl bg-slate-100 p-4 text-xs leading-6 text-slate-600">“已复习”由你手动标记，表示学习安排的完成状态，不修改面试分数，也不代表能力评估。任务保留加入时的主题分数；评分来源和版本可在来源报告查看。删除来源面试或账户会同时删除对应任务。</p>
+    <p className="rounded-xl bg-slate-100 p-4 text-xs leading-6 text-slate-600">“已复习”由你手动标记，表示学习安排的完成状态，不修改面试分数，也不代表能力评估。任务保留加入时的主题分数；删除来源面试或账户会同时删除对应任务。</p>
     <p className="text-sm leading-6 text-slate-600">可直接练习任务主题，沿用原报告的岗位与强度，每场最多2道主问题。跨场题目可能重复；练习结束后，仍由你决定是否标记已复习。</p>
     {error && <div role="alert" className="space-y-2 rounded-xl bg-red-50 p-4 text-sm text-red-700"><p>{error}</p><button type="button" disabled={busy} onClick={() => void load()} className="underline">重试读取</button></div>}
     {actionError && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{actionError}</p>}

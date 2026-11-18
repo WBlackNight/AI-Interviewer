@@ -2,6 +2,13 @@
 /* 我的题单：收藏、手动标记与主题练习，纯文本展示。 */
 (function () {
 	'use strict';
+function notify(message, type = 'success', nextPage = false) {
+	const detail = { message: String(message || '').slice(0, 240), type };
+	if (!detail.message) return;
+	if (nextPage) {
+		try { sessionStorage.setItem('ui:notice', JSON.stringify({ ...detail, expires: Date.now() + 10000 })); } catch {}
+	} else if (typeof CustomEvent === 'function') dispatchEvent(new CustomEvent('app:notice', { detail }));
+}
 function readSession() {
 	try {
 		const value = JSON.parse(sessionStorage.getItem('account:session'));
@@ -28,12 +35,55 @@ async function guardedFetch(url, options) {
 	};
 	return response;
 }
+/* 当前页选择：切页和刷新时清空，保留原生复选框语义。 */
+function createBatchSelection(prefix, keyOf = (row) => row.id) {
+	const root = document.querySelector('#' + prefix);
+	const all = root.querySelector('[data-select-all]');
+	const count = root.querySelector('[data-selection-count]');
+	let rows = [], selected = new Map(), controls = [], disabled = false;
+	function update(locked = disabled) {
+		disabled = locked;
+		count.textContent = '已选 ' + selected.size + ' 道';
+		all.checked = rows.length > 0 && selected.size === rows.length;
+		all.indeterminate = selected.size > 0 && selected.size < rows.length;
+		all.disabled = disabled || !rows.length;
+		root.querySelectorAll('[data-batch-action]').forEach((button) => { button.disabled = disabled || !selected.size; });
+		controls.forEach(({ input, card, key }) => {
+			input.checked = selected.has(key); input.disabled = disabled;
+			card.classList.toggle('is-selected', input.checked);
+		});
+	}
+	all.addEventListener('change', () => {
+		if (disabled) return;
+		selected = all.checked ? new Map(rows.map((row) => [keyOf(row), row])) : new Map(); update();
+	});
+	root.querySelector('[data-clear-selection]').addEventListener('click', () => { if (!disabled) clear(); });
+	function clear() { selected.clear(); update(); }
+	return {
+		update, clear,
+		reset(items = []) { rows = items; controls = []; selected.clear(); update(); },
+		values() { return [...selected.values()]; },
+		attach(card, row, text) {
+			const key = keyOf(row), label = createNode('label', undefined, 'library-choice');
+			const input = createNode('input'); input.type = 'checkbox';
+			label.append(input, createNode('span', text)); card.prepend(label);
+			controls.push({ input, card, key });
+			input.addEventListener('change', () => {
+				if (disabled) return;
+				if (input.checked) selected.set(key, row); else selected.delete(key); update();
+			});
+			update();
+		}
+	};
+}
 	const find = (id) => document.querySelector('#library-' + id);
 	const endpoint = '/api/account/question-marks';
 	const levels = { easy: '基础', mid: '进阶', hard: '挑战' };
 	let identity = '', busy = false, writing = false, saved = null, bank = null, removal = null, created = null;
 	let filters = { position: '', status: '', query: '', offset: 0 };
 	let picker = { position: '', query: '', offset: 0 };
+	const selection = createBatchSelection('library-selection');
+	const bankSelection = createBatchSelection('library-bank-selection', (row) => row.position + ':' + row.id);
 	const incoming = new URLSearchParams(location.search);
 	if (/^[a-z][a-z0-9_]{0,63}$/.test(incoming.get('position') || '') && /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/.test(incoming.get('question') || '')) {
 		picker.position = incoming.get('position'); picker.query = incoming.get('question');
@@ -43,6 +93,7 @@ async function guardedFetch(url, options) {
 	function hidePrivate() {
 		find('workspace').hidden = true; find('list').replaceChildren(); find('bank-list').replaceChildren();
 		find('login').hidden = false; find('remove-dialog').close(); removal = null;
+		selection.reset(); bankSelection.reset(); saved = bank = null;
 	}
 	async function request(path, method = 'GET', body, authenticated = true) {
 		const current = session();
@@ -83,13 +134,17 @@ async function guardedFetch(url, options) {
 		find('bank-next').disabled = busy || !!created || !bank?.has_more;
 		find('enter-created').hidden = !created; find('enter-created').disabled = busy;
 		find('retry').disabled = busy;
+		selection.update(busy || !!created); bankSelection.update(busy || !!created);
+		find('workspace').setAttribute('aria-busy', String(busy));
 	}
 	function renderSaved() {
 		options(find('position'), saved.positions, filters.position, '全部岗位'); find('status').value = filters.status; find('search').value = filters.query;
 		find('counts').textContent = '当前岗位与关键词范围：收藏 ' + saved.counts.all + ' · 待回看 ' + saved.counts.todo + ' · 已看过 ' + saved.counts.done + ' · 不可用 ' + saved.counts.unavailable + '。上限 ' + saved.max_marks + ' 道。';
 		find('list').replaceChildren();
+		selection.reset(saved.items);
 		saved.items.forEach((row) => {
 			const card = element('article', undefined, 'note-card library-card'); const question = row.question;
+			selection.attach(card, row, '选择题目 ' + row.question_id);
 			const role = saved.positions.find((item) => item.id === row.position)?.display_name || row.position;
 			card.append(element('p', role + ' · ' + (row.status === 'done' ? '已看过' : '待回看'), 'eyebrow'));
 			card.append(element('h3', question?.content || '这道题当前已不在运行题库中。'));
@@ -98,7 +153,7 @@ async function guardedFetch(url, options) {
 			const actions = element('div', undefined, 'note-actions');
 			actions.append(button(row.status === 'done' ? '恢复待回看' : '标记已看过', () => mutate(() => request(endpoint + '/' + row.id, 'PATCH', { status: row.status === 'done' ? 'todo' : 'done', expected_version: row.version }), '手动标记已保存。')));
 			if (row.can_practice) actions.append(button('练习本主题', () => practice(row)));
-			actions.append(button('移除收藏', () => { removal = row; find('remove-description').textContent = row.question_id; find('remove-dialog').showModal(); }));
+			actions.append(button('移除收藏', () => confirmRemoval([row])));
 			card.append(actions);
 			if (!row.can_practice) card.append(element('p', question?.is_coding ? '编程题可收藏回看；不从这里创建知识主题专项。' : '当前没有可练知识主题，仍可整理收藏。', 'notes-boundary'));
 			find('list').append(card);
@@ -110,8 +165,10 @@ async function guardedFetch(url, options) {
 		picker.position = bank.position || ''; options(find('bank-position'), bank.positions, picker.position);
 		find('query').value = picker.query; find('bank-count').textContent = '匹配 ' + bank.total + ' 题；重复收藏保持原标记。';
 		find('bank-list').replaceChildren();
+		bankSelection.reset(bank.items);
 		bank.items.forEach((row) => {
 			const card = element('article', undefined, 'note-card library-card');
+			bankSelection.attach(card, row, '选择题目 ' + row.id);
 			card.append(element('p', row.theme + ' · ' + (row.is_coding ? '编程题' : '知识题') + ' · ' + (levels[row.difficulty] || row.difficulty), 'eyebrow'), element('h3', row.content));
 			card.append(element('p', row.id + ' · 来源：' + (row.source || '未标注'), 'report-version'));
 			card.append(button('收藏这道题', () => mutate(async () => {
@@ -144,6 +201,7 @@ async function guardedFetch(url, options) {
 		if (busy || created) return;
 		busy = true; lock(); find('error').textContent = ''; find('loading').hidden = false; find('retry').hidden = true;
 		saved = bank = null;
+		selection.reset(); bankSelection.reset();
 		for (const part of ['list', 'bank-list']) find(part).replaceChildren();
 		for (const part of ['empty', 'bank-empty', 'pages', 'bank-pages']) find(part).hidden = true;
 		find('counts').textContent = find('bank-count').textContent = '正在读取…';
@@ -157,10 +215,11 @@ async function guardedFetch(url, options) {
 	async function mutate(action, notice) {
 		if (busy || created) return;
 		busy = writing = true; lock(); find('error').textContent = ''; find('notice').textContent = '';
-		try { const result = await action(); find('notice').textContent = notice || result; await readSaved(); }
+		try { const result = await action(); find('notice').textContent = notice || result; notify(notice || result); await readSaved(); }
 		catch (error) {
 			find('error').textContent = error.message;
-			if (error.status === 409) { try { await readSaved(); } catch { hidePrivate(); } }
+			notify(error.message, 'error');
+			if (error.status === 409 || error.status === 404) { try { await readSaved(); } catch { hidePrivate(); } }
 		} finally { busy = writing = false; lock(); }
 	}
 	function enterCreated() {
@@ -177,6 +236,30 @@ async function guardedFetch(url, options) {
 		} catch (error) { find('error').textContent = error.message; }
 		finally { busy = writing = false; lock(); }
 	}
+	function references(rows) { return rows.map((row) => ({ id: row.id, expected_version: row.version })); }
+	function batch(action, rows = selection.values()) {
+		if (!rows.length) return;
+		mutate(async () => {
+			const result = await request(endpoint + '/batch', 'PATCH', { action, items: references(rows) });
+			return action === 'remove' ? '已移除 ' + result.changed + ' 道收藏。' : '已将 ' + result.changed + ' 道题标记为“' + (action === 'done' ? '已看过' : '待回看') + '”' + (result.changed < result.selected ? '，其余题目已是该状态。' : '。');
+		});
+	}
+	function confirmRemoval(rows) {
+		if (busy || created || !rows.length) return;
+		removal = rows; find('remove-description').textContent = '本次移除 ' + rows.length + ' 道：' + rows.map((row) => row.question_id).join('、');
+		find('remove-dialog').showModal();
+	}
+	find('batch-done').addEventListener('click', () => batch('done'));
+	find('batch-todo').addEventListener('click', () => batch('todo'));
+	find('batch-remove').addEventListener('click', () => confirmRemoval(selection.values()));
+	find('batch-collect').addEventListener('click', () => {
+		const rows = bankSelection.values(); if (!rows.length) return;
+		mutate(async () => {
+			const result = await request(endpoint + '/batch', 'POST', { items: rows.map((row) => ({ position: row.position, question_id: row.id })) });
+			bankSelection.clear();
+			return '已新增收藏 ' + result.added + ' 道' + (result.reused ? '，另有 ' + result.reused + ' 道已在题单中，保留原标记。' : '。');
+		});
+	});
 	find('filters').addEventListener('submit', (event) => { event.preventDefault(); filters = { position: find('position').value, status: find('status').value, query: find('search').value.trim(), offset: 0 }; refresh(); });
 	find('reset').addEventListener('click', () => { filters = { position: '', status: '', query: '', offset: 0 }; find('search').value = ''; refresh(); });
 	find('picker').addEventListener('submit', (event) => { event.preventDefault(); picker = { position: find('bank-position').value, query: find('query').value.trim(), offset: 0 }; refresh(); });
@@ -187,9 +270,10 @@ async function guardedFetch(url, options) {
 	find('bank-next').addEventListener('click', () => { picker.offset += 4; refresh(); });
 	find('keep').addEventListener('click', () => find('remove-dialog').close());
 	find('remove-confirm').addEventListener('click', () => {
-		const row = removal; find('remove-dialog').close(); removal = null;
-		if (row) mutate(() => request(endpoint + '/' + row.id + '?expected_version=' + row.version, 'DELETE'), '收藏已移除。');
+		const rows = removal; find('remove-dialog').close(); removal = null;
+		if (rows) batch('remove', rows);
 	});
+	find('remove-dialog').addEventListener('close', () => { removal = null; });
 	find('enter-created').addEventListener('click', () => { try { enterCreated(); } catch (error) { find('error').textContent = error.message; } });
 	async function boot() {
 		if (busy) return;
@@ -205,5 +289,8 @@ async function guardedFetch(url, options) {
 	find('retry').addEventListener('click', () => created ? refresh() : boot());
 	addEventListener('beforeunload', (event) => { if (writing) { event.preventDefault(); event.returnValue = ''; } });
 	addEventListener('pageshow', (event) => { if (event.persisted) boot(); });
+	addEventListener('account:changed', () => {
+		if (session()?.account.id !== identity) { hidePrivate(); find('identity').textContent = ''; find('notice').textContent = ''; }
+	});
 	boot();
 }());

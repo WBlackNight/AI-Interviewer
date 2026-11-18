@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import delete, func, select
 
 from app.factories import load_assets
-from app.models.entities import PreparationPlan, PreparationPractice, Interview, ResourceOwner
+from app.models.entities import PreparationPlan, PreparationPractice, PreparationGoal, Interview, ResourceOwner
 from app.services.accounts import lock_account, now_utc
 from app.services.interviews import save_interview
 from app.services.history import summaries
@@ -41,13 +41,27 @@ def create_plan(db, account_id, payload, settings):
         difficulty=payload.difficulty, target_date=payload.target_date, status='active', version=0,
         created_at=moment, updated_at=moment)
     db.add(row); db.flush()
+    if payload.target_sessions is not None:
+        db.add(PreparationGoal(plan_id=row.id, target_sessions=payload.target_sessions))
     return {'id': row.id, 'version': row.version}
 
 
 def update_plan(db, account_id, plan_id, payload):
     row = owned_plan(db, account_id, plan_id, payload.expected_version)
     changes = payload.model_dump(exclude_unset=True, exclude={'expected_version'})
-    if any(getattr(row, key) != value for key, value in changes.items()):
+    goal_changed = False
+    if 'target_sessions' in changes:
+        target = changes.pop('target_sessions')
+        goal = db.get(PreparationGoal, row.id)
+        goal_changed = target != (goal.target_sessions if goal else None)
+        if goal_changed:
+            if target is None:
+                db.delete(goal)
+            elif goal:
+                goal.target_sessions = target
+            else:
+                db.add(PreparationGoal(plan_id=row.id, target_sessions=target))
+    if goal_changed or any(getattr(row, key) != value for key, value in changes.items()):
         for key, value in changes.items(): setattr(row, key, value)
         row.version += 1; row.updated_at = now_utc()
     return {'id': row.id, 'version': row.version}
@@ -57,6 +71,7 @@ def remove_plan(db, account_id, plan_id, expected_version):
     row = owned_plan(db, account_id, plan_id, expected_version)
     if row.status != 'archived': raise HTTPException(409, '请先归档计划，再移除')
     db.execute(delete(PreparationPractice).where(PreparationPractice.plan_id == row.id))
+    db.execute(delete(PreparationGoal).where(PreparationGoal.plan_id == row.id))
     db.delete(row)
     return {'deleted': True}
 
@@ -83,6 +98,8 @@ def list_plans(db, account_id, settings, *, position=None, status=None, plan_id=
         .select_from(summaries).join(PreparationPractice, PreparationPractice.id == summaries.c.latest_id)
         .join(Interview, Interview.id == PreparationPractice.interview_id)).all() if ids else []
     latest, finished = {}, Counter()
+    goals = {goal.plan_id: goal.target_sessions for goal in db.scalars(select(PreparationGoal)
+        .where(PreparationGoal.plan_id.in_(ids)))} if ids else {}
     for plan_id, count, interview_id, interview_status in linked:
         latest[plan_id] = {'interview_id': interview_id, 'status': interview_status}
         finished[plan_id] = count
@@ -91,7 +108,8 @@ def list_plans(db, account_id, settings, *, position=None, status=None, plan_id=
               'target_date': row.target_date.isoformat() if row.target_date else None, 'status': row.status,
               'version': row.version, 'created_at': row.created_at.isoformat() + 'Z', 'updated_at': row.updated_at.isoformat() + 'Z',
               'available': bool(row.themes) and len(row.themes) <= settings.max_plan_themes and all(theme in allowed.get(row.position, set()) for theme in row.themes),
-              'latest_practice': latest.get(row.id), 'finished_count': finished[row.id]} for row in rows]
+              'latest_practice': latest.get(row.id), 'finished_count': finished[row.id],
+              'target_sessions': goals.get(row.id)} for row in rows]
     return {'items': items, 'total': total, 'offset': offset, 'limit': limit, 'has_more': offset + len(rows) < total,
             'positions': positions, 'counts': {'active': counts['active'], 'archived': counts['archived'], 'past_target': past_target},
             'today': today.isoformat(), 'timezone': 'Asia/Shanghai', 'max_plans': MAX_PLANS}
@@ -141,11 +159,20 @@ def plan_dashboard(db, account_id, today):
         .group_by(PreparationPlan.status)).all())
     active = owned.where(PreparationPlan.status == 'active')
     past_target = db.scalar(select(func.count()).select_from(active.where(PreparationPlan.target_date < today).subquery()))
-    rows = db.scalars(active.order_by(PreparationPlan.target_date.asc().nullslast(),
-        PreparationPlan.created_at.desc(), PreparationPlan.id.desc()).limit(3))
+    rows = list(db.scalars(active.order_by(PreparationPlan.target_date.asc().nullslast(),
+        PreparationPlan.created_at.desc(), PreparationPlan.id.desc()).limit(3)))
+    ids = [row.id for row in rows]
+    goals = {goal.plan_id: goal.target_sessions for goal in db.scalars(select(PreparationGoal)
+        .where(PreparationGoal.plan_id.in_(ids)))} if ids else {}
+    finished = dict(db.execute(select(PreparationPractice.plan_id, func.count()).join(Interview,
+        Interview.id == PreparationPractice.interview_id).join(ResourceOwner,
+        (ResourceOwner.resource_kind == 'interview') & (ResourceOwner.resource_id == Interview.id))
+        .where(PreparationPractice.plan_id.in_(ids), Interview.status == 'finished',
+               ResourceOwner.account_id == account_id).group_by(PreparationPractice.plan_id)).all()) if ids else {}
     return {'counts': {'active': counts.get('active', 0), 'archived': counts.get('archived', 0), 'past_target': past_target},
             'items': [{'id': row.id, 'name': row.name, 'position': row.position,
-                       'target_date': row.target_date.isoformat() if row.target_date else None} for row in rows], 'limit': 3}
+                       'target_date': row.target_date.isoformat() if row.target_date else None,
+                       'target_sessions': goals.get(row.id), 'finished_count': finished.get(row.id, 0)} for row in rows], 'limit': 3}
 
 
 def start_plan_practice(db, account_id, plan_id, expected_version, settings):

@@ -15,7 +15,7 @@ from starlette.concurrency import run_in_threadpool
 
 from app.config import get_settings
 from app.db import get_db
-from app.domain import PlanItem, ResumeData
+from app.domain import ResumeData
 from app.factories import build_llm, build_planner, load_assets
 from app.rag.resume_parser import parse_resume_text, parse_resume_text_with_llm
 from app.repositories import (
@@ -31,14 +31,17 @@ from app.schemas import (
     ResumeCreateRequest,
     ResumeResponse,
     InterviewCancelResponse,
+    QuestionRetryRequest,
 )
 from app.services.report import build_report
+from app.services.question_retry import enrich_retry_report, start_question_retry
 from app.services.catalog import question_catalog
 from app.services.coverage import catalog_coverage
 from app.services.question_audit import load_registry
 from app.services.practice import available_themes, practice_plan, weak_practice_themes
+from app.services.practice_planning import plan_practice
 from app.models.entities import Account, ResourceOwner
-from app.services.accounts import optional_account, attach_owner, lock_account
+from app.services.accounts import optional_account, require_account, attach_owner, lock_account
 from app.services.history import summaries
 from app.services.interviews import save_interview as _save_interview
 from app.security import issue_access, has_access, sanitize_pii
@@ -77,8 +80,6 @@ def voice_diagnostics():
 
 @router.get("/health", response_model=HealthResponse)
 def health(db: Session = Depends(get_db)) -> HealthResponse:
-    from app.models.entities import Question as QuestionORM
-
     trees, bank = load_assets(settings)
     question_count = len(bank)
     return HealthResponse(
@@ -166,7 +167,7 @@ def create_resume(payload: ResumeCreateRequest, db: Session = Depends(get_db),
                 if llm else parse_resume_text(safe_text)
             )
     except BudgetExceeded:
-        raise HTTPException(429, detail="简历模型预算已暂停或耗尽，请核对用量") from None
+        raise HTTPException(429, detail="简历暂时无法解析，请稍后重试。") from None
     finally:
         if hasattr(llm, "close"):
             llm.close()
@@ -265,8 +266,9 @@ def create_interview_api(
         if payload.resume_id:
             raise HTTPException(422, detail="主题专项无需简历，请移除resume_id")
         try:
-            plan = practice_plan(tree, bank, payload.position, payload.difficulty,
-                                 payload.themes, settings.max_plan_themes)
+            plan = plan_practice(tree=tree, bank=bank, position=payload.position,
+                difficulty=payload.difficulty, themes=payload.themes,
+                duration_minutes=payload.duration_minutes, max_themes=settings.max_plan_themes)
         except ValueError as exc:
             raise HTTPException(422, detail=str(exc)) from None
         return _save_interview(db, payload.position, payload.difficulty, plan,
@@ -301,18 +303,16 @@ def create_interview_api(
     try:
         meter = PersistentBudget(sessionmaker(bind=db.get_bind()), "interview", interview_id, settings) if llm else None
         with use_budget(meter):
-            plan = planner.build_plan(
-                position=payload.position, difficulty=payload.difficulty,
-                resume=resume_data, bank=bank, max_themes=settings.max_plan_themes,
-            )
+            plan = plan_practice(tree=tree, bank=bank, position=payload.position,
+                difficulty=payload.difficulty, resume=resume_data, planner=planner,
+                duration_minutes=payload.duration_minutes, max_themes=settings.max_plan_themes)
     except BudgetExceeded:
-        raise HTTPException(429, detail="规划模型预算已暂停或耗尽，请核对用量") from None
+        raise HTTPException(429, detail="暂时无法创建练习，请稍后重试。") from None
+    except ValueError as error:
+        raise HTTPException(422, detail=str(error)) from None
     finally:
         if hasattr(llm, "close"):
             llm.close()
-    if not plan:
-        raise HTTPException(status_code=500, detail="面试大纲生成失败（题库为空？）")
-
     return _save_interview(db, payload.position, payload.difficulty, plan,
                            user_id=user_id, resume_id=payload.resume_id, interview_id=interview_id,
                            account_id=account_id)
@@ -347,7 +347,14 @@ def get_report(interview_id: str, db: Session = Depends(get_db),
     tree = trees.get(interview.position)
     report = build_report(db, interview, tree)
     report["practice_themes"] = weak_practice_themes(report, tree, bank, settings.max_plan_themes)
-    return report
+    return enrich_retry_report(db, interview, report, tree, bank, token)
+
+
+@router.post("/interview/{interview_id}/question-practice", response_model=InterviewCreateResponse)
+def create_question_practice(interview_id: str, payload: QuestionRetryRequest,
+                            db: Session = Depends(get_db), account: Account = Depends(require_account)):
+    trees, bank = load_assets(settings)
+    return start_question_retry(db, account.id, interview_id, payload.question_id, trees, bank)
 
 
 @router.post("/interview/{interview_id}/practice", response_model=InterviewCreateResponse)
