@@ -16,6 +16,32 @@ python tools/project.py serve --offline --port 3000 --database backend/competiti
 
 保持日常数据库和真实云端数据路径独立。已配置的本地 `.env` 由启动器在 `backend/` 工作目录读取。
 
+## 创建评委体验账号
+
+该命令在当前配置的数据库创建普通用户 `admin`。密码在终端隐藏输入，以加盐散列保存。用户名已存在时命令会退出，保留原账户和密码。
+
+本地 Windows 演示库在项目根目录按以下方式初始化：
+
+```powershell
+Push-Location backend
+$previousDatabaseUrl = $env:DATABASE_URL
+try {
+    $env:DATABASE_URL = 'sqlite:///./competition-demo.sqlite3'
+    .\.venv\Scripts\python.exe -m app.manage_database create-reviewer
+} finally {
+    $env:DATABASE_URL = $previousDatabaseUrl
+    Pop-Location
+}
+```
+
+云端演示环境在项目根目录运行下面的交互命令。容器使用部署时配置的数据卷：
+
+```sh
+docker compose --env-file deploy/cloud/.env -f compose.cloud.yml exec app python -m app.manage_database create-reviewer
+```
+
+将账号与密码填入赛事允许的评审专用字段，避免在仓库里公开。登录后可验证练习报告、小青和社区。后台角色由服务端的账户 ID 列表决定，体验账号保持普通用户权限。
+
 ## 环境变量
 
 | 服务 | 参数 | 使用方式 |

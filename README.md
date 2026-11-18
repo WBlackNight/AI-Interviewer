@@ -26,6 +26,8 @@ backend/.venv/bin/python tools/project.py serve --offline --port 3000 --database
 
 打开 [本机首页](http://localhost:3000/)。从首页开始一场文字练习可直接检查题目、追问与报告。注册后可体验小青的本地学习指引、个人记录和社区互动。实际语音、外部大模型和邮件需要服务端配置。
 
+准备评审演示站点时，可用[评委体验账号初始化命令](docs/参赛API配置与密钥管理.md#创建评委体验账号)创建普通用户 `admin`。
+
 ## 技术架构
 
 页面与工作区采用原生 HTML/CSS/JS。文字练习室、小青与管理工作台使用 React 18、TypeScript 和 Vite 独立构建。FastAPI 同源提供页面、业务 JSON、SSE 与 WebSocket。SQLAlchemy 与 SQLite 保存会话及业务记录，题库与技能树是版本化的本地文件。云端由 Caddy 提供 HTTPS 并代理到 FastAPI。
